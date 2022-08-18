@@ -16,10 +16,10 @@ workflow minimapWorkflow {
             threads=threads,
             reference=referenceFile,
             reads=readsFile,
-			useMd=true
+			useEqx=true
     }
 
 	output {
-        File smallVariantsVcf = minimap2.bam
+        File minimapBam = minimap2.bam
 	}
 }
