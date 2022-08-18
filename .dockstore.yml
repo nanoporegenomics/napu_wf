@@ -1,0 +1,14 @@
+versionon: 1.2
+workflows:
+   -  name: pepperMarginDvWorkflow
+      subclass: WDL
+      primaryDescriptorPath: /wdl/workflows/pepper_margin_deepvariant.wdl
+   -  name: dipdiffWorkflow
+      subclass: WDL
+      primaryDescriptorPath: /wdl/workflows/dipdiff.wdl
+   -  name: snifflesWorkflow
+      subclass: WDL
+      primaryDescriptorPath: /wdl/workflows/sniffles.wdl
+   -  name: minimapWorkflow
+      subclass: WDL
+      primaryDescriptorPath: /wdl/workflows/minimap.wdl
