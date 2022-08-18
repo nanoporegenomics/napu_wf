@@ -6,7 +6,7 @@ workflow snifflesWf {
 
     input {
         File bamAlignment,
-        File vntrAnnotations
+        File vntrAnnotations,
         Int threads
     }
 
