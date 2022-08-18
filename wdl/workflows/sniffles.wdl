@@ -5,8 +5,8 @@ import "../tasks/sniffles.wdl" as sniffles_t
 workflow snifflesWf {
 
     input {
-        File bamAlignment,
-        File vntrAnnotations,
+        File bamAlignment
+        File vntrAnnotations
         Int threads
     }
 
