@@ -7,7 +7,7 @@ task minimap2_t {
     File reads
 	String mapMode = "map-ont"
 	Boolean useMd = false
-	Boolean useEqx = false
+	Boolean useEqx = true
 	Int memSizeGb = 128
 	Int diskSizeGb = 1024
 	Int kmerSize = 17

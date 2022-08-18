@@ -16,7 +16,6 @@ workflow minimapWorkflow {
             threads=threads,
             reference=referenceFile,
             reads=readsFile,
-			useEqx=true
     }
 
 	output {
