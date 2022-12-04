@@ -1,6 +1,6 @@
 version 1.0
 
-task dipdiff_t {
+task hapdiff_t {
   input {
     File ctgsPat
     File ctgsMat
@@ -26,17 +26,17 @@ task dipdiff_t {
     echo $TRF_STRING
 
 
-    dipdiff.py --reference ~{reference} ${TRF_STRING} --pat ~{ctgsPat} --mat ~{ctgsMat} --out-dir dipdiff -t ~{threads} --sv-size ~{minSvSize} 2>&1 | tee dipdiff.log
+    hapdiff.py --reference ~{reference} ${TRF_STRING} --pat ~{ctgsPat} --mat ~{ctgsMat} --out-dir hapdiff -t ~{threads} --sv-size ~{minSvSize} 2>&1 | tee hapdiff.log
   >>>
 
   output {
-    File dipdiffUnphasedVcf = "dipdiff/dipdiff_unphased.vcf.gz"
-    File dipdiffPhasedVcf = "dipdiff/dipdiff_phased.vcf.gz"
-    File dipdiffLog = "dipdiff.log"
+    File hapdiffUnphasedVcf = "hapdiff/hapdiff_unphased.vcf.gz"
+    File hapdiffPhasedVcf = "hapdiff/hapdiff_phased.vcf.gz"
+    File hapdiffLog = "hapdiff.log"
   }
 
   runtime {
-    docker: "mkolmogo/dipdiff:0.6"
+    docker: "mkolmogo/hapdiff:0.7"
     cpu: threads
     memory: memSizeGb + " GB"
     disks: "local-disk " + diskSizeGb + " SSD"

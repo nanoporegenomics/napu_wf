@@ -1,8 +1,8 @@
 version 1.0
 
-import "../tasks/dipdiff.wdl" as dipdiff_t
+import "../tasks/hapdiff.wdl" as hapdiff_t
 
-workflow dipdiffWf {
+workflow hapdiffWf {
 
     input {
         File referenceFile
@@ -13,8 +13,8 @@ workflow dipdiffWf {
         Int threads = 32
     }
 
-	### dipdiff
-	call dipdiff_t.dipdiff_t as dipdiff_t {
+	### hapdiff
+	call hapdiff_t.hapdiff_t as hapdiff_t {
 		input:
 			threads=threads,
 			reference=referenceFile,
@@ -25,7 +25,7 @@ workflow dipdiffWf {
 	}
 
 	output {
-		File vcfUnphased = dipdiff_t.dipdiffUnphasedVcf
-		File vcfPhased = dipdiff_t.dipdiffPhasedVcf
+		File vcfUnphased = hapdiff_t.hapdiffUnphasedVcf
+		File vcfPhased = hapdiff_t.hapdiffPhasedVcf
 	}
 }
