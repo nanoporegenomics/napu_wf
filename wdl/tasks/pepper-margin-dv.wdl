@@ -19,13 +19,14 @@ task pepper_margin_dv_t {
     set -o xtrace
 
     samtools index -@ 10 ~{bamAlignment}
-    run_pepper_margin_deepvariant call_variant -b ~{bamAlignment} -f ~{reference} -o `pwd` -t ~{threads} ~{pepperMode} -p PMDV_FINAL 2>&1 | tee pmdv.log
+    run_pepper_margin_deepvariant call_variant -b ~{bamAlignment} -f ~{reference} -o `pwd` -t ~{threads} ~{pepperMode} --phased_output -p PMDV_FINAL 2>&1 | tee pmdv.log
   >>>
 
   output {
 	File pepperVcf = "PMDV_FINAL.vcf.gz"
 	File pepperLog = "pmdv.log"
-    #File haplotaggedBam = "intermediate_files/PHASED.PEPPER_MARGIN.haplotagged.bam"
+    File haplotaggedBam = "intermediate_files/PHASED.PEPPER_MARGIN.haplotagged.bam"
+    File haplotaggedBamIdx = "intermediate_files/PHASED.PEPPER_MARGIN.haplotagged.bam.bai"
   }
 
   runtime {
