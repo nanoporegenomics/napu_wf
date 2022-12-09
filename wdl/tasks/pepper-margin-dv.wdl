@@ -20,13 +20,14 @@ task pepper_margin_dv_t {
 
     samtools index -@ 10 ~{bamAlignment}
     run_pepper_margin_deepvariant call_variant -b ~{bamAlignment} -f ~{reference} -o `pwd` -t ~{threads} ~{pepperMode} --phased_output -p PMDV_FINAL 2>&1 | tee pmdv.log
+    samtools index -@ 10 PMDV_FINAL.haplotagged.bam
   >>>
 
   output {
-	File pepperVcf = "PMDV_FINAL.vcf.gz"
+	File pepperVcf = "PMDV_FINAL.phased.vcf.gz"
 	File pepperLog = "pmdv.log"
-    File haplotaggedBam = "intermediate_files/PHASED.PEPPER_MARGIN.haplotagged.bam"
-    File haplotaggedBamIdx = "intermediate_files/PHASED.PEPPER_MARGIN.haplotagged.bam.bai"
+    	File haplotaggedBam = "PMDV_FINAL.haplotagged.bam"
+    	File haplotaggedBamIdx = "PMDV_FINAL.haplotagged.bam.bai"
   }
 
   runtime {
