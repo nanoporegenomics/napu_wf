@@ -15,9 +15,9 @@ workflow cardEndToEndVcfMethyl
 		File  inputUnphasedMethylBam	
 		File  referenceFasta
 		Int   threads
-		File  sampleName = "sample"
-		File  referenceName = "ref"
 		File  referenceVntrAnnotations = ""
+		String  sampleName = "sample"
+		String  referenceName = "ref"
 	}
 
 	call minimap_methyl_t.fastqAlignAndSortBam as mm_align {
