@@ -1,12 +1,12 @@
 version 1.0
 
 import "https://raw.githubusercontent.com/meredith705/ont_methylation/main/tasks/methyltagMinimap2.wdl" as minimap_methyl_t
-import "https://raw.githubusercontent.com/nanoporegenomics/variant_calling_wf/main/wdl/tasks/pepper-margin-dv.wdl" as pmdv_haplotag_t
 import "https://raw.githubusercontent.com/meredith705/ont_methylation/main/tasks/modbam2bed.wdl" as modbam2bed_t
-import "https://raw.githubusercontent.com/nanoporegenomics/variant_calling_wf/main/wdl/tasks/sniffles.wdl" as sniffles_t
-import "https://raw.githubusercontent.com/nanoporegenomics/assembly_wf/main/wdl/workflows/shasta_hapdup_denovo.wdl" as denovo_asm_wf
-import "https://raw.githubusercontent.com/nanoporegenomics/variant_calling_wf/main/wdl/tasks/hapdiff.wdl" as hapdiff_t
-import "https://raw.githubusercontent.com/nanoporegenomics/variant_calling_wf/main/wdl/workflows/marginPhase.wdl" as margin_phase_wf
+import "../tasks/pepper-margin-dv.wdl" as pmdv_haplotag_t
+import "../tasks/sniffles.wdl" as sniffles_t
+import "../tasks/hapdiff.wdl" as hapdiff_t
+import "shasta_hapdup_denovo.wdl" as denovo_asm_wf
+import "marginPhase.wdl" as margin_phase_wf
 
 workflow cardEndToEndVcfMethyl
 {
