@@ -22,7 +22,15 @@ task minimap2_t {
     set -u
     set -o xtrace
     
-    minimap2 -ax ~{mapMode} ~{reference} ~{reads} -k ~{kmerSize} -K 5G -t ~{threads} ~{mdString} ~{eqxString} | samtools sort -@ 4 -m 4G > minimap2.bam
+    MM_INPUT=~{reads}
+    if [ "${MM_INPUT: -3}" == "bam" ]
+    then
+      samtools fastq -TMm,Ml ~{reads} | \
+        minimap2 -ax ~{mapMode} ~{reference} - -k ~{kmerSize} -y -K 5G -t ~{threads} ~{mdString} ~{eqxString} | samtools sort -@4 -m 4G > minimap2.bam
+    else
+      minimap2 -ax ~{mapMode} ~{reference} ~{reads} -k ~{kmerSize} -K 5G -t ~{threads} ~{mdString} ~{eqxString} | samtools sort -@4 -m 4G > minimap2.bam
+    fi
+
     samtools index -@ ~{threads} minimap2.bam
   >>>
 

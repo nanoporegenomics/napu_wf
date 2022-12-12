@@ -29,7 +29,18 @@ task shasta_t {
       rm $SHASTA_INPUT
       SHASTA_INPUT=${UNGZIPPED}
     fi
-    shasta --input $SHASTA_INPUT --config ~{shastaConfig} --threads ~{threads} --memoryMode filesystem --memoryBacking disk 2>&1 | tee shasta.log
+
+    if [ "${SHASTA_INPUT: -3}" == "bam" ]
+    then
+      UNGZIPPED=${SHASTA_INPUT:0:-4}.fasta
+      samtools fasta $SHASTA_INPUT > $UNGZIPPED
+      SHASTA_INPUT=${UNGZIPPED}
+    fi
+
+    #Try regular in-memory mode first. If it fails, then fall back to disk cashing mode
+    shasta --input $SHASTA_INPUT --config ~{shastaConfig} --threads ~{threads} 2>&1 | tee shasta.log || \
+      (echo "In-memory assmebly failed, running Shasta in disk caching mode"; \
+       shasta --input $SHASTA_INPUT --config ~{shastaConfig} --threads ~{threads} --memoryMode filesystem --memoryBacking disk 2>&1 | tee -a shasta.log)
   >>>
 
   output {
@@ -38,6 +49,7 @@ task shasta_t {
     File shastaLog = "shasta.log"
   }
 
+  #This is optimized for GCP/Terra environemnt to get maximum available RAM. May need to adjust for other cloud environemnts or HPC
   runtime {
     docker: "mkolmogo/card_shasta:0.3"
     cpu: threads
