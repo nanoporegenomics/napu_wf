@@ -11,7 +11,6 @@ import "marginPhase.wdl" as margin_phase_wf
 workflow cardEndToEndVcfMethyl
 {
 	input {
-		File  asmTmpReads
 		File  inputUnphasedMethylBam	
 		File  referenceFasta
 		Int   threads
@@ -56,7 +55,7 @@ workflow cardEndToEndVcfMethyl
 
 	call denovo_asm_wf.structuralVariantsDenovoAssembly as asm {
 		input:
-			readsFile = asmTmpReads,
+			readsFile = inputUnphasedMethylBam,
 			threads = threads
 	}
 
