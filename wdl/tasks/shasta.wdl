@@ -37,10 +37,11 @@ task shasta_t {
       SHASTA_INPUT=${UNGZIPPED}
     fi
 
-    #Try regular in-memory mode first. If it fails, then fall back to disk cashing mode
-    shasta --input $SHASTA_INPUT --config ~{shastaConfig} --threads ~{threads} 2>&1 | tee shasta.log || \
-      (echo "In-memory assmebly failed, running Shasta in disk caching mode"; \
-       shasta --input $SHASTA_INPUT --config ~{shastaConfig} --threads ~{threads} --memoryMode filesystem --memoryBacking disk 2>&1 | tee -a shasta.log)
+    #In-memory mode, in case you are shure all samples will fit
+    #shasta --input $SHASTA_INPUT --config ~{shastaConfig} --threads ~{threads} 2>&1 | tee shasta.log
+    
+    #By default use disk caching
+    shasta --input $SHASTA_INPUT --config ~{shastaConfig} --threads ~{threads} --memoryMode filesystem --memoryBacking disk 2>&1 | tee shasta.log
   >>>
 
   output {
