@@ -23,7 +23,8 @@ workflow structuralVariantsDenovoAssembly {
         input:
             threads=threads,
             reference=shasta_t.shastaFasta,
-            reads=readsFile
+            reads=readsFile,
+            useEqx=false
     }
 
 	### hapdup
