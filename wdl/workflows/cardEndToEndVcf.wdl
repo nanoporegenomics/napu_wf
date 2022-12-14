@@ -1,7 +1,7 @@
 version 1.0
 
-import "https://raw.githubusercontent.com/meredith705/ont_methylation/main/tasks/methyltagMinimap2.wdl" as minimap_methyl_t
-import "https://raw.githubusercontent.com/meredith705/ont_methylation/main/tasks/modbam2bed.wdl" as modbam2bed_t
+import "../tasks/methyltagMinimap2.wdl" as minimap_methyl_t
+import "../tasks/modbam2bed.wdl" as modbam2bed_t
 import "../tasks/pepper-margin-dv.wdl" as pmdv_haplotag_t
 import "../tasks/sniffles.wdl" as sniffles_t
 import "../tasks/hapdiff.wdl" as hapdiff_t
