@@ -1,6 +1,6 @@
-# WDL variant calling workflows
+# CARD nanopore workflows
 
-Various mapping-based workflow for long-read variant calling
+WDL workflows for processing nanopore sequencing of brain samples, generated at NIH CARD.
 
 1. [Pepper-Margin-DeepVariant](https://github.com/kishwarshafin/pepper)
 2. [Sniffles2](https://github.com/fritzsedlazeck/Sniffles)
