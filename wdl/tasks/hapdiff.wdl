@@ -6,7 +6,7 @@ task hapdiff_t {
     File ctgsMat
     File reference
     File vntrAnnotations = ""
-    Int minSvSize = 30
+    Int minSvSize = 25
     Int threads = 32
     Int memSizeGb = 128
     Int diskSizeGb = 256

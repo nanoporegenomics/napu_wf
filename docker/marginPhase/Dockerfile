@@ -5,7 +5,7 @@ ARG git_commit
 
 # update and install dependencies
 RUN apt-get update && \
-    apt-get -y install time git make wget autoconf gcc g++ zlib1g-dev libcurl4-openssl-dev libbz2-dev libhdf5-dev liblzma-dev && \
+    apt-get -y install time git make wget autoconf gcc g++ zlib1g-dev libcurl4-openssl-dev libbz2-dev libhdf5-dev liblzma-dev python3 && \
     apt-get clean && \
     apt-get purge && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -75,5 +75,9 @@ RUN wget https://github.com/samtools/bcftools/releases/download/${bcftoolsVer}/b
  make install && \
  mkdir /data
 
+WORKDIR /opt
+COPY ./vcf_filter_size.py /opt/vcf_filter_size.py
+
 RUN apt-get update && apt-get install --no-install-recommends -y tabix
 WORKDIR /data
+
