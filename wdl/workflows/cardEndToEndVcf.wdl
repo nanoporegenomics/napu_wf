@@ -80,7 +80,7 @@ workflow cardEndToEndVcfMethyl
 		File phasedMethylBam = pmdvHap.haplotaggedBam
 		File smallVariantsVcf = pmdvHap.pepperVcf
 		File methylationBed1 = modbam2bed.hap1bedOut
-		File methylationBed2 = modbam2bed.hap1bedOut
+		File methylationBed2 = modbam2bed.hap2bedOut
 		File snifflesVcf = sniffles.snifflesVcf
 		File assemblyHap1 = asm.asmDual1
 		File assemblyHap2 = asm.asmDual2

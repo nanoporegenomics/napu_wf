@@ -23,6 +23,6 @@ workflow mod2bed_wf
 
 	output {
 		File methylationBed1 = modbam2bed.hap1bedOut
-		File methylationBed2 = modbam2bed.hap1bedOut
+		File methylationBed2 = modbam2bed.hap2bedOut
 	}
 }
