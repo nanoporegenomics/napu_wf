@@ -19,7 +19,7 @@ workflow pepperWf {
 
 	output {
 		File pepperVcf = pepper_t.pepperVcf,
-		haplotaggedBam = pepper_t.haplotaggedBam,
-		haplotaggedBamBai = pepper_t.haplotaggedBamIdx
+		File haplotaggedBam = pepper_t.haplotaggedBam,
+		File haplotaggedBamBai = pepper_t.haplotaggedBamIdx
 	}
 }
