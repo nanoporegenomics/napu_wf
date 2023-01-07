@@ -5,12 +5,12 @@ task pepper_margin_dv_t {
     Int threads
     File reference
 	File bamAlignment
-	String mapMode = "ont"
+      String pepperMode = "--ont_r10_q20"  ## --ont_r9_guppy5_sup, --hifi, or --ont_r10_q20
 	Int memSizeGb = 256
-	Int diskSizeGb = 1024
+	  Int diskSizeGb = 1024
   }
 
-  String pepperMode = if mapMode == "ont" then "--ont_r9_guppy5_sup" else "--hifi"
+  
 
   command <<<
     set -o pipefail
