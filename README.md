@@ -1,4 +1,4 @@
-CARD Nanopore Varaint Calling and Assmebly Workflows
+CARD Nanopore Varaint Calling and Assembly Workflows
 ===================================================
 
 This repository contains pieplines for variant calling and de novo assembly of ONT data,
