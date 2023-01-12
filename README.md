@@ -1,19 +1,22 @@
 CARD Nanopore Varaint Calling and Assmebly Workflows
 ===================================================
 
-WDL workflows for processing nanopore sequencing of brain samples, generated at NIH CARD.
+This repository contains pieplines for variant calling and de novo assembly of ONT data,
+optimized for [single-flowcell ONT sequencing protocol](https://dx.doi.org/10.17504/protocols.io.ewov1n93ygr2/v1).
+The wet-lab/informatics protocol is now applied to sequence and characterize thousands of human brain genomes at 
+the [Center for Alzheimer's and Related Dementias at NIH](https://card.nih.gov/).
 
 CARD Data availability
 ---------------------
 
 The cell line and brain sample sequencing data, assemblies and variant calls are currently
-being uploaded to Terra. We will post the links as soon as the data is available.
+being uploaded to [Terra](https://terra.bio/). We will post the links as soon as the data is available.
 If you want to access the data sooner, don't hesitate to contact us in the meantime.
 
 Installation and Usage
 ---------------------
 
-### Using Terra
+### Using Terra/DNAnexus/AnVIL
 
 If you are using Terra, the workflows are already available at the 
 [Dockstore collection](https://dockstore.org/organizations/NIHCARD/collections/NanoporeSequencing).
@@ -26,16 +29,18 @@ There are multiple existing WDL engine implementations. We performed our tests u
 assume this WDL implementation.
 
 First, follow [these instructions](https://cromwell.readthedocs.io/en/stable/tutorials/FiveMinuteIntro/) 
-to download and install the latest version of Cromwell. Make sure that Docker is installed and running.
+to download and install the latest version of Cromwell. Also make sure that [Docker](https://docs.docker.com/get-docker/)
+is installed and running.
 
-Then, you will need to prepare an inputs file. For example, for the endToEnd pipeline, 
-you can generate blank input file as follows.
+Then, you will need to prepare an inputs file. For example, for the end-to-end pipeline, 
+you can generate blank input file as follows (`-o` option hides optional workflow inputs)
 
 ```
-java womtool.jar XXX
+java -jar womtool-XX.jar inputs -o false wdl/workflows/cardEndToEndVcf.wdl > inputs.json
 ```
 
-Then, you will be able to run the corresponding pipeline (for example, endToEnd) as follows:
+Then, edit the `inputs.json` file with your input parameters. Afterwards, you will be able to run the corresponding 
+workflow (for example, `cardEndToEndVcf.wdl`) as follows:
 
 ```
 java -jar cromwell-XY.jar run wdl/workflows/cardEndToEndVcf.wdl --inputs inputs.json
@@ -47,9 +52,9 @@ Cromwell could be configures to run on an HPC or cloud. This
 configuration is more involving and requires optimization for a particular environemnt.
 Please refer to the [corresponding manual](https://cromwell.readthedocs.io/en/stable/Configuring/) for details
 
-### Small dataset example
+### Quick demo
 
-[Prepare a small dataset to illustrate how to run everything locally.]
+XXX
 
 Input data requirements
 -----------------------
@@ -61,6 +66,9 @@ a special version of this pipeline for R10 ONT data.
 
 The input for end-to-end workflow is a single unmapped bam file with methylation tags
 produced by Guppy. Other workflows can take either unmapped bam or fastq file as input.
+
+Other kinds of input include reference genome and corresponding VNTR annotations (provided
+in this repository).
 
 Pipeline description
 ---------------------
