@@ -43,21 +43,54 @@ java -jar cromwell-XY.jar run wdl/workflows/cardEndToEndVcf.wdl --inputs inputs.
 
 # On a custom HPC server or cloud environemnt
 
+Cromwell could be configures to run on an HPC or cloud. This
+configuration is more involving and requires optimization for a particular environemnt.
+Please refer to the [corresponding manual](https://cromwell.readthedocs.io/en/stable/Configuring/) for details
+
 # Small dataset example
 
-Prepare a small dataset to illustrate how to run everythin locally.
+[Prepare a small dataset to illustrate how to run everything locally.]
+
+Input data requirements
+-----------------------
+
+The pipeline was tested using 30-40x ONT sequencing using R9.4 pore with read N50 ~30kb.
+Basecalling and mehtylation calls were done using Guppy 6.1.2. The pipeline should
+work for similar or newer nanopore data. We are currently planning to release
+a special version of this pipeline for R10 ONT data.
+
+The input for end-to-end workflow is a single unmapped bam file with methylation tags
+produced by Guppy. Other workflows can take either unmapped bam or fastq file as input.
 
 Pipeline description
 ---------------------
 
+The pipeline begins by generating a diploid de novo assembly using a combination of Shasta, 
+which produces a haploid assembly and Hapdup, which generates locally phased diploid contigs. 
+We then use the generated assemblies to call structural variants (at least 50 bp in size) 
+against a given reference genome using a new assembly-to-reference pipeline called hapdiff.
+
+Ideally, small variants could also be recovered from diploid contigs, as has been successfully done 
+for HiFi-based assemblies. Our Shasta-Hapdup assemblies had mean substitution error rates of ~8 per 100 kb, which is  
+higher than current contig assemblies produced with PacBio HiFi (<1 per 100kb). 
+Reference-based small variant calling methods are less error-prone because they can better 
+approximate the biases of ONT base calling errors via supervised learning. 
+We therefore use  PEPPER-Margin-DeepVariant software to call small variants against a reference.
+
+Given a set of structural variants produced with de novo assemblies, and reference-based small variant calls, 
+our pipeline phases them into a harmonized variant call set using Margin. 
+In addition, given the phased reference alignment with methylation tags (produced by Guppy), 
+we produce haplotype-specific calls of hypo- and hyper-methylated regions of the genome.
+
 The workflows are buit around the following tools:
 
-1. [Pepper-Margin-DeepVariant](https://github.com/kishwarshafin/pepper)
-2. [Sniffles2](https://github.com/fritzsedlazeck/Sniffles)
-3. [hapdiff](https://github.com/KolmogorovLab/hapdiff)
-4. [margin phase](https://github.com/UCSC-nanopore-cgl/margin)
-5. [Shasta](https://github.com/chanzuckerberg/shasta)
-6. [Hapdup](https://github.com/KolmogorovLab/hapdup)
+* [Pepper-Margin-DeepVariant](https://github.com/kishwarshafin/pepper)
+* [Sniffles2](https://github.com/fritzsedlazeck/Sniffles)
+* [hapdiff](https://github.com/KolmogorovLab/hapdiff)
+* [margin phase](https://github.com/UCSC-nanopore-cgl/margin)
+* [Shasta](https://github.com/chanzuckerberg/shasta)
+* [Hapdup](https://github.com/KolmogorovLab/hapdup)
+* [modbam2bed](https://github.com/epi2me-labs/modbam2bed)
 
 License 
 --------
