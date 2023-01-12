@@ -1,31 +1,56 @@
 CARD Nanopore Varaint Calling and Assmebly Workflows
 ===================================================
 
-1-2 paragraphs description
-
 WDL workflows for processing nanopore sequencing of brain samples, generated at NIH CARD.
 
 CARD Data availability
 ---------------------
 
-Installation
-------------
+The cell line and brain sample sequencing data, assemblies and variant calls are currently
+being uploaded to Terra. We will post the links as soon as the data is available.
+If you want to access the data sooner, don't hesitate to contact us in the meantime.
 
-Dockstore collection: https://dockstore.org/organizations/NIHCARD/collections/NanoporeSequencing
+Installation and Usage
+---------------------
 
-Link to Cromwell installation
+# Using Terra
 
+If you are using Terra, the workflows are already available at the 
+[Dockstore collection](https://dockstore.org/organizations/NIHCARD/collections/NanoporeSequencing).
+All you need to do is to import the relevant workflow to your Terra workspace.
 
-Quick example
---------------
+# On a single local compute node
+
+There are multiple existing WDL engine implementations. We performed our tests using
+[Cromwell](https://cromwell.readthedocs.io/en/stable/), and the following instructions
+assume this WDL implementation.
+
+First, follow [these instructions](https://cromwell.readthedocs.io/en/stable/tutorials/FiveMinuteIntro/) 
+to download and install the latest version of Cromwell. Make sure that Docker is installed and running.
+
+Then, you will need to prepare an inputs file. For example, for the endToEnd pipeline, 
+you can generate blank input file as follows.
+
+```
+java womtool.jar XXX
+```
+
+Then, you will be able to run the corresponding pipeline (for example, endToEnd) as follows:
+
+```
+java -jar cromwell-XY.jar run wdl/workflows/cardEndToEndVcf.wdl --inputs inputs.json
+```
+
+# On a custom HPC server or cloud environemnt
+
+# Small dataset example
+
+Prepare a small dataset to illustrate how to run everythin locally.
 
 Pipeline description
 ---------------------
 
-Usage
------
-
-The workflows are buit around the followinf tools:
+The workflows are buit around the following tools:
 
 1. [Pepper-Margin-DeepVariant](https://github.com/kishwarshafin/pepper)
 2. [Sniffles2](https://github.com/fritzsedlazeck/Sniffles)
