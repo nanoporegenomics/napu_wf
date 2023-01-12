@@ -13,13 +13,13 @@ If you want to access the data sooner, don't hesitate to contact us in the meant
 Installation and Usage
 ---------------------
 
-# Using Terra
+### Using Terra
 
 If you are using Terra, the workflows are already available at the 
 [Dockstore collection](https://dockstore.org/organizations/NIHCARD/collections/NanoporeSequencing).
 All you need to do is to import the relevant workflow to your Terra workspace.
 
-# On a single local compute node
+### On a single local compute node
 
 There are multiple existing WDL engine implementations. We performed our tests using
 [Cromwell](https://cromwell.readthedocs.io/en/stable/), and the following instructions
@@ -41,13 +41,13 @@ Then, you will be able to run the corresponding pipeline (for example, endToEnd)
 java -jar cromwell-XY.jar run wdl/workflows/cardEndToEndVcf.wdl --inputs inputs.json
 ```
 
-# On a custom HPC server or cloud environemnt
+### On a custom HPC server or cloud environemnt
 
 Cromwell could be configures to run on an HPC or cloud. This
 configuration is more involving and requires optimization for a particular environemnt.
 Please refer to the [corresponding manual](https://cromwell.readthedocs.io/en/stable/Configuring/) for details
 
-# Small dataset example
+### Small dataset example
 
 [Prepare a small dataset to illustrate how to run everything locally.]
 
