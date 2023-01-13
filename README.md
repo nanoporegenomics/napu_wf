@@ -48,7 +48,7 @@ java -jar cromwell-XY.jar run wdl/workflows/cardEndToEndVcf.wdl --inputs inputs.
 
 ### On a custom HPC server or cloud environemnt
 
-Cromwell could be configures to run on an HPC or cloud. This
+Cromwell could be configured to run on an HPC or cloud. This
 configuration is more involving and requires optimization for a particular environemnt.
 Please refer to the [corresponding manual](https://cromwell.readthedocs.io/en/stable/Configuring/) for details
 
