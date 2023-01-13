@@ -54,7 +54,14 @@ Please refer to the [corresponding manual](https://cromwell.readthedocs.io/en/st
 
 ### Quick demo
 
-XXX
+```
+wget https://zenodo.org/record/7532080/files/card_pipeline_small_test.tar.gz
+tar -xvf card_pipeline_small_test.tar.gz
+cd card_pipeline_small_test
+java -jar PATH_TO/cromwell-XX.jar run PATH_TO/cardEndToEndVcf.wdl --inputs inputs_end2end.js
+```
+
+Make sure cromwell is installed and substitute the paths to cromwell and WDL workflow according to your setup.
 
 Input data requirements
 -----------------------
