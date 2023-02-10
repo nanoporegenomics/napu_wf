@@ -21,10 +21,10 @@ workflow runMarginPhase {
 
     call marginPhase {
         input:
-            combinedVcfFile = combineVcfs.outVcf,
-            refFile = refFile,
-            bamFile = bamFile,
-            sampleName = sampleName,
+        combinedVcfFile = combineVcfs.outVcf,
+        refFile = refFile,
+        bamFile = bamFile,
+        sampleName = sampleName,
         marginExtraArgs = marginExtraArgs,
         dockerImage = dockerImage
     }
