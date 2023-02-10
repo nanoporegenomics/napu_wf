@@ -7,7 +7,6 @@ workflow runMarginPhase {
         File refFile
         File bamFile
         String sampleName
-        String marginExtraArgs = ""
         String dockerImage = "mkolmogo/card_harmonize_vcf:0.1"
     }
 
@@ -25,7 +24,6 @@ workflow runMarginPhase {
         refFile = refFile,
         bamFile = bamFile,
         sampleName = sampleName,
-        marginExtraArgs = marginExtraArgs,
         dockerImage = dockerImage
     }
 
@@ -81,7 +79,7 @@ task marginPhase {
         File bamFile
         String sampleName
         String dockerImage
-        String marginExtraArgs
+        String marginOtherArgs = ""
         Int threads = 32
         Int memSizeGb = 128
         Int diskSizeGb = 256
@@ -95,7 +93,7 @@ task marginPhase {
         samtools index -@ ~{threads} ~{bamFile}
         samtools faidx ~{refFile}
         mkdir output/
-        margin phase ~{bamFile} ~{refFile} ~{combinedVcfFile} /opt/margin/params/phase/allParams.phase_vcf.ont.sv.json -t ~{threads} ~{marginExtraArgs} -o output/~{sampleName} -M
+        margin phase ~{bamFile} ~{refFile} ~{combinedVcfFile} /opt/margin/params/phase/allParams.phase_vcf.ont.sv.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName} -M
         bgzip output/~{sampleName}.phased.vcf
     >>>
     output {
