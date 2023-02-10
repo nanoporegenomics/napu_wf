@@ -18,3 +18,6 @@ workflows:
    -  name: minimapWorkflow
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/minimap.wdl
+   -  name: marginPhase
+      subclass: WDL
+      primaryDescriptorPath: /wdl/workflows/marginPhase.wdl
