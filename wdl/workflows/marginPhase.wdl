@@ -81,7 +81,7 @@ task marginPhase {
         File bamFile
         String sampleName
         String dockerImage
-        String marginExtraArgs = ""
+        String marginExtraArgs
         Int threads = 32
         Int memSizeGb = 128
         Int diskSizeGb = 256
