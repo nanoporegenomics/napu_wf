@@ -10,3 +10,14 @@ Dockstore collection: https://dockstore.org/organizations/NIHCARD/collections/Na
 4. [margin phase](https://github.com/UCSC-nanopore-cgl/margin)
 5. [Shasta](https://github.com/chanzuckerberg/shasta)
 6. [Hapdup](https://github.com/KolmogorovLab/hapdup)
+
+
+## Test locally
+
+```
+## DV+margin workflow
+miniwdl run --as-me  --copy-input-files wdl/workflows/dvMargin.wdl -i test/test.input.dvmargin.json
+
+## End-to-end workflow (no methylation)
+miniwdl run --as-me  --copy-input-files wdl/workflows/cardEndToEndVcfFastq.wdl -i test/test.input.endtoendfastq.json
+```

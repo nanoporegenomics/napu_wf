@@ -2,7 +2,7 @@ version 1.0
 
 import "../tasks/methyltagMinimap2.wdl" as minimap_methyl_t
 import "../tasks/modbam2bed.wdl" as modbam2bed_t
-import "../tasks/pepper-margin-dv.wdl" as pmdv_haplotag_t
+import "../tasks/dv-margin.wdl" as dv_margin_t
 import "../tasks/sniffles.wdl" as sniffles_t
 import "../tasks/hapdiff.wdl" as hapdiff_t
 import "shasta_hapdup_denovo.wdl" as denovo_asm_wf
@@ -28,19 +28,26 @@ workflow cardEndToEndVcfMethyl
 			in_cores = threads
 	}
 
-	call pmdv_haplotag_t.pepper_margin_dv_t as pmdvHap{
+	call dv_margin_t.dv_t{
 		input:
-			threads = threads,
-			reference = referenceFasta,
-			bamAlignment = mm_align.out_bam,
-			#bamAlignmentBai = mm_align.out_bam_idx,
-			#output_prefix = inSampleName
+		threads = threads,
+		reference = referenceFasta,
+		bamAlignment = mm_align.out_bam,
 	}
-	
+
+    call dv_margin_t.margin_t{
+		input:
+		threads = threads,
+		reference = referenceFasta,
+		bamAlignment = mm_align.out_bam,
+        vcfFile = dv_t.dvVcf,
+        sampleName = sampleName
+	}
+
 	call modbam2bed_t.modbam2bed as modbam2bed {
 		input:
-			haplotaggedBam = pmdvHap.haplotaggedBam,
-			haplotaggedBamBai = pmdvHap.haplotaggedBamIdx,
+			haplotaggedBam = margin_t.haplotaggedBam,
+			haplotaggedBamBai = margin_t.haplotaggedBamIdx,
 			ref = referenceFasta,
 			sample_name = sampleName,
 			ref_name = referenceName
@@ -49,7 +56,7 @@ workflow cardEndToEndVcfMethyl
 	call sniffles_t.sniffles_t as sniffles {
 		input:
 			threads = threads,
-			bamAlignment = pmdvHap.haplotaggedBam,
+			bamAlignment = margin_t.haplotaggedBam,
 			vntrAnnotations = referenceVntrAnnotations
 	}
 
@@ -69,16 +76,16 @@ workflow cardEndToEndVcfMethyl
 
 	call margin_phase_wf.runMarginPhase as margin_phase {
 		input:
-			smallVariantsFile = pmdvHap.pepperVcf,
+			smallVariantsFile = margin_t.phasedVcf,
 			structuralVariantsFile = hapdiff.hapdiffUnphasedVcf,
 			refFile = referenceFasta,
-			bamFile = pmdvHap.haplotaggedBam,
+			bamFile = margin_t.haplotaggedBam,
 			sampleName = sampleName
 	}
 
 	output {
-		File phasedMethylBam = pmdvHap.haplotaggedBam
-		File smallVariantsVcf = pmdvHap.pepperVcf
+		File phasedMethylBam = margin_t.haplotaggedBam
+		File smallVariantsVcf = margin_t.phasedVcf
 		File methylationBed1 = modbam2bed.hap1bedOut
 		File methylationBed2 = modbam2bed.hap2bedOut
 		File snifflesVcf = sniffles.snifflesVcf

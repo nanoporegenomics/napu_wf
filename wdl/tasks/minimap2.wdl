@@ -10,7 +10,9 @@ task minimap2_t {
 	Boolean useEqx = true
 	Int memSizeGb = 128
 	Int diskSizeGb = 1024
-	Int kmerSize = 17
+	  Int kmerSize = 17
+      String minibatchSize = "5G"
+      Int sortMemgb = "4"
   }
 
   String mdString = if useMd then "--MD" else ""
@@ -26,9 +28,9 @@ task minimap2_t {
     if [ "${MM_INPUT: -3}" == "bam" ]
     then
       samtools fastq -TMm,Ml ~{reads} | \
-        minimap2 -ax ~{mapMode} ~{reference} - -k ~{kmerSize} -y -K 5G -t ~{threads} ~{mdString} ~{eqxString} | samtools sort -@4 -m 4G > minimap2.bam
+        minimap2 -ax ~{mapMode} ~{reference} - -k ~{kmerSize} -y -K ~{minibatchSize} -t ~{threads} ~{mdString} ~{eqxString} | samtools sort -@4 -m ~{sortMemgb}G > minimap2.bam
     else
-      minimap2 -ax ~{mapMode} ~{reference} ~{reads} -k ~{kmerSize} -K 5G -t ~{threads} ~{mdString} ~{eqxString} | samtools sort -@4 -m 4G > minimap2.bam
+      minimap2 -ax ~{mapMode} ~{reference} ~{reads} -k ~{kmerSize} -K ~{minibatchSize} -t ~{threads} ~{mdString} ~{eqxString} | samtools sort -@4 -m ~{sortMemgb}G > minimap2.bam
     fi
 
     samtools index -@ ~{threads} minimap2.bam

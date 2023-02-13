@@ -6,9 +6,9 @@ workflows:
    -  name: cardEndToEndVcf
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/cardEndToEndVcfFastq.wdl
-   -  name: pepperMarginDvWorkflow
+   -  name: dvMargin
       subclass: WDL
-      primaryDescriptorPath: /wdl/workflows/pepper_margin_deepvariant.wdl
+      primaryDescriptorPath: /wdl/workflows/dvMargin.wdl
    -  name: dipdiffWorkflow
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/dipdiff.wdl

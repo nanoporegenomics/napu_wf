@@ -1,7 +1,7 @@
 version 1.0
 
 import "../tasks/minimap2.wdl" as minimap_t
-import "../tasks/pepper-margin-dv.wdl" as pmdv_haplotag_t
+import "../tasks/dv-margin.wdl" as dv_margin_t
 import "../tasks/sniffles.wdl" as sniffles_t
 import "../tasks/hapdiff.wdl" as hapdiff_t
 import "shasta_hapdup_denovo.wdl" as denovo_asm_wf
@@ -24,17 +24,26 @@ workflow cardEndToEndVcf
 			threads = threads
 	}
 
-	call pmdv_haplotag_t.pepper_margin_dv_t as pmdvHap{
+	call dv_margin_t.dv_t{
 		input:
-			threads = threads,
-			reference = referenceFasta,
-			bamAlignment = mm_align.bam,
+		threads = threads,
+		reference = referenceFasta,
+		bamAlignment = mm_align.bam,
 	}
-	
+
+    call dv_margin_t.margin_t{
+		input:
+		threads = threads,
+		reference = referenceFasta,
+		bamAlignment = mm_align.bam,
+        vcfFile = dv_t.dvVcf,
+        sampleName = sampleName
+	}
+
 	call sniffles_t.sniffles_t as sniffles {
 		input:
 			threads = threads,
-			bamAlignment = pmdvHap.haplotaggedBam,
+			bamAlignment = margin_t.haplotaggedBam,
 			vntrAnnotations = referenceVntrAnnotations
 	}
 
@@ -54,16 +63,16 @@ workflow cardEndToEndVcf
 
 	call margin_phase_wf.runMarginPhase as margin_phase {
 		input:
-			smallVariantsFile = pmdvHap.pepperVcf,
+			smallVariantsFile = margin_t.phasedVcf,
 			structuralVariantsFile = hapdiff.hapdiffUnphasedVcf,
 			refFile = referenceFasta,
-			bamFile = pmdvHap.haplotaggedBam,
+			bamFile = margin_t.haplotaggedBam,
 			sampleName = sampleName
 	}
 
 	output {
-		File phasedBam = pmdvHap.haplotaggedBam
-		File smallVariantsVcf = pmdvHap.pepperVcf
+		File phasedBam = margin_t.haplotaggedBam
+		File smallVariantsVcf = margin_t.phasedVcf
 		File snifflesVcf = sniffles.snifflesVcf
 		File assemblyHap1 = asm.asmDual1
 		File assemblyHap2 = asm.asmDual2
