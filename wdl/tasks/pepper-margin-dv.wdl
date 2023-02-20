@@ -10,7 +10,7 @@ task pepper_margin_dv_t {
 	Int diskSizeGb = 1024
   }
 
-  String pepperMode = if mapMode == "ont" then "--ont_r9_guppy5_sup" else "--hifi"
+  String pepperMode = if mapMode == "ont" then "--ont_r10_q20" else "--hifi"
 
   command <<<
     set -o pipefail
