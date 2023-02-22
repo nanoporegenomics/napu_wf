@@ -4,7 +4,7 @@ task shasta_t {
   input {
     File reads
     Int threads = 96
-    String shastaConfig = "/opt/shasta_config/Nanopore-CARD-Jan2022.conf"
+    String shastaConfig = "/opt/shasta_config/Nanopore-R10-Fast-Nov2022.conf"
     Int memSizeGb = 624
     Int diskSizeGb = 1024
   }
@@ -52,7 +52,7 @@ task shasta_t {
 
   #This is optimized for GCP/Terra environemnt to get maximum available RAM. May need to adjust for other cloud environemnts or HPC
   runtime {
-    docker: "mkolmogo/card_shasta:0.3"
+    docker: "quay.io/jmonlong/card_shasta:0.11.1"
     cpu: threads
     memory: memSizeGb + " GB"
     disks: "local-disk " + diskSizeGb + " SSD"

@@ -1,0 +1,7 @@
+{
+  "dvMargin.fastqReads": "test/test_ont.fastq.gz",
+  "dvMargin.referenceFile": "test/ref.fa",
+  "dvMargin.threads": 1,
+  "dvMargin.mm_align.minibatchSize": "500M",
+  "dvMargin.mm_align.sortMemgb": 1
+}

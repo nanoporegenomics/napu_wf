@@ -1,8 +1,14 @@
-versionon: 1.2
+version: 1.2
 workflows:
-   -  name: pepperMarginDvWorkflow
+   -  name: cardEndToEndVcfMethyl
       subclass: WDL
-      primaryDescriptorPath: /wdl/workflows/pepper_margin_deepvariant.wdl
+      primaryDescriptorPath: /wdl/workflows/cardEndToEndVcf.wdl
+   -  name: cardEndToEndVcf
+      subclass: WDL
+      primaryDescriptorPath: /wdl/workflows/cardEndToEndVcfFastq.wdl
+   -  name: dvMargin
+      subclass: WDL
+      primaryDescriptorPath: /wdl/workflows/dvMargin.wdl
    -  name: dipdiffWorkflow
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/dipdiff.wdl
@@ -12,3 +18,6 @@ workflows:
    -  name: minimapWorkflow
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/minimap.wdl
+   -  name: marginPhase
+      subclass: WDL
+      primaryDescriptorPath: /wdl/workflows/marginPhase.wdl

@@ -1,0 +1,7 @@
+{
+  "cardEndToEndVcf.inputFastq": "test/test_ont.fastq.gz",
+  "cardEndToEndVcf.referenceFasta": "test/ref.fa",
+  "cardEndToEndVcf.threads": 1,
+  "cardEndToEndVcf.mm_align.minibatchSize": "500M",
+  "cardEndToEndVcf.mm_align.sortMemgb": 1
+}

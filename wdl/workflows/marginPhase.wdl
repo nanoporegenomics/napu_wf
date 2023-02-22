@@ -20,11 +20,11 @@ workflow runMarginPhase {
 
     call marginPhase {
         input:
-            combinedVcfFile = combineVcfs.outVcf,
-            refFile = refFile,
-            bamFile = bamFile,
-            sampleName = sampleName,
-            dockerImage = dockerImage
+        combinedVcfFile = combineVcfs.outVcf,
+        refFile = refFile,
+        bamFile = bamFile,
+        sampleName = sampleName,
+        dockerImage = dockerImage
     }
 
     output {
@@ -53,10 +53,12 @@ task combineVcfs {
         SV_FILTERED=~{structuralVariantsFile}_size_filtered.vcf
         SMALL_FILTERED=~{smallVariantsFile}_size_filtered.vcf
 
+        echo ~{sampleName} > samplename.txt
+        
         #-f option supports unzgipped input
-        zcat -f ~{structuralVariantsFile} | python3 /opt/vcf_filter_size.py greater ~{svLengthCutoff} | bgzip > $SV_FILTERED
+        zcat -f ~{structuralVariantsFile} | python3 /opt/vcf_filter_size.py greater ~{svLengthCutoff} | bcftools reheader -s samplename.txt | bgzip > $SV_FILTERED
         tabix -p vcf $SV_FILTERED
-        zcat -f ~{smallVariantsFile} | python3 /opt/vcf_filter_size.py less ~{svLengthCutoff} | bgzip > $SMALL_FILTERED
+        zcat -f ~{smallVariantsFile} | python3 /opt/vcf_filter_size.py less ~{svLengthCutoff} | bcftools reheader -s samplename.txt | bgzip > $SMALL_FILTERED
         tabix -p vcf $SMALL_FILTERED
 
         bcftools concat -a $SMALL_FILTERED $SV_FILTERED -o ~{sampleName}.merged_small_svs.vcf
@@ -79,6 +81,7 @@ task marginPhase {
         File bamFile
         String sampleName
         String dockerImage
+        String marginOtherArgs = ""
         Int threads = 32
         Int memSizeGb = 128
         Int diskSizeGb = 256
@@ -92,7 +95,7 @@ task marginPhase {
         samtools index -@ ~{threads} ~{bamFile}
         samtools faidx ~{refFile}
         mkdir output/
-        margin phase ~{bamFile} ~{refFile} ~{combinedVcfFile} /opt/margin/params/phase/allParams.phase_vcf.ont.sv.json -t ~{threads} -o output/~{sampleName} -M
+        margin phase ~{bamFile} ~{refFile} ~{combinedVcfFile} /opt/margin/params/phase/allParams.phase_vcf.ont.sv.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName} -M
         bgzip output/~{sampleName}.phased.vcf
     >>>
     output {

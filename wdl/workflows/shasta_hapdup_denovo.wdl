@@ -9,13 +9,15 @@ workflow structuralVariantsDenovoAssembly {
     input {
         File readsFile
         Int threads
+        Int shastaDiskSizeGB = 1024
     }
 
     ### Shasta assembly ###
     call shasta_t.shasta_t as shasta_t {
         input:
-            #threads=threads,
-            reads=readsFile
+        #threads=threads,
+        reads=readsFile,
+        diskSizeGb=shastaDiskSizeGB
     }
 
 	### minimap2 alignent ###

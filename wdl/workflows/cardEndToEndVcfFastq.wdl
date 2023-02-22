@@ -1,56 +1,43 @@
 version 1.0
 
-import "../tasks/methyltagMinimap2.wdl" as minimap_methyl_t
-import "../tasks/modbam2bed.wdl" as modbam2bed_t
+import "../tasks/minimap2.wdl" as minimap_t
 import "../tasks/dv-margin.wdl" as dv_margin_t
 import "../tasks/sniffles.wdl" as sniffles_t
 import "../tasks/hapdiff.wdl" as hapdiff_t
 import "shasta_hapdup_denovo.wdl" as denovo_asm_wf
 import "marginPhase.wdl" as margin_phase_wf
 
-workflow cardEndToEndVcfMethyl
+workflow cardEndToEndVcf
 {
 	input {
-		File  inputUnphasedMethylBam	
+		File  inputFastq	
 		File  referenceFasta
 		Int   threads
 		File  referenceVntrAnnotations = ""
 		String  sampleName = "sample"
-		String  referenceName = "ref"
 	}
 
-	call minimap_methyl_t.fastqAlignAndSortBam as mm_align {
+	call minimap_t.minimap2_t as mm_align {
 		input:
-			unaligned_methyl_bam = inputUnphasedMethylBam,
-			ref_file = referenceFasta,
-			ref_name = referenceName,
-			sample = sampleName,
-			in_cores = threads
+			reads = inputFastq,
+			reference = referenceFasta,
+			threads = threads
 	}
 
 	call dv_margin_t.dv_t{
 		input:
 		threads = threads,
 		reference = referenceFasta,
-		bamAlignment = mm_align.out_bam,
+		bamAlignment = mm_align.bam,
 	}
 
     call dv_margin_t.margin_t{
 		input:
 		threads = threads,
 		reference = referenceFasta,
-		bamAlignment = mm_align.out_bam,
+		bamAlignment = mm_align.bam,
         vcfFile = dv_t.dvVcf,
         sampleName = sampleName
-	}
-
-	call modbam2bed_t.modbam2bed as modbam2bed {
-		input:
-			haplotaggedBam = margin_t.haplotaggedBam,
-			haplotaggedBamBai = margin_t.haplotaggedBamIdx,
-			ref = referenceFasta,
-			sample_name = sampleName,
-			ref_name = referenceName
 	}
 
 	call sniffles_t.sniffles_t as sniffles {
@@ -62,7 +49,7 @@ workflow cardEndToEndVcfMethyl
 
 	call denovo_asm_wf.structuralVariantsDenovoAssembly as asm {
 		input:
-			readsFile = inputUnphasedMethylBam,
+			readsFile = inputFastq,
 			threads = threads
 	}
 
@@ -84,10 +71,8 @@ workflow cardEndToEndVcfMethyl
 	}
 
 	output {
-		File phasedMethylBam = margin_t.haplotaggedBam
+		File phasedBam = margin_t.haplotaggedBam
 		File smallVariantsVcf = margin_t.phasedVcf
-		File methylationBed1 = modbam2bed.hap1bedOut
-		File methylationBed2 = modbam2bed.hap2bedOut
 		File snifflesVcf = sniffles.snifflesVcf
 		File assemblyHap1 = asm.asmDual1
 		File assemblyHap2 = asm.asmDual2
