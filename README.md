@@ -128,6 +128,7 @@ Main code contributors.
 * Mikhail Kolmogorov (NCI)
 * Mira Mastoras (UCSC)
 * Melissa Meredith (UCSC)
+* Jean Monlong (UCSC)
 
 Citation
 --------
