@@ -88,8 +88,8 @@ task splitReads {
     runtime {
         preemptible: 2
         time: 120
-        cpu: 4
-        memory: "8 GB"
+        cpu: threads
+        memory: "4 GB"
         disks: "local-disk " + diskGb + " SSD"
         docker: "quay.io/jmonlong/minimap2_samtools:v2.24_v1.16.1_pigz"
     }
