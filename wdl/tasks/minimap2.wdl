@@ -55,9 +55,11 @@ task splitReads {
     input {
         File reads
         Int readsPerChunk
+        Int threads = 8
         Int diskGb = 5 * round(size(reads, "G")) + 20
     }
 
+    Int gzThreads = if threads > 1 then threads - 1 else 1
     command <<<
         # Set the exit code of a pipeline to that of the rightmost command
         # to exit with a non-zero status, or zero if all commands of the pipeline exit
@@ -75,9 +77,9 @@ task splitReads {
         MM_INPUT=~{reads}
         if [ "${MM_INPUT: -3}" == "bam" ]
         then
-            samtools fastq -TMm,Ml ~{reads} | split -l $CHUNK_LINES --filter='gzip > ${FILE}.fq.gz' - "fq_chunk.part."
+            samtools fastq -TMm,Ml,MM,ML ~{reads} | split -l $CHUNK_LINES --filter='pigz -p ~{gzThreads} > ${FILE}.fq.gz' - "fq_chunk.part."
         else
-            gzip -cd ~{reads} | split -l $CHUNK_LINES --filter='gzip > ${FILE}.fq.gz' - "fq_chunk.part."
+            gzip -cd ~{reads} | split -l $CHUNK_LINES --filter='pigz -p ~{gzThreads} > ${FILE}.fq.gz' - "fq_chunk.part."
         fi
     >>>
     output {
@@ -89,7 +91,7 @@ task splitReads {
         cpu: 4
         memory: "8 GB"
         disks: "local-disk " + diskGb + " SSD"
-        docker: "mkolmogo/card_minimap2:2.23"
+        docker: "quay.io/jmonlong/minimap2_samtools:v2.24_v1.16.1_pigz"
     }
 }
 
