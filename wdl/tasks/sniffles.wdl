@@ -5,26 +5,20 @@ task sniffles_t {
     Int threads
 	File bamAlignment
 	File bamAlignmentIndex
-	File vntrAnnotations = ""
+	File? vntrAnnotations
 	Int minSvLen = 25
 	Int memSizeGb = 128
 	Int diskSizeGb = 256
   }
-  
+
+  String trfString = if defined(vntrAnnotations) then "--tandem-repeats ~{vntrAnnotations}" else ""
   command <<<
     set -o pipefail
     set -e
     set -u
     set -o xtrace
 
-    TRF_STRING=""
-    if [ ! -z ~{vntrAnnotations} ]
-    then
-       TRF_STRING="--tandem-repeats ~{vntrAnnotations}"
-    fi
-    echo $TRF_STRING
-
-    sniffles -i ~{bamAlignment} -v sniffles.vcf -t ~{threads} ${TRF_STRING} --minsvlen ~{minSvLen} 2>&1 | tee sniffles.log
+    sniffles -i ~{bamAlignment} -v sniffles.vcf -t ~{threads} ~{trfString} --minsvlen ~{minSvLen} 2>&1 | tee sniffles.log
   >>>
 
   output {

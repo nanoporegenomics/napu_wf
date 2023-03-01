@@ -13,7 +13,7 @@ workflow cardEndToEndVcf
 		File  inputFastq	
 		File  referenceFasta
 		Int   threads
-		File  referenceVntrAnnotations = ""
+		File?  referenceVntrAnnotations
         Int   nbReadsPerChunk = 0
 		String  sampleName = "sample"
         Array[String] chrs = []

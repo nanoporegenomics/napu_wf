@@ -1,7 +1,11 @@
 {
-  "cardEndToEndVcf.inputFastq": "test/test_ont.fastq.gz",
-  "cardEndToEndVcf.referenceFasta": "test/ref.fa",
-  "cardEndToEndVcf.threads": 1,
-  "cardEndToEndVcf.mm_align.minibatchSize": "500M",
-  "cardEndToEndVcf.mm_align.sortMemgb": 1
+    "cardEndToEndVcf.inputFastq": "test/test_ont.fastq.gz",
+    "cardEndToEndVcf.referenceFasta": "test/ref.fa",
+    "cardEndToEndVcf.threads": 1,
+    "cardEndToEndVcf.asm.shasta_t.threads": 1,
+    "cardEndToEndVcf.asm.shasta_t.shastaConfig": "/opt/shasta_config/shasta.local.small.conf",
+    "cardEndToEndVcf.asm.minimap2.minibatchSize": "500M",
+    "cardEndToEndVcf.asm.minimap2.sortMemgb": 1,
+    "cardEndToEndVcf.mm_align.minibatchSize": "500M",
+    "cardEndToEndVcf.mm_align.sortMemgb": 1
 }
