@@ -10,7 +10,6 @@ workflow structuralVariantsDenovoAssembly {
         File readsFile
         Array[File] chunkedReadsFiles = []
         Int threads
-        Int nbReadsPerChunk = 0
         Int shastaDiskSizeGB = 1024
     }
 

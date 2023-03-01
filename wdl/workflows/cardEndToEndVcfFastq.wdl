@@ -104,8 +104,9 @@ workflow cardEndToEndVcf
 
 	call denovo_asm_wf.structuralVariantsDenovoAssembly as asm {
 		input:
-			readsFile = inputFastq,
-			threads = threads
+		readsFile = inputFastq,
+        chunkedReadsFiles=select_first([splitReads.readChunks, []]),
+		threads = threads,
 	}
 
 	call hapdiff_t.hapdiff_t as hapdiff {

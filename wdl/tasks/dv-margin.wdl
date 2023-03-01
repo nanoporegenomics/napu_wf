@@ -102,7 +102,7 @@ task mergeVCFs {
     set -o xtrace
 
     mkdir bcftools.tmp
-    bcftools concat -n ${sep=" " vcfFiles} | bcftools sort -T bcftools.tmp -O z -o ~{outname}.vcf.gz -
+    bcftools concat -n ~{sep=" " vcfFiles} | bcftools sort -T bcftools.tmp -O z -o ~{outname}.vcf.gz -
     bcftools index -t -o ~{outname}.vcf.gz.tbi ~{outname}.vcf.gz
   >>>
 

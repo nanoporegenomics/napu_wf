@@ -8,6 +8,7 @@ task hapdup_t {
     String readType = "ont"
     Int memSizeGb = 256
     Int diskSizeGb = 1024
+    String dockerContainer = "mkolmogo/hapdup:0.11"
   }
 
   command <<<
@@ -35,7 +36,7 @@ task hapdup_t {
   }
 
   runtime {
-    docker: "mkolmogo/hapdup:0.11"
+    docker: dockerContainer
     cpu: threads
     memory: memSizeGb + " GB"
     disks: "local-disk " + diskSizeGb + " SSD"
