@@ -6,7 +6,7 @@ task modbam2bed {
         File haplotaggedBamBai
         File ref
         String sample_name
-        String ref_name
+        String ref_name = "ref"
         String modType = "5mC"    
         String out_type_filter = "cpg"
         String? extraArgs

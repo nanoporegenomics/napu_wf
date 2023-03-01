@@ -3,9 +3,6 @@ workflows:
    -  name: cardEndToEndVcfMethyl
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/cardEndToEndVcf.wdl
-   -  name: cardEndToEndVcf
-      subclass: WDL
-      primaryDescriptorPath: /wdl/workflows/cardEndToEndVcfFastq.wdl
    -  name: dvMargin
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/dvMargin.wdl

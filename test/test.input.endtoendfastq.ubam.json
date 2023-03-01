@@ -1,5 +1,5 @@
 {
-  "cardEndToEndVcfMethyl.inputReads": "test/test_ont.fastq.gz",
+  "cardEndToEndVcfMethyl.inputReads": "test/test_ont.u.bam",
   "cardEndToEndVcfMethyl.referenceFasta": "test/ref.fa",
   "cardEndToEndVcfMethyl.threads": 1,
   "cardEndToEndVcfMethyl.asm.shasta_t.threads": 1,

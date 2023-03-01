@@ -1,15 +1,15 @@
 {
-  "cardEndToEndVcf.nbReadsPerChunk": 50,
-  "cardEndToEndVcf.chrs": ["chr1"],
-  "cardEndToEndVcf.inputFastq": "test/test_ont.fastq.gz",
-  "cardEndToEndVcf.referenceFasta": "test/ref.fa",
-  "cardEndToEndVcf.threads": 1,
-  "cardEndToEndVcf.asm.shasta_t.threads": 1,
-  "cardEndToEndVcf.asm.shasta_t.shastaConfig": "/opt/shasta_config/shasta.local.small.conf",
-  "cardEndToEndVcf.asm.minimap2_chunk.minibatchSize": "500M",
-  "cardEndToEndVcf.asm.minimap2_chunk.sortMemgb": 1,
-  "cardEndToEndVcf.mm_align_chunk.minibatchSize": "500M",
-  "cardEndToEndVcf.mm_align_chunk.sortMemgb": 1,
-  "cardEndToEndVcf.asm.hapdup_t.dockerContainer": "quay.io/jmonlong/hapdup:lowmem",
-  "cardEndToEndVcf.hapdiff.dockerContainer": "quay.io/jmonlong/hapdiff:lowmem"
+  "cardEndToEndVcfMethyl.nbReadsPerChunk": 50,
+  "cardEndToEndVcfMethyl.chrs": ["chr1"],
+  "cardEndToEndVcfMethyl.inputReads": "test/test_ont.fastq.gz",
+  "cardEndToEndVcfMethyl.referenceFasta": "test/ref.fa",
+  "cardEndToEndVcfMethyl.threads": 1,
+  "cardEndToEndVcfMethyl.asm.shasta_t.threads": 1,
+  "cardEndToEndVcfMethyl.asm.shasta_t.shastaConfig": "/opt/shasta_config/shasta.local.small.conf",
+  "cardEndToEndVcfMethyl.asm.minimap2_chunk.minibatchSize": "500M",
+  "cardEndToEndVcfMethyl.asm.minimap2_chunk.sortMemgb": 1,
+  "cardEndToEndVcfMethyl.mm_align_chunk.minibatchSize": "500M",
+  "cardEndToEndVcfMethyl.mm_align_chunk.sortMemgb": 1,
+  "cardEndToEndVcfMethyl.asm.hapdup_t.dockerContainer": "quay.io/jmonlong/hapdup:lowmem",
+  "cardEndToEndVcfMethyl.hapdiff.dockerContainer": "quay.io/jmonlong/hapdiff:lowmem"
 }

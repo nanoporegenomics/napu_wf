@@ -6,10 +6,13 @@ Test locally, for example using [miniwdl](https://github.com/chanzuckerberg/mini
 
 ```
 ## End-to-end workflow (no methylation)
-miniwdl run --as-me  --copy-input-files wdl/workflows/cardEndToEndVcfFastq.wdl -i test/test.input.endtoendfastq.json
+miniwdl run --as-me  --copy-input-files wdl/workflows/cardEndToEndVcf.wdl -i test/test.input.endtoendfastq.json
 
 ## End-to-end workflow (no methylation) cheaper by chunking reads (and preempting)
-miniwdl run --as-me  --copy-input-files wdl/workflows/cardEndToEndVcfFastq.wdl -i test/test.input.endtoendfastq.chunks.json
+miniwdl run --as-me  --copy-input-files wdl/workflows/cardEndToEndVcf.wdl -i test/test.input.endtoendfastq.chunks.json
+
+## End-to-end workflow with uBAM input (for methylation)
+miniwdl run --as-me  --copy-input-files wdl/workflows/cardEndToEndVcf.wdl -i test/test.input.endtoendfastq.ubam.json
 
 ## DV+margin workflow
 miniwdl run --as-me  --copy-input-files wdl/workflows/dvMargin.wdl -i test/test.input.dvmargin.json

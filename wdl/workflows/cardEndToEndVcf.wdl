@@ -1,69 +1,124 @@
 version 1.0
 
-import "../tasks/methyltagMinimap2.wdl" as minimap_methyl_t
-import "../tasks/modbam2bed.wdl" as modbam2bed_t
+import "../tasks/minimap2.wdl" as minimap_t
 import "../tasks/dv-margin.wdl" as dv_margin_t
 import "../tasks/sniffles.wdl" as sniffles_t
 import "../tasks/hapdiff.wdl" as hapdiff_t
+import "../tasks/modbam2bed.wdl" as modbam2bed_t
 import "shasta_hapdup_denovo.wdl" as denovo_asm_wf
 import "marginPhase.wdl" as margin_phase_wf
 
 workflow cardEndToEndVcfMethyl
 {
 	input {
-		File  inputUnphasedMethylBam	
+		File  inputReads
 		File  referenceFasta
 		Int   threads
-		File  referenceVntrAnnotations = ""
+		File?  referenceVntrAnnotations
+        Int   nbReadsPerChunk = 0
 		String  sampleName = "sample"
-		String  referenceName = "ref"
+        Array[String] chrs = []
 	}
 
-	call minimap_methyl_t.fastqAlignAndSortBam as mm_align {
-		input:
-			unaligned_methyl_bam = inputUnphasedMethylBam,
-			ref_file = referenceFasta,
-			ref_name = referenceName,
-			sample = sampleName,
-			in_cores = threads
-	}
+    if(nbReadsPerChunk == 0){
+	    call minimap_t.minimap2_t as mm_align {
+		    input:
+			reads = inputReads,
+			reference = referenceFasta,
+			threads = threads
+	    }
+    }
+    if(nbReadsPerChunk > 0){
+	    call minimap_t.splitReads {
+		    input:
+			reads = inputReads,
+            readsPerChunk = nbReadsPerChunk
+	    }
 
-	call dv_margin_t.dv_t{
-		input:
-		threads = threads,
-		reference = referenceFasta,
-		bamAlignment = mm_align.out_bam,
-	}
+        scatter (readChunk in splitReads.readChunks){
+	        call minimap_t.minimap2_t as mm_align_chunk {
+		        input:
+			    reads = readChunk,
+			    reference = referenceFasta,
+                preemptible = 2,
+			    threads = threads
+	        }
+        }
 
+        call minimap_t.mergeBAM {
+		    input:
+			bams = mm_align_chunk.bam,
+            outname = sampleName
+	    }
+    }
+
+    File bamFile = select_first([mm_align.bam, mergeBAM.bam])
+    File bamFileIndex = select_first([mm_align.bamIndex, mergeBAM.bamIndex])
+    
+    if(length(chrs) > 0){
+        # shard by chromosome
+        scatter (chrn in chrs){
+	        call dv_margin_t.dv_t as chr_dv_t {
+		        input:
+		        threads = threads,
+		        reference = referenceFasta,
+		        bamAlignment = bamFile,
+		        bamAlignmentIndex = bamFileIndex,
+                region = chrn
+	        }
+        }
+
+        call dv_margin_t.mergeVCFs {
+            input:
+            vcfFiles = chr_dv_t.dvVcf,
+            outname = sampleName
+        }
+    }
+    if(length(chrs) == 0){
+	    call dv_margin_t.dv_t{
+		    input:
+		    threads = threads,
+		    reference = referenceFasta,
+		    bamAlignment = bamFile,
+		    bamAlignmentIndex = bamFileIndex
+	    }
+    }
+    File dvVCF = select_first([mergeVCFs.vcf, dv_t.dvVcf])
+    
     call dv_margin_t.margin_t{
 		input:
 		threads = threads,
 		reference = referenceFasta,
-		bamAlignment = mm_align.out_bam,
-        vcfFile = dv_t.dvVcf,
+		bamAlignment = bamFile,
+		bamAlignmentIndex = bamFileIndex,
+        vcfFile = dvVCF,
         sampleName = sampleName
 	}
 
-	call modbam2bed_t.modbam2bed as modbam2bed {
-		input:
+    # run the methylation analysis only if input reads was a BAM
+    if(basename(inputReads, ".bam") != basename(inputReads)){
+	    call modbam2bed_t.modbam2bed as modbam2bed {
+		    input:
 			haplotaggedBam = margin_t.haplotaggedBam,
 			haplotaggedBamBai = margin_t.haplotaggedBamIdx,
 			ref = referenceFasta,
-			sample_name = sampleName,
-			ref_name = referenceName
-	}
-
+			sample_name = sampleName
+	    }
+    }
+    
 	call sniffles_t.sniffles_t as sniffles {
 		input:
 			threads = threads,
 			bamAlignment = margin_t.haplotaggedBam,
+		    bamAlignmentIndex = margin_t.haplotaggedBamIdx,
 			vntrAnnotations = referenceVntrAnnotations
 	}
 
 	call denovo_asm_wf.structuralVariantsDenovoAssembly as asm {
 		input:
-			readsFile = inputUnphasedMethylBam,
-			threads = threads
+		readsFile = inputReads,
+        chunkedReadsFiles=select_first([splitReads.readChunks, []]),
+		threads = threads,
 	}
 
 	call hapdiff_t.hapdiff_t as hapdiff {
@@ -84,14 +139,14 @@ workflow cardEndToEndVcfMethyl
 	}
 
 	output {
-		File phasedMethylBam = margin_t.haplotaggedBam
+		File phasedBam = margin_t.haplotaggedBam
 		File smallVariantsVcf = margin_t.phasedVcf
-		File methylationBed1 = modbam2bed.hap1bedOut
-		File methylationBed2 = modbam2bed.hap2bedOut
 		File snifflesVcf = sniffles.snifflesVcf
 		File assemblyHap1 = asm.asmDual1
 		File assemblyHap2 = asm.asmDual2
 		File structuralVariantsVcf = hapdiff.hapdiffUnphasedVcf
 		File harmonizedVcf = margin_phase.out_margin_phase_svs
+		File? methylationBed1 = modbam2bed.hap1bedOut
+		File? methylationBed2 = modbam2bed.hap2bedOut
 	}
 }
