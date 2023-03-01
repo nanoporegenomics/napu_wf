@@ -67,6 +67,7 @@ task combineVcfs {
         File outVcf = "~{sampleName}.merged_small_svs.vcf"
     }
     runtime {
+        preemptible: 1
         memory: memSizeGb + " GB"
         cpu: threads
         disks: "local-disk " + diskSizeGb + " SSD"
@@ -103,6 +104,7 @@ task marginPhase {
     }
 
     runtime {
+        preemptible: 1
         memory: memSizeGb + " GB"
         cpu: threads
         disks: "local-disk " + diskSizeGb + " SSD"

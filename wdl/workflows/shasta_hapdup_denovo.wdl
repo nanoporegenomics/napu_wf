@@ -8,7 +8,9 @@ workflow structuralVariantsDenovoAssembly {
 
     input {
         File readsFile
+        Array[File] chunkedReadsFiles = []
         Int threads
+        Int nbReadsPerChunk = 0
         Int shastaDiskSizeGB = 1024
     }
 
@@ -20,20 +22,41 @@ workflow structuralVariantsDenovoAssembly {
         diskSizeGb=shastaDiskSizeGB
     }
 
-	### minimap2 alignent ###
-    call minimap2_t.minimap2_t as minimap2 {
-        input:
-            threads=threads,
+	### minimap2 alignment ###
+    if(length(chunkedReadsFiles) == 0){
+	    call minimap2_t.minimap2_t as minimap2 {
+		    input:
+			reads = readsFile,
             reference=shasta_t.shastaFasta,
-            reads=readsFile,
-            useEqx=false
+			useEqx=false,
+            threads = threads
+	    }
     }
+    if(length(chunkedReadsFiles) > 0){
+        scatter (readChunk in chunkedReadsFiles){
+	        call minimap2_t.minimap2_t as minimap2_chunk {
+		        input:
+			    reads = readChunk,
+                reference=shasta_t.shastaFasta,
+			    useEqx=false,
+                preemptible=2,
+			    threads = threads
+	        }
+        }
+
+        call minimap2_t.mergeBAM as mergeBAMhapdup {
+		    input:
+			bams = minimap2_chunk.bam
+	    }
+    }
+
+    File bamFile = select_first([minimap2.bam, mergeBAMhapdup.bam])
 
 	### hapdup
 	call hapdup_t.hapdup_t as hapdup_t {
 		input:
 			threads=threads,
-			alignedBam=minimap2.bam,
+			alignedBam=bamFile,
 			contigs=shasta_t.shastaFasta
 	}
 

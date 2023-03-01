@@ -5,11 +5,14 @@ task dv_t {
       Int threads
       File reference
 	  File bamAlignment
+	  File bamAlignmentIndex
       String dvModel = "ONT_R104"
+      String region = ""
 	  Int memSizeGb = 256
 	  Int diskSizeGb = 1024
   }  
 
+  String regionArg = if region != "" then "--regions ~{region}" else ""
   command <<<
     set -o pipefail
     set -e
@@ -18,15 +21,12 @@ task dv_t {
 
     ln -s ~{reference} ref.fa
     samtools faidx ref.fa
-
-    ln -s ~{bamAlignment} reads.bam
-    samtools index -@ {threads} reads.bam
     
     /opt/deepvariant/bin/run_deepvariant \
         --model_type ~{dvModel} \
         --ref ref.fa \
-        --reads reads.bam \
-        --output_vcf dv.vcf.gz \
+        --reads ~{bamAlignment} \
+        --output_vcf dv.vcf.gz ~{regionArg} \
         --num_shards ~{threads}
   >>>
 
@@ -47,6 +47,7 @@ task margin_t {
       File reference
       File vcfFile
 	  File bamAlignment
+	  File bamAlignmentIndex
       String sampleName
       Int threads
       String marginOtherArgs = ""
@@ -60,14 +61,11 @@ task margin_t {
     set -u
     set -o xtrace
 
-    ln -s ~{bamAlignment} reads.bam
-    samtools index -@ ~{threads} reads.bam
-
     ln -s ~{reference} ref.fa
     samtools faidx ref.fa
     
     mkdir output/
-    margin phase reads.bam ref.fa ~{vcfFile} /opt/margin/params/phase/allParams.haplotag.ont-r104q20.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName}
+    margin phase ~{bamAlignment} ref.fa ~{vcfFile} /opt/margin/params/phase/allParams.haplotag.ont-r104q20.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName}
 
     bgzip output/~{sampleName}.phased.vcf
 
@@ -81,8 +79,42 @@ task margin_t {
   }
 
   runtime {
+    preemptible: 1
     docker: "mkolmogo/card_harmonize_vcf:0.1"
     cpu: threads
+	memory: memSizeGb + " GB"
+	disks: "local-disk " + diskSizeGb + " SSD"
+  }
+}
+
+task mergeVCFs {
+  input {
+      Array[File] vcfFiles
+      String outname = "merged"
+	  Int memSizeGb = 6
+	  Int diskSizeGb = 5 * round(size(vcfFiles, 'G')) + 20
+  }  
+
+  command <<<
+    set -o pipefail
+    set -e
+    set -u
+    set -o xtrace
+
+    mkdir bcftools.tmp
+    bcftools concat -n ${sep=" " vcfFiles} | bcftools sort -T bcftools.tmp -O z -o ~{outname}.vcf.gz -
+    bcftools index -t -o ~{outname}.vcf.gz.tbi ~{outname}.vcf.gz
+  >>>
+
+  output {
+      File vcf = "~{outname}.vcf.gz"
+      File vcfIndex = "~{outname}.vcf.gz.tbi"
+  }
+
+  runtime {
+    preemptible: 1
+    docker: "quay.io/biocontainers/bcftools@sha256:95c212df20552fc74670d8f16d20099d9e76245eda6a1a6cfff4bd39e57be01b"
+    cpu: 1
 	memory: memSizeGb + " GB"
 	disks: "local-disk " + diskSizeGb + " SSD"
   }

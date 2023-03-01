@@ -4,6 +4,7 @@ task sniffles_t {
   input {
     Int threads
 	File bamAlignment
+	File bamAlignmentIndex
 	File vntrAnnotations = ""
 	Int minSvLen = 25
 	Int memSizeGb = 128
@@ -23,7 +24,6 @@ task sniffles_t {
     fi
     echo $TRF_STRING
 
-    samtools index -@ 10 ~{bamAlignment}
     sniffles -i ~{bamAlignment} -v sniffles.vcf -t ~{threads} ${TRF_STRING} --minsvlen ~{minSvLen} 2>&1 | tee sniffles.log
   >>>
 
@@ -33,6 +33,7 @@ task sniffles_t {
   }
 
   runtime {
+    preemptible: 1
     docker: "mkolmogo/card_sniffles:2.0.3"
     cpu: threads
 	memory: memSizeGb + " GB"

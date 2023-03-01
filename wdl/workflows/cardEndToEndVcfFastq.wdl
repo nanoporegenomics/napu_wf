@@ -14,29 +14,83 @@ workflow cardEndToEndVcf
 		File  referenceFasta
 		Int   threads
 		File  referenceVntrAnnotations = ""
+        Int   nbReadsPerChunk = 0
 		String  sampleName = "sample"
+        Array[String] chrs = []
 	}
 
-	call minimap_t.minimap2_t as mm_align {
-		input:
+    if(nbReadsPerChunk == 0){
+	    call minimap_t.minimap2_t as mm_align {
+		    input:
 			reads = inputFastq,
 			reference = referenceFasta,
 			threads = threads
-	}
+	    }
+    }
+    if(nbReadsPerChunk > 0){
+	    call minimap_t.splitReads {
+		    input:
+			reads = inputFastq,
+            readsPerChunk = nbReadsPerChunk
+	    }
 
-	call dv_margin_t.dv_t{
-		input:
-		threads = threads,
-		reference = referenceFasta,
-		bamAlignment = mm_align.bam,
-	}
+        scatter (readChunk in splitReads.readChunks){
+	        call minimap_t.minimap2_t as mm_align_chunk {
+		        input:
+			    reads = readChunk,
+			    reference = referenceFasta,
+                preemptible = 2,
+			    threads = threads
+	        }
+        }
 
+        call minimap_t.mergeBAM {
+		    input:
+			bams = mm_align_chunk.bam,
+            outname = sampleName
+	    }
+    }
+
+    File bamFile = select_first([mm_align.bam, mergeBAM.bam])
+    File bamFileIndex = select_first([mm_align.bamIndex, mergeBAM.bamIndex])
+    
+    if(length(chrs) > 0){
+        # shard by chromosome
+        scatter (chrn in chrs){
+	        call dv_margin_t.dv_t as chr_dv_t {
+		        input:
+		        threads = threads,
+		        reference = referenceFasta,
+		        bamAlignment = bamFile,
+		        bamAlignmentIndex = bamFileIndex,
+                region = chrn
+	        }
+        }
+
+        call dv_margin_t.mergeVCFs {
+            input:
+            vcfFiles = chr_dv_t.dvVcf,
+            outname = sampleName
+        }
+    }
+    if(length(chrs) == 0){
+	    call dv_margin_t.dv_t{
+		    input:
+		    threads = threads,
+		    reference = referenceFasta,
+		    bamAlignment = bamFile,
+		    bamAlignmentIndex = bamFileIndex
+	    }
+    }
+    File dvVCF = select_first([mergeVCFs.vcf, dv_t.dvVcf])
+    
     call dv_margin_t.margin_t{
 		input:
 		threads = threads,
 		reference = referenceFasta,
-		bamAlignment = mm_align.bam,
-        vcfFile = dv_t.dvVcf,
+		bamAlignment = bamFile,
+		bamAlignmentIndex = bamFileIndex,
+        vcfFile = dvVCF,
         sampleName = sampleName
 	}
 
@@ -44,6 +98,7 @@ workflow cardEndToEndVcf
 		input:
 			threads = threads,
 			bamAlignment = margin_t.haplotaggedBam,
+		    bamAlignmentIndex = margin_t.haplotaggedBamIdx,
 			vntrAnnotations = referenceVntrAnnotations
 	}
 

@@ -36,6 +36,7 @@ task hapdiff_t {
   }
 
   runtime {
+    preemptible: 1
     docker: "mkolmogo/hapdiff:0.7"
     cpu: threads
     memory: memSizeGb + " GB"
