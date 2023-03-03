@@ -5,8 +5,8 @@ task shasta_t {
     File reads
     Int threads = 96
     String shastaConfig = "/opt/shasta_config/Nanopore-R10-Fast-Nov2022.conf"
-    Int memSizeGb = 624
-    Int diskSizeGb = 1024
+    Int memSizeGb = 384
+    Int diskSizeGb = 1125
   }
 
   command <<<
@@ -42,12 +42,14 @@ task shasta_t {
     
     #By default use disk caching
     shasta --input $SHASTA_INPUT --config ~{shastaConfig} --threads ~{threads} --memoryMode filesystem --memoryBacking disk 2>&1 | tee shasta.log
+
+    tar -czvf shasta.log.tar.gz shasta.log ShastaRun/performance.log ShastaRun/stdout.log ShastaRun/AssemblySummary.html
   >>>
 
   output {
     File shastaFasta = "ShastaRun/Assembly.fasta"
     File shastaGfa = "ShastaRun/Assembly.gfa"
-    File shastaLog = "shasta.log"
+    File shastaLog = "shasta.log.tar.gz"
   }
 
   #This is optimized for GCP/Terra environemnt to get maximum available RAM. May need to adjust for other cloud environemnts or HPC
@@ -55,7 +57,7 @@ task shasta_t {
     docker: "quay.io/jmonlong/card_shasta:0.11.1"
     cpu: threads
     memory: memSizeGb + " GB"
-    disks: "local-disk " + diskSizeGb + " SSD"
+    disks: "local-disk " + diskSizeGb + " LOCAL"
     #cpuPlatform: "Intel Cascade Lake"
   }
 }
