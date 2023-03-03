@@ -13,11 +13,18 @@ workflow structuralVariantsDenovoAssembly {
         Int shastaDiskSizeGB = 1024
     }
 
+    
     ### Shasta assembly ###
+    if ((basename(readsFile, ".fasta") == basename(readsFile)) && (basename(readsFile, ".fa") == basename(readsFile))){
+        call shasta_t.convertToFasta {
+            input:
+            reads=readsFile
+        }
+    }
+    File readsFasta = select_first([convertToFasta.fasta, readsFile])
     call shasta_t.shasta_t as shasta_t {
         input:
-        #threads=threads,
-        reads=readsFile,
+        reads=readsFasta,
         diskSizeGb=shastaDiskSizeGB
     }
 

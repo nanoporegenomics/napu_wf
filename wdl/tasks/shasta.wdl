@@ -59,3 +59,48 @@ task shasta_t {
     #cpuPlatform: "Intel Cascade Lake"
   }
 }
+
+task convertToFasta {
+  input {
+    File reads
+    Int threads = 4
+    Int memSizeGb = 8
+    Int diskSizeGb = 5 * round(size(reads, 'G')) + 50
+  }
+
+  String outname = sub(sub(basename(reads), ".gz$", ""), ".bam", "")
+  command <<<
+    set -o pipefail
+    set -e
+    set -u
+    set -o xtrace
+
+    READS=~{reads}
+    if [ "${READS: -3}" == ".gz" ]
+    then
+      if [ "${READS: -4}" == "q.gz" ]
+      then
+        zcat $READS | awk '{if(NR%4==1) {printf(">%s\n",substr($0,2));} else if(NR%4==2) print;}' > ~{outname}.fasta
+      else
+        zcat $READS > ~{outname}.fasta
+      fi
+    fi
+
+    if [ "${READS: -3}" == "bam" ]
+    then
+      samtools fasta -@ ~{threads} $READS > ~{outname}.fasta
+    fi
+  >>>
+
+  output {
+    File fasta = "~{outname}.fasta"
+  }
+
+  runtime {
+      docker: "quay.io/jmonlong/card_shasta:0.11.1"
+      preemptible: 2
+      cpu: threads
+      memory: memSizeGb + " GB"
+      disks: "local-disk " + diskSizeGb + " SSD"
+  }
+}
