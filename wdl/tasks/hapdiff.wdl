@@ -13,14 +13,14 @@ task hapdiff_t {
       String dockerContainer = "mkolmogo/hapdiff:0.7"
   }
 
-  String trfString = if defined(vntrAnnotations) then "--tandem-repeats ~{vntrAnnotations}" else ""
+  String trfString = if defined(vntrAnnotations) then "--tandem-repeats " else ""
   command <<<
     set -o pipefail
     set -e
     set -u
     set -o xtrace
 
-    hapdiff.py --reference ~{reference} ~{trfString} --pat ~{ctgsPat} --mat ~{ctgsMat} --out-dir hapdiff -t ~{threads} --sv-size ~{minSvSize} 2>&1 | tee hapdiff.log
+    hapdiff.py --reference ~{reference} ~{trfString}~{vntrAnnotations} --pat ~{ctgsPat} --mat ~{ctgsMat} --out-dir hapdiff -t ~{threads} --sv-size ~{minSvSize} 2>&1 | tee hapdiff.log
   >>>
 
   output {

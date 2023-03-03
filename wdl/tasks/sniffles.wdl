@@ -11,14 +11,14 @@ task sniffles_t {
 	Int diskSizeGb = 256
   }
 
-  String trfString = if defined(vntrAnnotations) then "--tandem-repeats ~{vntrAnnotations}" else ""
+  String trfString = if defined(vntrAnnotations) then "--tandem-repeats " else ""
   command <<<
     set -o pipefail
     set -e
     set -u
     set -o xtrace
 
-    sniffles -i ~{bamAlignment} -v sniffles.vcf -t ~{threads} ~{trfString} --minsvlen ~{minSvLen} 2>&1 | tee sniffles.log
+    sniffles -i ~{bamAlignment} -v sniffles.vcf -t ~{threads} ~{trfString}~{vntrAnnotations} --minsvlen ~{minSvLen} 2>&1 | tee sniffles.log
   >>>
 
   output {
