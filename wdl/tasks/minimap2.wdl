@@ -31,7 +31,7 @@ task minimap2_t {
       samtools fastq -TMm,Ml,MM,ML ~{reads} | \
         minimap2 -ax ~{mapMode} ~{reference} - -k ~{kmerSize} -y -K ~{minibatchSize} -t ~{threads} ~{mdString} ~{eqxString} | samtools sort -@4 -m ~{sortMemgb}G > minimap2.bam
     else
-      minimap2 -ax ~{mapMode} ~{reference} ~{reads} -k ~{kmerSize} -K ~{minibatchSize} -t ~{threads} ~{mdString} ~{eqxString} | samtools sort -@4 -m ~{sortMemgb}G > minimap2.bam
+      minimap2 -ax ~{mapMode} ~{reference} ~{reads} -k ~{kmerSize} -y -K ~{minibatchSize} -t ~{threads} ~{mdString} ~{eqxString} | samtools sort -@4 -m ~{sortMemgb}G > minimap2.bam
     fi
 
     samtools index -@ ~{threads} minimap2.bam
