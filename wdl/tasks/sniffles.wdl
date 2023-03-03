@@ -27,7 +27,7 @@ task sniffles_t {
   }
 
   runtime {
-    preemptible: 1
+    preemptible: 2
     docker: "mkolmogo/card_sniffles:2.0.3"
     cpu: threads
 	memory: memSizeGb + " GB"

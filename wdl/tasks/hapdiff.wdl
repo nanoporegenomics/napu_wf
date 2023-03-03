@@ -30,7 +30,7 @@ task hapdiff_t {
   }
 
   runtime {
-    preemptible: 1
+    preemptible: 2
     docker: dockerContainer
     cpu: threads
     memory: memSizeGb + " GB"
