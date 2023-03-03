@@ -64,7 +64,8 @@ workflow cardEndToEndVcfMethyl
 		        reference = referenceFasta,
 		        bamAlignment = bamFile,
 		        bamAlignmentIndex = bamFileIndex,
-                region = chrn
+                region = chrn,
+                preemptible = 2
 	        }
         }
 

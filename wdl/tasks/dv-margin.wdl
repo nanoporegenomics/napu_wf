@@ -10,6 +10,7 @@ task dv_t {
       String region = ""
 	  Int memSizeGb = 256
 	  Int diskSizeGb = 1024
+      Int preemptible = 0
   }  
 
   String regionArg = if region != "" then "--regions ~{region}" else ""
@@ -35,6 +36,7 @@ task dv_t {
   }
 
   runtime {
+    preemptible: preemptible
     docker: "google/deepvariant:cl508467184"
     cpu: threads
 	memory: memSizeGb + " GB"
@@ -79,7 +81,7 @@ task margin_t {
   }
 
   runtime {
-    preemptible: 1
+    preemptible: 2
     docker: "mkolmogo/card_harmonize_vcf:0.1"
     cpu: threads
 	memory: memSizeGb + " GB"
@@ -112,7 +114,7 @@ task mergeVCFs {
   }
 
   runtime {
-    preemptible: 1
+    preemptible: 2
     docker: "quay.io/biocontainers/bcftools@sha256:95c212df20552fc74670d8f16d20099d9e76245eda6a1a6cfff4bd39e57be01b"
     cpu: 1
 	memory: memSizeGb + " GB"
