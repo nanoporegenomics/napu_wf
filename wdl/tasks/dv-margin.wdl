@@ -7,32 +7,41 @@ task dv_t {
 	  File bamAlignment
 	  File bamAlignmentIndex
       String dvModel = "ONT_R104"
-      String region = ""
+      Boolean oneChr = false
 	  Int memSizeGb = 256
 	  Int diskSizeGb = 1024
       Int preemptible = 0
   }  
 
-  String regionArg = if region != "" then "--regions ~{region}" else ""
   command <<<
     set -o pipefail
     set -e
     set -u
     set -o xtrace
-
+    
     ln -s ~{reference} ref.fa
     samtools faidx ref.fa
-    
+
+    ## if BAM has reads only for one chromosome
+    ## figure out which one and add argument
+    REGION_ARG=""
+    if [ ~{oneChr} == true ]
+    then
+        CONTIG_ID=`head -1 < <(samtools view ~{bamAlignment}) | cut -f3`
+        REGION_ARG="--regions $CONTIG_ID"
+    fi
+
+    ## run DeepVariant
     /opt/deepvariant/bin/run_deepvariant \
         --model_type ~{dvModel} \
         --ref ref.fa \
         --reads ~{bamAlignment} \
-        --output_vcf dv.vcf.gz ~{regionArg} \
+        --output_vcf dv.vcf.gz $REGION_ARG \
         --num_shards ~{threads}
   >>>
 
   output {
-	File dvVcf = "dv.vcf.gz"
+	  File dvVcf = "dv.vcf.gz"
   }
 
   runtime {

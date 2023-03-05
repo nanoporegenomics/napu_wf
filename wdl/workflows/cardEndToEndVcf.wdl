@@ -14,12 +14,14 @@ workflow cardEndToEndVcfMethyl
 		File  inputReads
 		File  referenceFasta
 		Int   threads
-		File?  referenceVntrAnnotations
+		File? referenceVntrAnnotations
         Int   nbReadsPerChunk = 0
 		String  sampleName = "sample"
         Array[String] chrs = []
 	}
 
+    ##### Aligning the reads to the reference genome
+    ## Reads can be split into chunks to make shorter jobs that can be run on cheaper preemptible instances 
     if(nbReadsPerChunk == 0){
 	    call minimap_t.minimap2_t as mm_align {
 		    input:
@@ -34,7 +36,6 @@ workflow cardEndToEndVcfMethyl
 			reads = inputReads,
             readsPerChunk = nbReadsPerChunk
 	    }
-
         scatter (readChunk in splitReads.readChunks){
 	        call minimap_t.minimap2_t as mm_align_chunk {
 		        input:
@@ -44,38 +45,40 @@ workflow cardEndToEndVcfMethyl
 			    threads = threads
 	        }
         }
-
+        ## if "chrs" is not empty, BAMs for each specified chromosomes will also be output
         call minimap_t.mergeBAM {
 		    input:
 			bams = mm_align_chunk.bam,
-            outname = sampleName
+            outname = sampleName,
+            chrs=chrs
 	    }
     }
-
+    ## Aligned reads to the reference genome
     File bamFile = select_first([mm_align.bam, mergeBAM.bam])
     File bamFileIndex = select_first([mm_align.bamIndex, mergeBAM.bamIndex])
-    
-    if(length(chrs) > 0){
-        # shard by chromosome
-        scatter (chrn in chrs){
+
+    ##### Reference-based variant calling with DeepVariant
+    ## if the reads/BAMs were chunked by chromosomes, use directly those chunks
+    if(length(chrs) > 0 && nbReadsPerChunk > 0){
+        scatter (bamChr in zip(select_first([mergeBAM.bamPerChrs]), select_first([mergeBAM.bamPerChrsIndex]))){
 	        call dv_margin_t.dv_t as chr_dv_t {
 		        input:
 		        threads = threads,
 		        reference = referenceFasta,
-		        bamAlignment = bamFile,
-		        bamAlignmentIndex = bamFileIndex,
-                region = chrn,
+		        bamAlignment = bamChr.left,
+		        bamAlignmentIndex = bamChr.right,
+                oneChr = true,
                 preemptible = 2
 	        }
         }
-
         call dv_margin_t.mergeVCFs {
             input:
             vcfFiles = chr_dv_t.dvVcf,
             outname = sampleName
         }
     }
-    if(length(chrs) == 0){
+    ## otherwise, one job for the whole-genome on the entire BAM
+    if(length(chrs) == 0 || nbReadsPerChunk == 0){
 	    call dv_margin_t.dv_t{
 		    input:
 		    threads = threads,
@@ -84,8 +87,10 @@ workflow cardEndToEndVcfMethyl
 		    bamAlignmentIndex = bamFileIndex
 	    }
     }
+    ## Variant calls from DeepVariant
     File dvVCF = select_first([mergeVCFs.vcf, dv_t.dvVcf])
-    
+
+    ##### Haplotag the reads
     call dv_margin_t.margin_t{
 		input:
 		threads = threads,
@@ -96,7 +101,8 @@ workflow cardEndToEndVcfMethyl
         sampleName = sampleName
 	}
 
-    # run the methylation analysis only if input reads was a BAM
+    ##### estimate methylation at CpG sites
+    ## only if the input reads file was a BAM
     if(basename(inputReads, ".bam") != basename(inputReads)){
 	    call modbam2bed_t.modbam2bed as modbam2bed {
 		    input:
@@ -106,7 +112,8 @@ workflow cardEndToEndVcfMethyl
 			sample_name = sampleName
 	    }
     }
-    
+
+    ##### Reference-based structural variant calling
 	call sniffles_t.sniffles_t as sniffles {
 		input:
 			threads = threads,
@@ -115,6 +122,7 @@ workflow cardEndToEndVcfMethyl
 			vntrAnnotations = referenceVntrAnnotations
 	}
 
+    ##### De novo phased assembly
 	call denovo_asm_wf.structuralVariantsDenovoAssembly as asm {
 		input:
 		readsFile = inputReads,
@@ -122,6 +130,7 @@ workflow cardEndToEndVcfMethyl
 		threads = threads,
 	}
 
+    ##### Assembly-based structural variant calling
 	call hapdiff_t.hapdiff_t as hapdiff {
 		input:
 			ctgsPat = asm.asmDual1,
@@ -130,6 +139,7 @@ workflow cardEndToEndVcfMethyl
 			vntrAnnotations = referenceVntrAnnotations
 	}
 
+    ##### Phase short variants and structural variants
 	call margin_phase_wf.runMarginPhase as margin_phase {
 		input:
 			smallVariantsFile = margin_t.phasedVcf,
