@@ -25,7 +25,10 @@ task sniffles_t {
         bash ~{resourceLogScript} 20 top.log &
     fi
 
-    sniffles -i ~{bamAlignment} -v sniffles.vcf -t ~{threads} ~{trfString}~{vntrAnnotations} --minsvlen ~{minSvLen} 2>&1 | tee sniffles.log
+    ln -s ~{bamAlignment} reads.bam
+    ln -s ~{bamAlignmentIndex} reads.bam.bai
+    
+    sniffles -i reads.bam -v sniffles.vcf -t ~{threads} ~{trfString}~{vntrAnnotations} --minsvlen ~{minSvLen} 2>&1 | tee sniffles.log
   >>>
 
   output {

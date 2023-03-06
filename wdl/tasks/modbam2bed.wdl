@@ -46,10 +46,13 @@ task modbam2bed {
             EXTRA_ARGS="~{extraArgs}"
         fi
 
+        ln -s ~{haplotaggedBam} reads.bam
+        ln -s ~{haplotaggedBamBai} reads.bam.bai
+        
         for HP in 1 2; do
             modbam2bed \
                 -e -m ~{modType} --~{out_type_filter} -t ~{threadCount} --haplotype ${HP} ${EXTRA_ARGS} \
-                ~{ref} ~{haplotaggedBam} | bgzip -c > ~{sample_name}.haplotagged.bam.hp${HP}.cpg.bed.gz
+                ~{ref} reads.bam | bgzip -c > ~{sample_name}.haplotagged.bam.hp${HP}.cpg.bed.gz
         done;
     >>>
 

@@ -29,6 +29,9 @@ task dv_t {
     ln -s ~{reference} ref.fa
     samtools faidx ref.fa
 
+    ln -s ~{bamAlignment} reads.bam
+    ln -s ~{bamAlignmentIndex} reads.bam.bai
+
     ## if BAM has reads only for one chromosome
     ## figure out which one and add argument
     REGION_ARG=""
@@ -42,7 +45,7 @@ task dv_t {
     /opt/deepvariant/bin/run_deepvariant \
         --model_type ~{dvModel} \
         --ref ref.fa \
-        --reads ~{bamAlignment} \
+        --reads reads.bam \
         --output_vcf dv.vcf.gz $REGION_ARG \
         --num_shards ~{threads}
   >>>
@@ -89,9 +92,12 @@ task margin_t {
 
     ln -s ~{reference} ref.fa
     samtools faidx ref.fa
+
+    ln -s ~{bamAlignment} reads.bam
+    ln -s ~{bamAlignmentIndex} reads.bam.bai
     
     mkdir output/
-    margin phase ~{bamAlignment} ref.fa ~{vcfFile} /opt/margin/params/phase/allParams.haplotag.ont-r104q20.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName}
+    margin phase reads.bam ref.fa ~{vcfFile} /opt/margin/params/phase/allParams.haplotag.ont-r104q20.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName}
 
     bgzip output/~{sampleName}.phased.vcf
 
