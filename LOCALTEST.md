@@ -11,11 +11,18 @@ miniwdl run --as-me  --copy-input-files wdl/workflows/cardEndToEndVcf.wdl -i tes
 ## End-to-end workflow (no methylation) cheaper by chunking reads (and preempting)
 miniwdl run --as-me  --copy-input-files wdl/workflows/cardEndToEndVcf.wdl -i test/test.input.endtoendfastq.chunks.json
 
+## End-to-end workflow (no methylation) starting with an available assembly (e.g. from shasta workflow below)
+miniwdl run --as-me  --copy-input-files wdl/workflows/cardEndToEndVcf.wdl -i test/test.input.endtoendfastq.amb.json
+
 ## End-to-end workflow with uBAM input (for methylation)
 miniwdl run --as-me  --copy-input-files wdl/workflows/cardEndToEndVcf.wdl -i test/test.input.endtoendfastq.ubam.json
 
 ## DV+margin workflow
 miniwdl run --as-me  --copy-input-files wdl/workflows/dvMargin.wdl -i test/test.input.dvmargin.json
+
+## shasta workflow
+miniwdl run --as-me  --copy-input-files wdl/tasks/shasta.wdl -i test/test.input.shasta.json
+miniwdl run --as-me  --copy-input-files wdl/tasks/shasta.wdl -i test/test.input.shasta.inmem.json
 ```
 
 ### Next

@@ -1,0 +1,13 @@
+{
+  "cardEndToEndVcfMethyl.inputReads": "test/test_ont.fastq.gz",
+  "cardEndToEndVcfMethyl.referenceFasta": "test/ref.fa",
+  "cardEndToEndVcfMethyl.referenceVntrAnnotations": "test/vntr.bed",
+  "cardEndToEndVcfMethyl.shastaFasta": "test/shasta.assembly.fasta",
+  "cardEndToEndVcfMethyl.threads": 1,
+  "cardEndToEndVcfMethyl.asm.minimap2.minibatchSize": "500M",
+  "cardEndToEndVcfMethyl.asm.minimap2.sortMemgb": 1,
+  "cardEndToEndVcfMethyl.mm_align.minibatchSize": "500M",
+  "cardEndToEndVcfMethyl.mm_align.sortMemgb": 1,
+  "cardEndToEndVcfMethyl.asm.hapdup_t.dockerContainer": "quay.io/jmonlong/hapdup:lowmem",
+  "cardEndToEndVcfMethyl.hapdiff.dockerContainer": "quay.io/jmonlong/hapdiff:lowmem"
+}

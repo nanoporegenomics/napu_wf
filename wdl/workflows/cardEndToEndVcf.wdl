@@ -15,6 +15,7 @@ workflow cardEndToEndVcfMethyl
 		File  referenceFasta
 		Int   threads
 		File? referenceVntrAnnotations
+        File? shastaFasta
         Int   nbReadsPerChunk = 0
 		String  sampleName = "sample"
         Array[String] chrs = []
@@ -127,6 +128,7 @@ workflow cardEndToEndVcfMethyl
 		input:
 		readsFile = inputReads,
         chunkedReadsFiles=select_first([splitReads.readChunks, []]),
+        shastaFasta = shastaFasta,
 		threads = threads
 	}
 
