@@ -13,7 +13,8 @@ task modbam2bed {
         Int memSizeGB = 128
         Int threadCount = 64
         Int diskSizeGB = 4 * round(size(haplotaggedBam, 'G')) + round(size(ref, 'G')) + 100
-        String dockerImage = "meredith705/ont_methyl:latest" 
+        String dockerImage = "meredith705/ont_methyl:latest"
+        File? resourceLogScript
     }
 
     parameter_meta {
@@ -30,6 +31,13 @@ task modbam2bed {
         set -eux -o pipefail
         set -o xtrace
 
+        ## run a recurrent "top" in the background to monitor resource usage
+        if [ ~{resourceLogScript} != "" ]
+        then
+            bash ~{resourceLogScript} 20 top.log &
+        fi
+
+        
         ## Pass optional arguments if extraArgs is set, if not just pass empty string
         if [ -z "~{extraArgs}" ]
         then
@@ -46,8 +54,9 @@ task modbam2bed {
     >>>
 
         output {
-        File hap1bedOut      = "~{sample_name}.haplotagged.bam.hp1.cpg.bed.gz"
-        File hap2bedOut      = "~{sample_name}.haplotagged.bam.hp2.cpg.bed.gz"
+            File hap1bedOut      = "~{sample_name}.haplotagged.bam.hp1.cpg.bed.gz"
+            File hap2bedOut      = "~{sample_name}.haplotagged.bam.hp2.cpg.bed.gz"
+            File? toplog = "top.log"
     }
 
     runtime {

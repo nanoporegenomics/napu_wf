@@ -8,6 +8,7 @@ workflow runMarginPhase {
         File bamFile
         String sampleName
         String dockerImage = "mkolmogo/card_harmonize_vcf:0.1"
+        File? resourceLogScript
     }
 
     call combineVcfs {
@@ -24,7 +25,8 @@ workflow runMarginPhase {
         refFile = refFile,
         bamFile = bamFile,
         sampleName = sampleName,
-        dockerImage = dockerImage
+        dockerImage = dockerImage,
+        resourceLogScript = resourceLogScript
     }
 
     output {
@@ -86,6 +88,7 @@ task marginPhase {
         Int threads = 32
         Int memSizeGb = 128
         Int diskSizeGb = 256
+        File? resourceLogScript
     }
     command <<<
         set -o pipefail
@@ -93,6 +96,12 @@ task marginPhase {
         set -u
         set -o xtrace
 
+        ## run a recurrent "top" in the background to monitor resource usage
+        if [ ~{resourceLogScript} != "" ]
+        then
+            bash ~{resourceLogScript} 20 top.log &
+        fi
+        
         samtools index -@ ~{threads} ~{bamFile}
         samtools faidx ~{refFile}
         mkdir output/
@@ -100,7 +109,8 @@ task marginPhase {
         bgzip output/~{sampleName}.phased.vcf
     >>>
     output {
-    File phasedVcf = "output/~{sampleName}.phased.vcf.gz"
+        File phasedVcf = "output/~{sampleName}.phased.vcf.gz"
+        File? toplog = "top.log"
     }
 
     runtime {

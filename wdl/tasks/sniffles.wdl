@@ -9,6 +9,7 @@ task sniffles_t {
 	Int minSvLen = 25
 	Int memSizeGb = 128
 	Int diskSizeGb = 256
+    File? resourceLogScript
   }
 
   String trfString = if defined(vntrAnnotations) then "--tandem-repeats " else ""
@@ -18,12 +19,19 @@ task sniffles_t {
     set -u
     set -o xtrace
 
+    ## run a recurrent "top" in the background to monitor resource usage
+    if [ ~{resourceLogScript} != "" ]
+    then
+        bash ~{resourceLogScript} 20 top.log &
+    fi
+
     sniffles -i ~{bamAlignment} -v sniffles.vcf -t ~{threads} ~{trfString}~{vntrAnnotations} --minsvlen ~{minSvLen} 2>&1 | tee sniffles.log
   >>>
 
   output {
 	File snifflesVcf = "sniffles.vcf"
 	File snifflesLog = "sniffles.log"
+    File? toplog = "top.log"
   }
 
   runtime {

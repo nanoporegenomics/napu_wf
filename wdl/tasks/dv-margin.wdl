@@ -11,6 +11,7 @@ task dv_t {
 	  Int memSizeGb = 256
 	  Int diskSizeGb = 1024
       Int preemptible = 0
+      File? resourceLogScript
   }  
 
   command <<<
@@ -18,7 +19,13 @@ task dv_t {
     set -e
     set -u
     set -o xtrace
-    
+
+    ## run a recurrent "top" in the background to monitor resource usage
+    if [ ~{resourceLogScript} != "" ]
+    then
+        bash ~{resourceLogScript} 20 top.log &
+    fi
+
     ln -s ~{reference} ref.fa
     samtools faidx ref.fa
 
@@ -42,6 +49,7 @@ task dv_t {
 
   output {
 	  File dvVcf = "dv.vcf.gz"
+      File? toplog = "top.log"
   }
 
   runtime {
@@ -64,6 +72,7 @@ task margin_t {
       String marginOtherArgs = ""
 	  Int memSizeGb = 256
 	  Int diskSizeGb = 1024
+      File? resourceLogScript
   }  
 
   command <<<
@@ -71,6 +80,12 @@ task margin_t {
     set -e
     set -u
     set -o xtrace
+
+    ## run a recurrent "top" in the background to monitor resource usage
+    if [ ~{resourceLogScript} != "" ]
+    then
+        bash ~{resourceLogScript} 20 top.log &
+    fi
 
     ln -s ~{reference} ref.fa
     samtools faidx ref.fa
@@ -87,6 +102,7 @@ task margin_t {
       File phasedVcf = "output/~{sampleName}.phased.vcf.gz"
       File haplotaggedBam = "output/~{sampleName}.haplotagged.bam"
       File haplotaggedBamIdx = "output/~{sampleName}.haplotagged.bam.bai"
+      File? toplog = "top.log"
   }
 
   runtime {

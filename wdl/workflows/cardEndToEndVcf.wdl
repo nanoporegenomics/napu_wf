@@ -127,7 +127,7 @@ workflow cardEndToEndVcfMethyl
 		input:
 		readsFile = inputReads,
         chunkedReadsFiles=select_first([splitReads.readChunks, []]),
-		threads = threads,
+		threads = threads
 	}
 
     ##### Assembly-based structural variant calling
