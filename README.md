@@ -77,6 +77,11 @@ produced by Guppy. Other workflows can take either unmapped bam or fastq file as
 Other kinds of input include reference genome and corresponding VNTR annotations (provided
 in this repository).
 
+R10 data
+--------
+
+For R10 Kit14 data, please use the pipeline version in the `r10` branch.
+
 Pipeline description
 ---------------------
 
@@ -123,6 +128,7 @@ Main code contributors.
 * Mikhail Kolmogorov (NCI)
 * Mira Mastoras (UCSC)
 * Melissa Meredith (UCSC)
+* Jean Monlong (UCSC)
 
 Citation
 --------
