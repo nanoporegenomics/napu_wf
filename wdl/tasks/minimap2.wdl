@@ -25,7 +25,7 @@ task minimap2_t {
     MM_INPUT=~{reads}
     if [ "${MM_INPUT: -3}" == "bam" ]
     then
-      samtools fastq -TMm,Ml ~{reads} | \
+      samtools fastq -TMm,Ml,MM,ML ~{reads} | \
         minimap2 -ax ~{mapMode} ~{reference} - -k ~{kmerSize} -y -K 5G -t ~{threads} ~{mdString} ~{eqxString} | samtools sort -@4 -m 4G > minimap2.bam
     else
       minimap2 -ax ~{mapMode} ~{reference} ~{reads} -k ~{kmerSize} -K 5G -t ~{threads} ~{mdString} ~{eqxString} | samtools sort -@4 -m 4G > minimap2.bam

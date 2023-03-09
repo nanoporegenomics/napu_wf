@@ -53,7 +53,7 @@ task fastqAlignAndSortBam {
     command <<<
     set -eux -o pipefail
     
-    samtools fastq -TMm,Ml ~{unaligned_methyl_bam} | minimap2 -t ~{in_cores} ~{in_args} ~{ref_file} - | samtools view -@ ~{in_cores} -bh - | samtools sort -@ ~{in_cores} - > ~{sample}.fastq.cpg.~{ref_name}.bam
+    samtools fastq -TMm,Ml,MM,ML ~{unaligned_methyl_bam} | minimap2 -t ~{in_cores} ~{in_args} ~{ref_file} - | samtools view -@ ~{in_cores} -bh - | samtools sort -@ ~{in_cores} - > ~{sample}.fastq.cpg.~{ref_name}.bam
 
     samtools index ~{sample}.fastq.cpg.~{ref_name}.bam
 
