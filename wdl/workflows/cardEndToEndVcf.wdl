@@ -117,7 +117,6 @@ workflow cardEndToEndVcfMethyl
     ##### Reference-based structural variant calling
 	call sniffles_t.sniffles_t as sniffles {
 		input:
-			threads = threads,
 			bamAlignment = margin_t.haplotaggedBam,
 		    bamAlignmentIndex = margin_t.haplotaggedBamIdx,
 			vntrAnnotations = referenceVntrAnnotations

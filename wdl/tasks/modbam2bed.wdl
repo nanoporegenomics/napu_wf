@@ -10,7 +10,7 @@ task modbam2bed {
         String modType = "5mC"    
         String out_type_filter = "cpg"
         String? extraArgs
-        Int memSizeGB = 128
+        Int memSizeGB = 64
         Int threadCount = 64
         Int diskSizeGB = 4 * round(size(haplotaggedBam, 'G')) + round(size(ref, 'G')) + 100
         String dockerImage = "meredith705/ont_methyl:latest"

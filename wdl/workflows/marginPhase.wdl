@@ -86,7 +86,7 @@ task marginPhase {
         String dockerImage
         String marginOtherArgs = ""
         Int threads = 32
-        Int memSizeGb = 128
+        Int memSizeGb = 64
         Int diskSizeGb = 256
         File? resourceLogScript
     }

@@ -2,12 +2,12 @@ version 1.0
 
 task sniffles_t {
   input {
-    Int threads
+    Int threads = 22
 	File bamAlignment
 	File bamAlignmentIndex
 	File? vntrAnnotations
 	Int minSvLen = 25
-	Int memSizeGb = 128
+	Int memSizeGb = 32
 	Int diskSizeGb = 256
     File? resourceLogScript
   }
