@@ -97,7 +97,7 @@ task shasta_t {
 
   #This is optimized for GCP/Terra environemnt to get maximum available RAM. May need to adjust for other cloud environemnts or HPC
   runtime {
-    docker: "quay.io/jmonlong/card_shasta:0.11.1"
+    docker: "quay.io/jmonlong/card_shasta@sha256:ce218dc133b2534f58f841bccd4b1d1d880c6ad62c1c321dd91bdd8d43e554f1"
     cpu: threads
     memory: memSizeGb + " GB"
     disks: "local-disk " + diskSizeGb + " LOCAL"
@@ -156,7 +156,7 @@ task shasta_inmem_t {
 
   #This is optimized for GCP/Terra environemnt to get maximum available RAM. May need to adjust for other cloud environemnts or HPC
   runtime {
-    docker: "quay.io/jmonlong/card_shasta:0.11.1"
+    docker: "quay.io/jmonlong/card_shasta@sha256:ce218dc133b2534f58f841bccd4b1d1d880c6ad62c1c321dd91bdd8d43e554f1"
     cpu: threads
     memory: memSizeGb + " GB"
     disks: "local-disk " + diskSizeGb + " LOCAL"
@@ -201,7 +201,7 @@ task convertToFasta {
   }
 
   runtime {
-      docker: "quay.io/jmonlong/card_shasta:0.11.1"
+      docker: "quay.io/jmonlong/card_shasta@sha256:ce218dc133b2534f58f841bccd4b1d1d880c6ad62c1c321dd91bdd8d43e554f1"
       preemptible: 2
       cpu: threads
       memory: memSizeGb + " GB"
