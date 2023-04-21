@@ -1,0 +1,8 @@
+{
+  "shasta.readsFile": "test/test_ont.fastq.gz",
+  "shasta.shasta_t.threads": 1,
+  "shasta.shasta_inmem_t.threads": 1,
+  "shasta.inMemory": true,
+  "shasta.shasta_t.shastaConfig": "/opt/shasta_config/shasta.local.small.conf",
+  "shasta.shasta_inmem_t.shastaConfig": "/opt/shasta_config/shasta.local.small.conf"
+}

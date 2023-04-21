@@ -1,7 +1,6 @@
 {
-  "cardEndToEndVcfMethyl.inputReads": "test/test_ont.fastq.gz",
+  "cardEndToEndVcfMethyl.inputReads": "test/test_ont.u.bam",
   "cardEndToEndVcfMethyl.referenceFasta": "test/ref.fa",
-  "cardEndToEndVcfMethyl.referenceVntrAnnotations": "test/vntr.bed",
   "cardEndToEndVcfMethyl.threads": 1,
   "cardEndToEndVcfMethyl.asm.shasta_t.threads": 1,
   "cardEndToEndVcfMethyl.asm.shasta_t.shastaConfig": "/opt/shasta_config/shasta.local.small.conf",

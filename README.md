@@ -52,6 +52,20 @@ Cromwell could be configured to run on an HPC or cloud. This
 configuration is more involving and requires optimization for a particular environemnt.
 Please refer to the [corresponding manual](https://cromwell.readthedocs.io/en/stable/Configuring/) for details
 
+### Running the assembly with Shasta separately
+
+The Shasta assembler can be run in *in-memory* mode (faster/cheaper) or *disk-backed* mode (slower but doesn't require as much memory).
+The end-to-end workflow uses the *disk-backed* mode by default because Terra can't (currently) launch instances with more than 768 Gb of memory which might not be enough for some samples.
+However, because the *in-memory* mode is much cheaper (~$20 vs ~$70), it might be worth attempting to run Shasta in *in-memory* mode first.
+Then, the rest of the workflow could be run on the samples that worked, or the full workflow with the *disk-backed* mode on the few that failed.
+
+Shasta can be run separately with the workflow defined at `wdl/tasks/shasta.wdl` and deposited [on Dockstore](https://dockstore.org/workflows/github.com/jmonlong/card_nanopore_wf/shasta:r10?tab=info).
+To use the *in-memory* mode on Terra, the suggested inputs are:
+- `inMemory=true`
+- `diskSizeGB=1500` (needed to get high-memory instances on Terra)
+
+Then, the FASTA file produced by Shasta can be provided to the end-to-end workflow described above (defined at `wdl/workflows/cardEndToEndVcf.wdl` and deposited [on Dockstore](https://dockstore.org/workflows/github.com/jmonlong/card_nanopore_wf/cardEndToEndVcfMethyl:r10?tab=info)) using the optional input `shastaFasta`.
+
 ### Quick demo
 
 ```
