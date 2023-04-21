@@ -1,17 +1,17 @@
 CARD Nanopore Varaint Calling and Assembly Workflows
 ===================================================
 
+### Pipeline version: R10
+
 This repository contains pieplines for variant calling and de novo assembly of ONT data,
 optimized for [single-flowcell ONT sequencing protocol](https://dx.doi.org/10.17504/protocols.io.ewov1n93ygr2/v1).
 The wet-lab/informatics protocol is now applied to sequence and characterize thousands of human brain genomes at 
 the [Center for Alzheimer's and Related Dementias at NIH](https://card.nih.gov/).
 
-CARD Data availability
----------------------
+Versions for R9/R10 data
+------------------------
 
-The cell line and brain sample sequencing data, assemblies and variant calls are currently
-being uploaded to [Terra](https://terra.bio/). We will post the links as soon as the data is available.
-If you want to access the data sooner, don't hesitate to contact us in the meantime.
+Please use either `r9` or `r10` branch for your corresponding data type.
 
 Installation and Usage
 ---------------------
@@ -91,10 +91,13 @@ produced by Guppy. Other workflows can take either unmapped bam or fastq file as
 Other kinds of input include reference genome and corresponding VNTR annotations (provided
 in this repository).
 
-R10 data
---------
 
-For R10 Kit14 data, please use the pipeline version in the `r10` branch.
+CARD manuscript data availability
+---------------------
+
+The cell line data (HG002, HG0073 and HG02723) and openly available through this [Terra workspace](https://anvil.terra.bio/#workspaces/anvil-datastorage/ ANVIL_NIA_CARD_Coriell_Cell_Lines_Open). 
+
+Human brain sequencing datasets are under controlled access and require a dbGap application (phs001300.v4). Afterwards, the data will be available through the [restricted Terra workspace](https://anvil.terra.bio/#workspaces/ anvil-datastorage/ANVIL_NIA_CARD_LR_WGS_NABEC_GRU).
 
 Pipeline description
 ---------------------
@@ -126,11 +129,6 @@ The workflows are buit around the following tools:
 * [Hapdup](https://github.com/KolmogorovLab/hapdup)
 * [modbam2bed](https://github.com/epi2me-labs/modbam2bed)
 
-License 
---------
-
-Workflows are distributed under a BSD license. See the LICENSE file for details.
-
 Credits
 -------
 
@@ -146,7 +144,11 @@ Main code contributors.
 
 Citation
 --------
-
 Kolmogorov, Billingsley et al, "Scalable Nanopore sequencing of human genomes provides a 
 comprehensive view of haplotype-resolved variation and methylation". bioRxiv 2023
->>>>>>> upstream/r10
+[doi.org/10.1101/2023.01.12.523790](https://doi.org/10.1101/2023.01.12.523790)
+
+
+License 
+--------
+Workflows are distributed under a BSD license. See the LICENSE file for details.
