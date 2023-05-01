@@ -4,10 +4,10 @@ task pepper_margin_dv_t {
   input {
     Int threads
     File reference
-	File bamAlignment
-	String mapMode = "ont"
-	Int memSizeGb = 256
-	  Int diskSizeGb = 1024
+    File bamAlignment
+    String mapMode = "ont"
+    Int memSizeGb = 256
+    Int diskSizeGb = 1024
   }
   String pepperMode = if mapMode == "ont" then "--ont_r10_q20" else "--hifi"
 
@@ -23,16 +23,16 @@ task pepper_margin_dv_t {
   >>>
 
   output {
-	File pepperVcf = "PMDV_FINAL.phased.vcf.gz"
-	File pepperLog = "pmdv.log"
-    	File haplotaggedBam = "PMDV_FINAL.haplotagged.bam"
-    	File haplotaggedBamIdx = "PMDV_FINAL.haplotagged.bam.bai"
+    File pepperVcf = "PMDV_FINAL.phased.vcf.gz"
+    File pepperLog = "pmdv.log"
+    File haplotaggedBam = "PMDV_FINAL.haplotagged.bam"
+    File haplotaggedBamIdx = "PMDV_FINAL.haplotagged.bam.bai"
   }
 
   runtime {
     docker: "kishwars/pepper_deepvariant:r0.8"
     cpu: threads
-	memory: memSizeGb + " GB"
-	disks: "local-disk " + diskSizeGb + " SSD"
+    memory: memSizeGb + " GB"
+    disks: "local-disk " + diskSizeGb + " SSD"
   }
 }
