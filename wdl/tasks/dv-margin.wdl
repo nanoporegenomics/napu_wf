@@ -2,16 +2,18 @@ version 1.0
 
 task dv_t {
   input {
-      Int threads
-      File reference
-	  File bamAlignment
-	  File bamAlignmentIndex
-      String dvModel = "ONT_R104"
-      Boolean oneChr = false
-	  Int memSizeGb = 128
-	  Int diskSizeGb = 1024
-      Int preemptible = 0
-      File? resourceLogScript
+    Int threads
+    File reference
+    File? bamAlignment
+    File bamAlignmentIndex
+    String sampleName
+    String extraArguments = ""
+    String dvModel = "ONT_R104"
+    Boolean oneChr = false
+    Int memSizeGb = 128
+    Int diskSizeGb = 1024
+    Int preemptible = 0
+    File? resourceLogScript
   }  
 
   command <<<
@@ -46,36 +48,37 @@ task dv_t {
         --model_type ~{dvModel} \
         --ref ref.fa \
         --reads reads.bam \
+        --sample_name ~{sampleName} \
         --output_vcf dv.vcf.gz $REGION_ARG \
-        --num_shards ~{threads}
+        --num_shards ~{threads} ~{extraArguments}
   >>>
 
   output {
-	  File dvVcf = "dv.vcf.gz"
-      File? toplog = "top.log"
+    File dvVcf = "dv.vcf.gz"
+    File? toplog = "top.log"
   }
 
   runtime {
     preemptible: preemptible
     docker: "google/deepvariant:cl508467184"
     cpu: threads
-	memory: memSizeGb + " GB"
-	disks: "local-disk " + diskSizeGb + " SSD"
+    memory: memSizeGb + " GB"
+    disks: "local-disk " + diskSizeGb + " SSD"
   }
 }
 
 task margin_t {
   input {
-      File reference
-      File vcfFile
-	  File bamAlignment
-	  File bamAlignmentIndex
-      String sampleName
-      Int threads
-      String marginOtherArgs = ""
-	  Int memSizeGb = 64
-	  Int diskSizeGb = 1024
-      File? resourceLogScript
+    File reference
+    File vcfFile
+    File bamAlignment
+    File bamAlignmentIndex
+    String sampleName
+    Int threads
+    String marginOtherArgs = ""
+    Int memSizeGb = 64
+    Int diskSizeGb = 1024
+    File? resourceLogScript
   }  
 
   command <<<
@@ -115,17 +118,17 @@ task margin_t {
     preemptible: 2
     docker: "mkolmogo/card_harmonize_vcf:0.1"
     cpu: threads
-	memory: memSizeGb + " GB"
-	disks: "local-disk " + diskSizeGb + " SSD"
+    memory: memSizeGb + " GB"
+    disks: "local-disk " + diskSizeGb + " SSD"
   }
 }
 
 task mergeVCFs {
   input {
-      Array[File] vcfFiles
-      String outname = "merged"
-	  Int memSizeGb = 6
-	  Int diskSizeGb = 5 * round(size(vcfFiles, 'G')) + 20
+    Array[File] vcfFiles
+    String outname = "merged"
+    Int memSizeGb = 6
+    Int diskSizeGb = 5 * round(size(vcfFiles, 'G')) + 20
   }  
 
   command <<<
@@ -148,7 +151,7 @@ task mergeVCFs {
     preemptible: 2
     docker: "quay.io/biocontainers/bcftools@sha256:95c212df20552fc74670d8f16d20099d9e76245eda6a1a6cfff4bd39e57be01b"
     cpu: 1
-	memory: memSizeGb + " GB"
-	disks: "local-disk " + diskSizeGb + " SSD"
+    memory: memSizeGb + " GB"
+    disks: "local-disk " + diskSizeGb + " SSD"
   }
 }

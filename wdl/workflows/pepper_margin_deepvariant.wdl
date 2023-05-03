@@ -7,19 +7,23 @@ workflow pepperWf {
     input {
         File referenceFile
         File bamAlignment
-		Int threads
+        Int threads
+        String sample
+        String pmdv_extra_arguments = ""
     }
 
     call pepper_t.pepper_margin_dv_t as pepper_t {
         input:
             threads=threads,
             reference=referenceFile,
-			bamAlignment=bamAlignment
+            bamAlignment=bamAlignment,
+            sample=sample,
+            extraArgs = pmdv_extra_arguments
     }
 
-	output {
-		File pepperVcf = pepper_t.pepperVcf
-		File haplotaggedBam = pepper_t.haplotaggedBam
-		File haplotaggedBamBai = pepper_t.haplotaggedBamIdx
-	}
+    output {
+        File pepperVcf = pepper_t.pepperVcf
+        File haplotaggedBam = pepper_t.haplotaggedBam
+        File haplotaggedBamBai = pepper_t.haplotaggedBamIdx
+    }
 }
