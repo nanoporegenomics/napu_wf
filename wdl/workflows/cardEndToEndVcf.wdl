@@ -22,7 +22,7 @@ workflow cardEndToEndVcfMethyl
         Array[String] chrs = []
     }
 
-    parameter_meta{
+    parameter_meta {
         inputReads: "Fasta file containing reads to be assembled & variant called."
         referenceFasta: "Reference"
         threads: "Threads to pass to minimap2, DV, Margin, & Shasta"
