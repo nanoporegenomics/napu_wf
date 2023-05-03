@@ -23,7 +23,7 @@ workflow cardEndToEndVcfMethyl
     }
 
     parameter_meta {
-        inputReads: "Fasta file containing reads to be assembled & variant called."
+        inputReads: "Unmapped BAM or FASTQ file containing reads to be assembled & variant called."
         referenceFasta: "Reference"
         threads: "Threads to pass to minimap2, DV, Margin, & Shasta"
         referenceVntrAnnotations: "Optional vntr annotation input"
