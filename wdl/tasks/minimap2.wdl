@@ -5,15 +5,15 @@ task minimap2_t {
     Int threads
     File reference
     File reads
-	String mapMode = "map-ont"
-	Boolean useMd = false
-	Boolean useEqx = true
-	Int memSizeGb = 128
-	Int diskSizeGb = 1024
-	  Int kmerSize = 17
-      String minibatchSize = "5G"
-      Int sortMemgb = "4"
-      Int preemptible = 0
+    String mapMode = "map-ont"
+    Boolean useMd = false
+    Boolean useEqx = true
+    Int memSizeGb = 128
+    Int diskSizeGb = 1024
+    Int kmerSize = 17
+    String minibatchSize = "5G"
+    Int sortMemgb = "4"
+    Int preemptible = 0
   }
 
   String mdString = if useMd then "--MD" else ""
