@@ -25,6 +25,12 @@ workflow cardEndToEndVcfMethyl
     parameter_meta{
         inputReads: "Fasta file containing reads to be assembled & variant called."
         referenceFasta: "Reference"
+        threads: "Threads to pass to minimap2, DV, Margin, & Shasta"
+        referenceVntrAnnotations: "Optional vntr annotation input"
+        shastaFasta: "Optional input Shasta assembly, assembly is skipped in workflow"
+        inputBams: "Array of input sorted BAMs aligned to the reference"
+        sampleName: "Name of Sample"
+        nbReadsPerChunk: "Number of reads to put into a chunk for using preemptible instances"
 
     }
 
@@ -150,10 +156,10 @@ workflow cardEndToEndVcfMethyl
     ##### De novo phased assembly
     call denovo_asm_wf.structuralVariantsDenovoAssembly as asm {
         input:
-        readsFile = inputReads,
-        chunkedReadsFiles=select_first([splitReads.readChunks, []]),
-        shastaFasta = shastaFasta,
-        threads = threads
+            readsFile = inputReads,
+            chunkedReadsFiles=select_first([splitReads.readChunks, []]),
+            shastaFasta = shastaFasta,
+            threads = threads
     }
 
     ##### Assembly-based structural variant calling
