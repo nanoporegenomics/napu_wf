@@ -5,6 +5,7 @@ import "../tasks/modbam2bed.wdl" as modbam2bed_t
 import "../tasks/pepper-margin-dv.wdl" as pmdv_haplotag_t
 import "../tasks/sniffles.wdl" as sniffles_t
 import "../tasks/hapdiff.wdl" as hapdiff_t
+import "../tasks/dipcall.wdl" as dipcall_t
 import "shasta_hapdup_denovo.wdl" as denovo_asm_wf
 import "marginPhase.wdl" as margin_phase_wf
 
@@ -67,6 +68,13 @@ workflow cardEndToEndVcfMethyl
 			vntrAnnotations = referenceVntrAnnotations
 	}
 
+	call dipcall_t.dipcall_t as dipcall {
+		input:
+			ctgsPat = asm.asmDual1,
+			ctgsMat = asm.asmDual2,
+			reference = referenceFasta
+	}
+
 	call margin_phase_wf.runMarginPhase as margin_phase {
 		input:
 			smallVariantsFile = pmdvHap.pepperVcf,
@@ -86,5 +94,6 @@ workflow cardEndToEndVcfMethyl
 		File assemblyHap2 = asm.asmDual2
 		File structuralVariantsVcf = hapdiff.hapdiffUnphasedVcf
 		File harmonizedVcf = margin_phase.out_margin_phase_svs
+		File asmDipcallVcf = dipcall.dipcallVcf
 	}
 }
