@@ -23,7 +23,7 @@ task dv_t {
     set -o xtrace
 
     ## run a recurrent "top" in the background to monitor resource usage
-    if [ ~{resourceLogScript} != "" ]
+    if [[ "~{resourceLogScript}" != "" ]]
     then
         bash ~{resourceLogScript} 20 top.log &
     fi

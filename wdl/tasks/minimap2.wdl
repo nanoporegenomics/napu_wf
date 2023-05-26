@@ -112,6 +112,7 @@ task mergeBAM {
         set -u
         set -o xtrace
 
+
         samtools merge -f -p -c --threads ~{threads} ~{outname}.bam ~{sep=" " bams}
         samtools index ~{outname}.bam
 
@@ -131,6 +132,37 @@ task mergeBAM {
         File bamIndex = "~{outname}.bam.bai"
         Array[File]? bamPerChrs = glob("bamPerChrs/*.bam")
         Array[File]? bamPerChrsIndex = glob("bamPerChrs/*.bam.bai")
+    }
+    runtime {
+        preemptible: 2
+        time: 240
+        memory: memGb + " GB"
+        cpu: threads
+        disks: "local-disk " + diskGb + " SSD"
+        docker: "biocontainers/samtools@sha256:3ff48932a8c38322b0a33635957bc6372727014357b4224d420726da100f5470"
+    }
+}
+
+task mergeFASTQ {
+    input {
+        Array[File] reads
+        String outname = "merged"
+        Int threads = 8
+        Int diskGb = round(3 * size(reads, 'G')) + 20
+        Int memGb = 8
+    }
+
+    command <<<
+        set -o pipefail
+        set -e
+        set -u
+        set -o xtrace
+
+        cat ~{sep=" " reads} > ~{outname}.fastq
+
+    >>>
+    output {
+        File fq = "~{outname}.fastq"
     }
     runtime {
         preemptible: 2

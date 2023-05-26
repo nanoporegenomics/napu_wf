@@ -11,86 +11,109 @@ import "marginPhase.wdl" as margin_phase_wf
 workflow cardEndToEndVcfMethyl
 {
     input {
-        File        inputReads
+        Array[File] inputReads  = []
         File        referenceFasta
         Int         threads
         File?       referenceVntrAnnotations
         File?       shastaFasta
-        Array[File] inputBams = []
+        Array[File] inputMappedBams = []
         Int         nbReadsPerChunk = 0
         String      sampleName = "sample"
         Array[String] chrs = []
     }
 
     parameter_meta {
-        inputReads: "Unmapped BAM or FASTQ file containing reads to be assembled & variant called."
+        inputReads: "Array of Unmapped BAM/s or FASTQ file/s containing ONT R10 reads."
         referenceFasta: "Reference"
         threads: "Threads to pass to minimap2, DV, Margin, & Shasta"
         referenceVntrAnnotations: "Optional vntr annotation input"
         shastaFasta: "Optional input Shasta assembly, assembly is skipped in workflow"
-        inputBams: "Array of input sorted BAMs aligned to the reference"
+        inputMappedBams: "Array of input sorted BAMs aligned to the reference"
         sampleName: "Name of Sample"
         nbReadsPerChunk: "Number of reads to put into a chunk for using preemptible instances"
 
     }
 
-    ## If no input bam files are provided align the input reads
-    if (length(inputBams) == 0){
-        ##### Aligning the reads to the reference genome
-        ## Reads can be split into chunks to make shorter jobs that can be run on cheaper preemptible instances 
-        if(nbReadsPerChunk == 0){
-            call minimap_t.minimap2_t as mm_align {
+    ## If one or more mapped bams are provided as input, merge them into one
+    if (length(inputMappedBams) > 0){
+        call minimap_t.mergeBAM as mergeInputBam{
                 input:
-                    reads = inputReads,
-                    reference = referenceFasta,
-                    threads = threads
+                    bams = inputMappedBams,
+                    outname = sampleName,
+                    chrs=chrs
             }
-        }
-        if(nbReadsPerChunk > 0){
-            call minimap_t.splitReads {
-                input:
-                    reads = inputReads,
-                    readsPerChunk = nbReadsPerChunk
-            }
-            scatter (readChunk in splitReads.readChunks){
-                call minimap_t.minimap2_t as mm_align_chunk {
+    }
+
+    ## If input ubam/fastq files are provided align the input reads    
+    if (length(inputReads) > 0){
+        scatter (inputReadsFile in inputReads){
+
+            ##### Aligning the reads to the reference genome
+            ## Reads can be split into chunks to make shorter jobs that can be run on cheaper preemptible instances 
+            if(nbReadsPerChunk == 0){
+                call minimap_t.minimap2_t as mm_align {
                     input:
-                        reads = readChunk,
+                        reads = inputReadsFile, 
                         reference = referenceFasta,
-                        preemptible = 2,
                         threads = threads
                 }
             }
-            ## if "chrs" is not empty, BAMs for each specified chromosomes will also be output
-            call minimap_t.mergeBAM {
+            if(nbReadsPerChunk > 0){
+                call minimap_t.splitReads {
+                    input:
+                        reads = inputReadsFile, 
+                        readsPerChunk = nbReadsPerChunk
+                }
+                scatter (readChunk in splitReads.readChunks){
+                    call minimap_t.minimap2_t as mm_align_chunk {
+                        input:
+                            reads = readChunk,
+                            reference = referenceFasta,
+                            preemptible = 2,
+                            threads = threads
+                    }
+                }
+                ## if "chrs" is not empty, BAMs for each specified chromosomes will also be output
+                call minimap_t.mergeBAM as mergeChunks{
+                    input:
+                        bams = mm_align_chunk.bam,
+                        outname = sampleName,
+                        chrs=chrs
+                }
+            }
+
+
+        }
+        if(nbReadsPerChunk == 0){
+            call minimap_t.mergeBAM as mergeAlignedBAMs {
                 input:
-                    bams = mm_align_chunk.bam,
+                    bams = select_all(mm_align.bam),
                     outname = sampleName,
                     chrs=chrs
             }
         }
-    }
-
-    ## If one or more bams are provided as input, merge them into one
-    if (length(inputBams) > 0){
-        call minimap_t.mergeBAM as mergeInputBam{
+        if(nbReadsPerChunk > 0){
+            call minimap_t.mergeBAM as mergeScatteredBAMs {
                 input:
-                    bams = inputBams,
+                    bams = select_all(mergeChunks.bam),
                     outname = sampleName,
                     chrs=chrs
             }
+        }
+        Array[File] chunkedReads = flatten(select_all(splitReads.readChunks))
+
     }
 
 
-
     ## Aligned reads to the reference genome 
-    File bamFile = select_first([mergeInputBam.bam, mm_align.bam, mergeBAM.bam])
-    File bamFileIndex = select_first([mergeInputBam.bamIndex, mm_align.bamIndex, mergeBAM.bamIndex])
+    File bamFile = select_first([mergeInputBam.bam, mergeAlignedBAMs.bam, mergeScatteredBAMs.bam])
+    File bamFileIndex = select_first([mergeInputBam.bamIndex, mergeAlignedBAMs.bamIndex, mergeScatteredBAMs.bamIndex])
+    
 
     ##### Reference-based variant calling with DeepVariant
     ## if the reads/BAMs were chunked by chromosomes, use directly those chunks
     if(length(chrs) > 0 && nbReadsPerChunk > 0){
-        scatter (bamChr in zip(select_first([mergeBAM.bamPerChrs]), select_first([mergeBAM.bamPerChrsIndex]))){
+        scatter (bamChr in zip(select_first([mergeScatteredBAMs.bamPerChrs]), select_first([mergeScatteredBAMs.bamPerChrsIndex]))){
             call dv_margin_t.dv_t as chr_dv_t {
                 input:
                     threads = threads,
@@ -133,9 +156,17 @@ workflow cardEndToEndVcfMethyl
             sampleName = sampleName
     }
 
+
     ##### estimate methylation at CpG sites
     ## only if the input reads file was a BAM
-    if(basename(inputReads, ".bam") != basename(inputReads)){
+    if (length(inputMappedBams) > 0){
+        File mappedBAM1 = select_first(inputMappedBams)
+    }
+    if (length(inputReads) > 0){
+        File mappedRead1 = select_first(inputReads)
+    }
+    File inReadFile = select_first([mappedRead1, mappedBAM1])
+    if(basename(inReadFile, ".bam") != basename(inReadFile)){
         call modbam2bed_t.modbam2bed as modbam2bed {
             input:
                 haplotaggedBam = margin_t.haplotaggedBam,
@@ -154,10 +185,33 @@ workflow cardEndToEndVcfMethyl
     }
 
     ##### De novo phased assembly
+
+    ## if any non-BAM reads are suppled as input use those for shasta
+    if(basename(inReadFile, ".bam") == basename(inReadFile)){
+        ## If one fastq is provided as input read/s store as a File 
+        if (length(inputReads) == 1){
+            File readFile = select_first(inputReads)
+        }
+
+        ## or merge multiple unaligned read fastqs into a single File
+        if (length(inputReads) > 1){
+            call minimap_t.mergeFASTQ as mergeInReadsFQs{
+                input:
+                    reads = inputReads,
+                    outname = sampleName,
+            }
+        }
+        File singleReadsFastq = select_first([mergeInReadsFQs.fq, readFile])
+    }
+
+    # if any non-BAM reads are suppled as input use those for shasta
+    File shastaInputReads = select_first([singleReadsFastq, bamFile])
+
+    ## Run assembly
     call denovo_asm_wf.structuralVariantsDenovoAssembly as asm {
         input:
-            readsFile = inputReads,
-            chunkedReadsFiles=select_first([splitReads.readChunks, []]),
+            readsFile = shastaInputReads, 
+            chunkedReadsFiles=select_first([chunkedReads, []]),
             shastaFasta = shastaFasta,
             threads = threads
     }

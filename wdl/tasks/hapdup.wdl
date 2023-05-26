@@ -4,7 +4,7 @@ task hapdup_t {
   input {
     Int threads
     File alignedBam
-	File contigs
+    File contigs
     String readType = "ont"
     Int memSizeGb = 256
     Int diskSizeGb = 1024

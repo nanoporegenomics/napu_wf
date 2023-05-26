@@ -3,12 +3,12 @@ version 1.0
 task sniffles_t {
   input {
     Int threads = 22
-	File bamAlignment
-	File bamAlignmentIndex
-	File? vntrAnnotations
-	Int minSvLen = 25
-	Int memSizeGb = 32
-	Int diskSizeGb = 256
+    File bamAlignment
+    File bamAlignmentIndex
+    File? vntrAnnotations
+    Int minSvLen = 25
+    Int memSizeGb = 32
+    Int diskSizeGb = 256
     File? resourceLogScript
   }
 
@@ -32,8 +32,8 @@ task sniffles_t {
   >>>
 
   output {
-	File snifflesVcf = "sniffles.vcf"
-	File snifflesLog = "sniffles.log"
+    File snifflesVcf = "sniffles.vcf"
+    File snifflesLog = "sniffles.log"
     File? toplog = "top.log"
   }
 
@@ -41,7 +41,7 @@ task sniffles_t {
     preemptible: 2
     docker: "mkolmogo/card_sniffles:2.0.3"
     cpu: threads
-	memory: memSizeGb + " GB"
-	disks: "local-disk " + diskSizeGb + " SSD"
+    memory: memSizeGb + " GB"
+    disks: "local-disk " + diskSizeGb + " SSD"
   }
 }
