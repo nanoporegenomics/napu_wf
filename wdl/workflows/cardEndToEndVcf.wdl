@@ -4,6 +4,7 @@ import "../tasks/minimap2.wdl" as minimap_t
 import "../tasks/dv-margin.wdl" as dv_margin_t
 import "../tasks/sniffles.wdl" as sniffles_t
 import "../tasks/hapdiff.wdl" as hapdiff_t
+import "../tasks/dipcall.wdl" as dipcall_t
 import "../tasks/modbam2bed.wdl" as modbam2bed_t
 import "shasta_hapdup_denovo.wdl" as denovo_asm_wf
 import "marginPhase.wdl" as margin_phase_wf
@@ -34,13 +35,13 @@ workflow cardEndToEndVcfMethyl
 
     }
 
+    ### Either align input, merge multiple mapped input, or reorganize single input
     ## If one or more mapped bams are provided as input, merge them into one
     if (length(inputMappedBams) > 0){
         call minimap_t.mergeBAM as mergeInputBam{
                 input:
                     bams = inputMappedBams,
-                    outname = sampleName,
-                    chrs=chrs
+                    outname = sampleName
             }
     }
 
@@ -186,7 +187,7 @@ workflow cardEndToEndVcfMethyl
 
     ##### De novo phased assembly
 
-    ## if any non-BAM reads are suppled as input use those for shasta
+    ## if any fastq reads are suppled as input use those for shasta
     if(basename(inReadFile, ".bam") == basename(inReadFile)){
         ## If one fastq is provided as input read/s store as a File 
         if (length(inputReads) == 1){
@@ -225,6 +226,13 @@ workflow cardEndToEndVcfMethyl
             vntrAnnotations = referenceVntrAnnotations
     }
 
+    call dipcall_t.dipcall_t as dipcall {
+        input:
+            ctgsPat = asm.asmDual1,
+            ctgsMat = asm.asmDual2,
+            reference = referenceFasta
+    }
+
     ##### Phase short variants and structural variants
     call margin_phase_wf.runMarginPhase as margin_phase {
         input:
@@ -245,5 +253,6 @@ workflow cardEndToEndVcfMethyl
         File harmonizedVcf = margin_phase.out_margin_phase_svs
         File? methylationBed1 = modbam2bed.hap1bedOut
         File? methylationBed2 = modbam2bed.hap2bedOut
+        File asmDipcallVcf = dipcall.dipcallVcf
     }
 }
