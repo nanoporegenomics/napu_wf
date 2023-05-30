@@ -106,14 +106,21 @@ task mergeBAM {
     }
 
     Boolean anyChrs = length(chrs) > 0
+    Boolean multiBAM = length(bams) > 1
+
     command <<<
         set -o pipefail
         set -e
         set -u
         set -o xtrace
 
-
-        samtools merge -f -p -c --threads ~{threads} ~{outname}.bam ~{sep=" " bams}
+        ## Only run merge if > 1 BAM is provided
+        if [ ~{multiBAM} == true ]
+        then 
+            samtools merge -f -p -c --threads ~{threads} ~{outname}.bam ~{sep=" " bams}
+        else
+            mv ~{sep=" " bams} ~{outname}.bam
+        fi
         samtools index ~{outname}.bam
 
         ## split by chromosome, if any chrs specified
@@ -158,11 +165,11 @@ task mergeFASTQ {
         set -u
         set -o xtrace
 
-        cat ~{sep=" " reads} > ~{outname}.fastq
+        cat ~{sep=" " reads} > ~{outname}.fastq.gz
 
     >>>
     output {
-        File fq = "~{outname}.fastq"
+        File fq = "~{outname}.fastq.gz"
     }
     runtime {
         preemptible: 2
