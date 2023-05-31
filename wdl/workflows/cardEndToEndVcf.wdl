@@ -82,16 +82,7 @@ workflow cardEndToEndVcfMethyl
                             threads = threads
                     }
                 }
-                ## if "chrs" is not empty, BAMs for each specified chromosomes will also be output
-                call minimap_t.mergeBAM as mergeChunks{
-                    input:
-                        bams = mm_align_chunk.bam,
-                        outname = sampleName,
-                        chrs=chrs
-                }
             }
-
-
         }
         if(nbReadsPerChunk == 0){
             call minimap_t.mergeBAM as mergeAlignedBAMs {
@@ -104,7 +95,7 @@ workflow cardEndToEndVcfMethyl
         if(nbReadsPerChunk > 0){
             call minimap_t.mergeBAM as mergeScatteredBAMs {
                 input:
-                    bams = select_all(mergeChunks.bam),
+                    bams = flatten(select_all(mm_align_chunk.bam)),
                     outname = sampleName,
                     chrs=chrs
             }
