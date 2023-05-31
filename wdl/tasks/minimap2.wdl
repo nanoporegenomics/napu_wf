@@ -145,9 +145,9 @@ task mergeBAM {
 
 task indexBAM {
     input {
-        File bam
+        File inBam
         Int threads = 8
-        Int diskGb = round(5 * size(bam, 'G')) + 20
+        Int diskGb = round(5 * size(inBam, 'G')) + 20
         Int memGb = 8
     }
     command <<<
@@ -156,11 +156,13 @@ task indexBAM {
         set -u
         set -o xtrace
 
-        samtools index ~{bam}
+        samtools sort -@~{threads} ~{inBam} > ~{inBam}.sorted.bam
+        samtools index ~{inBam}.sorted.bam
 
     >>>
     output {
-        File bamIndex = "~{bam}.bai"
+        File bamIndex = "~{inBam}.sorted.bam.bai"
+        File bam = "~{inBam}.sorted.bam"
     }
     runtime {
         preemptible: 2

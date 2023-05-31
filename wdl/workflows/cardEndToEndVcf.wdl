@@ -41,7 +41,7 @@ workflow cardEndToEndVcfMethyl
         File inputBam = select_first(inputMappedBams)
         call minimap_t.indexBAM as indexSingleInputBam{
             input: 
-                bam = inputBam
+                inBam = inputBam
         }
     }
     if (length(inputMappedBams) > 1){
@@ -114,7 +114,7 @@ workflow cardEndToEndVcfMethyl
 
 
     ## Aligned reads to the reference genome 
-    File bamFile = select_first([inputBam, mergeInputBams.bam, mergeAlignedBAMs.bam, mergeScatteredBAMs.bam])
+    File bamFile = select_first([indexSingleInputBam.bam, mergeInputBams.bam, mergeAlignedBAMs.bam, mergeScatteredBAMs.bam])
     File bamFileIndex = select_first([indexSingleInputBam.bamIndex, mergeInputBams.bamIndex, mergeAlignedBAMs.bamIndex, mergeScatteredBAMs.bamIndex])
     
 
