@@ -159,6 +159,7 @@ task indexBAM {
         set -u
         set -o xtrace
 
+        samtools sort -@ ~{threads} ~{bam} > ~{bam}.sorted.bam
         samtools index ~{bam}.sorted.bam
 
         ## split by chromosome, if any chrs specified
@@ -173,7 +174,8 @@ task indexBAM {
         fi
     >>>
     output {
-        File bamIndex = "~{bam}.bai"
+        File outBam = "~{bam}.sorted.bam"
+        File bamIndex = "~{bam}.sorted.bam.bai"
         Array[File]? bamPerChrs = glob("bamPerChrs/*.bam")
         Array[File]? bamPerChrsIndex = glob("bamPerChrs/*.bam.bai")
     }
