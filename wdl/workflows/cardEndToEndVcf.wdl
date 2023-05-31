@@ -37,8 +37,15 @@ workflow cardEndToEndVcfMethyl
 
     ### Either align input, merge multiple mapped input, or reorganize single input
     ## If one or more mapped bams are provided as input, merge them into one
-    if (length(inputMappedBams) > 0){
-        call minimap_t.mergeBAM as mergeInputBam{
+    if (length(inputMappedBams) == 1){
+        File inputBam = select_first(inputMappedBams)
+        call minimap_t.indexBAM as indexSingleInputBam{
+            input: 
+                bam = inputBam
+        }
+    }
+    if (length(inputMappedBams) > 1){
+        call minimap_t.mergeBAM as mergeInputBams{
                 input:
                     bams = inputMappedBams,
                     outname = sampleName
@@ -107,8 +114,8 @@ workflow cardEndToEndVcfMethyl
 
 
     ## Aligned reads to the reference genome 
-    File bamFile = select_first([mergeInputBam.bam, mergeAlignedBAMs.bam, mergeScatteredBAMs.bam])
-    File bamFileIndex = select_first([mergeInputBam.bamIndex, mergeAlignedBAMs.bamIndex, mergeScatteredBAMs.bamIndex])
+    File bamFile = select_first([inputBam, mergeInputBams.bam, mergeAlignedBAMs.bam, mergeScatteredBAMs.bam])
+    File bamFileIndex = select_first([indexSingleInputBam.bamIndex, mergeInputBams.bamIndex, mergeAlignedBAMs.bamIndex, mergeScatteredBAMs.bamIndex])
     
 
     ##### Reference-based variant calling with DeepVariant

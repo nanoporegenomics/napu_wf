@@ -106,7 +106,6 @@ task mergeBAM {
     }
 
     Boolean anyChrs = length(chrs) > 0
-    Boolean multiBAM = length(bams) > 1
 
     command <<<
         set -o pipefail
@@ -114,13 +113,7 @@ task mergeBAM {
         set -u
         set -o xtrace
 
-        ## Only run merge if > 1 BAM is provided
-        if [ ~{multiBAM} == true ]
-        then 
-            samtools merge -f -p -c --threads ~{threads} ~{outname}.bam ~{sep=" " bams}
-        else
-            mv ~{sep=" " bams} ~{outname}.bam
-        fi
+        samtools merge -f -p -c --threads ~{threads} ~{outname}.bam ~{sep=" " bams}
         samtools index ~{outname}.bam
 
         ## split by chromosome, if any chrs specified
@@ -139,6 +132,35 @@ task mergeBAM {
         File bamIndex = "~{outname}.bam.bai"
         Array[File]? bamPerChrs = glob("bamPerChrs/*.bam")
         Array[File]? bamPerChrsIndex = glob("bamPerChrs/*.bam.bai")
+    }
+    runtime {
+        preemptible: 2
+        time: 240
+        memory: memGb + " GB"
+        cpu: threads
+        disks: "local-disk " + diskGb + " SSD"
+        docker: "biocontainers/samtools@sha256:3ff48932a8c38322b0a33635957bc6372727014357b4224d420726da100f5470"
+    }
+}
+
+task indexBAM {
+    input {
+        File bam
+        Int threads = 8
+        Int diskGb = round(5 * size(bam, 'G')) + 20
+        Int memGb = 8
+    }
+    command <<<
+        set -o pipefail
+        set -e
+        set -u
+        set -o xtrace
+
+        samtools index ~{bam}
+
+    >>>
+    output {
+        File bamIndex = "~{bam}.bai"
     }
     runtime {
         preemptible: 2
