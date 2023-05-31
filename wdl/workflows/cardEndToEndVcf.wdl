@@ -32,7 +32,6 @@ workflow cardEndToEndVcfMethyl
         inputMappedBams: "Array of input sorted BAMs aligned to the reference"
         sampleName: "Name of Sample"
         nbReadsPerChunk: "Number of reads to put into a chunk for using preemptible instances"
-
     }
 
     ### Either align input, merge multiple mapped input, or reorganize single input
@@ -41,14 +40,20 @@ workflow cardEndToEndVcfMethyl
         File inputBam = select_first(inputMappedBams)
         call minimap_t.indexBAM as indexSingleInputBam{
             input: 
+<<<<<<< HEAD
                 inBam = inputBam
+=======
+            bam = inputBam,
+            chrs = chrs
+>>>>>>> dc0231d07b7a08383cce40976fcd594c130d5fb4
         }
     }
     if (length(inputMappedBams) > 1){
         call minimap_t.mergeBAM as mergeInputBams{
-                input:
-                    bams = inputMappedBams,
-                    outname = sampleName
+            input:
+            bams = inputMappedBams,
+            outname = sampleName,
+            chrs = chrs
             }
     }
 
@@ -81,16 +86,7 @@ workflow cardEndToEndVcfMethyl
                             threads = threads
                     }
                 }
-                ## if "chrs" is not empty, BAMs for each specified chromosomes will also be output
-                call minimap_t.mergeBAM as mergeChunks{
-                    input:
-                        bams = mm_align_chunk.bam,
-                        outname = sampleName,
-                        chrs=chrs
-                }
             }
-
-
         }
         if(nbReadsPerChunk == 0){
             call minimap_t.mergeBAM as mergeAlignedBAMs {
@@ -103,7 +99,7 @@ workflow cardEndToEndVcfMethyl
         if(nbReadsPerChunk > 0){
             call minimap_t.mergeBAM as mergeScatteredBAMs {
                 input:
-                    bams = select_all(mergeChunks.bam),
+                    bams = flatten(select_all(mm_align_chunk.bam)),
                     outname = sampleName,
                     chrs=chrs
             }
@@ -121,7 +117,9 @@ workflow cardEndToEndVcfMethyl
     ##### Reference-based variant calling with DeepVariant
     ## if the reads/BAMs were chunked by chromosomes, use directly those chunks
     if(length(chrs) > 0 && nbReadsPerChunk > 0){
-        scatter (bamChr in zip(select_first([mergeScatteredBAMs.bamPerChrs]), select_first([mergeScatteredBAMs.bamPerChrsIndex]))){
+        Array[File] bamChrs = select_first([mergeScatteredBAMs.bamPerChrs, mergeAlignedBAMs.bamPerChrs, indexSingleInputBam.bamPerChrs, mergeInputBams.bamPerChrs, mergeScatteredBAMs.bamPerChrs])
+        Array[File] bamChrsIndex = select_first([mergeScatteredBAMs.bamPerChrsIndex, mergeAlignedBAMs.bamPerChrsIndex, indexSingleInputBam.bamPerChrsIndex, mergeInputBams.bamPerChrsIndex, mergeScatteredBAMs.bamPerChrsIndex])
+        scatter (bamChr in zip(bamChrs, bamChrsIndex)){
             call dv_margin_t.dv_t as chr_dv_t {
                 input:
                     threads = threads,
