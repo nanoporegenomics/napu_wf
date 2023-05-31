@@ -146,10 +146,13 @@ task mergeBAM {
 task indexBAM {
     input {
         File bam
+        Array[String] chrs = []
         Int threads = 8
         Int diskGb = round(5 * size(bam, 'G')) + 20
         Int memGb = 8
     }
+    Boolean anyChrs = length(chrs) > 0
+    String outname = basename(bam, ".bam")
     command <<<
         set -o pipefail
         set -e
@@ -158,9 +161,21 @@ task indexBAM {
 
         samtools index ~{bam}
 
+        ## split by chromosome, if any chrs specified
+        if [ ~{anyChrs} == true ]
+        then
+            mkdir bamPerChrs
+            while read -r chrn
+            do
+                samtools view -@ ~{threads} -h -O BAM ~{bam} ${chrn} -o bamPerChrs/~{outname}.${chrn}.bam
+                samtools index bamPerChrs/~{outname}.${chrn}.bam
+            done < ~{write_lines(chrs)}
+        fi
     >>>
     output {
         File bamIndex = "~{bam}.bai"
+        Array[File]? bamPerChrs = glob("bamPerChrs/*.bam")
+        Array[File]? bamPerChrsIndex = glob("bamPerChrs/*.bam.bai")
     }
     runtime {
         preemptible: 2
