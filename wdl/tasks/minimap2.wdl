@@ -159,13 +159,8 @@ task indexBAM {
         set -u
         set -o xtrace
 
-        ls -lha .
-
         ln -s ~{bam} reads.bam
         samtools index reads.bam
-
-        #samtools sort -@ ~{threads} ~{bam} > ~{bam}.sorted.bam
-        #samtools index ~{bam}.sorted.bam
 
         ## split by chromosome, if any chrs specified
         if [ ~{anyChrs} == true ]
