@@ -168,7 +168,7 @@ task indexBAM {
             mkdir bamPerChrs
             while read -r chrn
             do
-                samtools view -@ ~{threads} -h -O BAM ~{bam} ${chrn} -o bamPerChrs/~{outname}.${chrn}.bam
+                samtools view -@ ~{threads} -h -O BAM reads.bam ${chrn} -o bamPerChrs/~{outname}.${chrn}.bam
                 samtools index bamPerChrs/~{outname}.${chrn}.bam
             done < ~{write_lines(chrs)}
         fi
