@@ -3,15 +3,17 @@ version 1.0
 workflow shasta {
 
     input {
-        File readsFile
+        Array[File] readFiles = []
         Boolean inMemory = false
         Int diskSizeGB = 1024
     }
     
+    File readsFile = select_first(readFiles)
+
     if ((basename(readsFile, ".fasta") == basename(readsFile)) && (basename(readsFile, ".fa") == basename(readsFile))){
         call convertToFasta {
             input:
-            reads=readsFile
+            readfiles=readFiles
         }
     }
     File readsFasta = select_first([convertToFasta.fasta, readsFile])
@@ -36,11 +38,11 @@ workflow shasta {
     File shastaGfa = select_first([shasta_t.shastaGfa, shasta_inmem_t.shastaGfa])
     File shastaLog = select_first([shasta_t.shastaLog, shasta_inmem_t.shastaLog])
 
-	output {
+  output {
         File fasta = shastaFasta
         File gfa = shastaGfa
-		File log = shastaLog
-	}
+        File log = shastaLog
+    }
 }
 
 task shasta_t {
@@ -167,34 +169,36 @@ task shasta_inmem_t {
 
 task convertToFasta {
   input {
-    File reads
+    Array[File] readfiles = []
     Int threads = 4
     Int memSizeGb = 8
-    Int diskSizeGb = 5 * round(size(reads, 'G')) + 50
+    Int diskSizeGb = 5 * round(size(readfiles, 'G')) + 50
   }
 
-  String outname = sub(sub(basename(reads), ".gz$", ""), ".bam", "")
+  String outname = sub(sub(basename(select_first(readfiles)), ".gz$", ""), ".bam", "")
   command <<<
     set -o pipefail
     set -e
     set -u
     set -o xtrace
 
-    READS=~{reads}
-    if [ "${READS: -3}" == ".gz" ]
-    then
-      if [ "${READS: -4}" == "q.gz" ]
+    for READS in ~{sep=' ' readfiles}
+    do
+      if [ "${READS: -3}" == ".gz" ]
       then
-        zcat $READS | awk '{if(NR%4==1) {printf(">%s\n",substr($0,2));} else if(NR%4==2) print;}' > ~{outname}.fasta
-      else
-        zcat $READS > ~{outname}.fasta
+        if [ "${READS: -4}" == "q.gz" ]
+        then
+          zcat $READS | awk '{if(NR%4==1) {printf(">%s\n",substr($0,2));} else if(NR%4==2) print;}' >> ~{outname}.fasta
+        else
+          zcat $READS >> ~{outname}.fasta
+        fi
       fi
-    fi
 
-    if [ "${READS: -3}" == "bam" ]
-    then
-      samtools fasta -@ ~{threads} $READS > ~{outname}.fasta
-    fi
+      if [ "${READS: -3}" == "bam" ]
+      then
+        samtools fasta -@ ~{threads} $READS >> ~{outname}.fasta
+      fi
+    done;
   >>>
 
   output {
