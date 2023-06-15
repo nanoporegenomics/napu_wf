@@ -6,9 +6,9 @@ workflows:
    -  name: pepperMarginDvWorkflow
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/pepper_margin_deepvariant.wdl
-   -  name: dipdiffWorkflow
+   -  name: hapdiffWorkflow
       subclass: WDL
-      primaryDescriptorPath: /wdl/workflows/dipdiff.wdl
+      primaryDescriptorPath: /wdl/workflows/hapdiff.wdl
    -  name: snifflesWorkflow
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/sniffles.wdl
