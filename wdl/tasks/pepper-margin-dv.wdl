@@ -52,7 +52,7 @@ task pepper_margin_dv_t {
   >>>
 
   output {
-	File pepperVcf = "PMDV_FINAL.phased.vcf.gz"
+	File pepperVcf = "~{sampleName}_PMDV_FINAL.phased.vcf.gz"
 	File pepperLog = "pmdv.log"
     File haplotaggedBam = "~{sampleName}_PMDV_FINAL.haplotagged.bam"
     File haplotaggedBamIdx = "~{sampleName}_PMDV_FINAL.haplotagged.bam.bai"
@@ -64,5 +64,38 @@ task pepper_margin_dv_t {
     cpu: threads
 	memory: memSizeGb + " GB"
 	disks: "local-disk " + diskSizeGb + " SSD"
+  }
+}
+
+task mergeVCFs {
+  input {
+    Array[File] vcfFiles
+    String outname = "merged"
+    Int memSizeGb = 6
+    Int diskSizeGb = 5 * round(size(vcfFiles, 'G')) + 20
+  }
+
+  command <<<
+    set -o pipefail
+    set -e
+    set -u
+    set -o xtrace
+
+    mkdir bcftools.tmp
+    bcftools concat -n ~{sep=" " vcfFiles} | bcftools sort -T bcftools.tmp -O z -o ~{outname}.vcf.gz -
+    bcftools index -t -o ~{outname}.vcf.gz.tbi ~{outname}.vcf.gz
+  >>>
+
+  output {
+      File vcf = "~{outname}.vcf.gz"
+      File vcfIndex = "~{outname}.vcf.gz.tbi"
+  }
+
+  runtime {
+    preemptible: 2
+    docker: "quay.io/biocontainers/bcftools@sha256:95c212df20552fc74670d8f16d20099d9e76245eda6a1a6cfff4bd39e57be01b"
+    cpu: 1
+    memory: memSizeGb + " GB"
+    disks: "local-disk " + diskSizeGb + " SSD"
   }
 }
