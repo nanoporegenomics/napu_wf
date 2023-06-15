@@ -206,7 +206,7 @@ workflow cardEndToEndVcfMethyl
         File singleReadsFastq = select_first([mergeInReadsFQs.fq, readFile])
     }
 
-    # if any non-BAM reads are suppled as input use those for shasta
+    # if any non-BAM reads are supplied as input use those for shasta
     File shastaInputReads = select_first([singleReadsFastq, bamFile])
 
     ## Run assembly

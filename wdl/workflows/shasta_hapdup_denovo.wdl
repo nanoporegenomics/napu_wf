@@ -16,12 +16,13 @@ workflow structuralVariantsDenovoAssembly {
 
     
     ### Shasta assembly ###
-    ## skip if a shastaFasta is provided
+    ## skip if a shastaFasta is 
+    Array[File] readArray = [readsFile]
     if(!defined(shastaFasta)){
         if ((basename(readsFile, ".fasta") == basename(readsFile)) && (basename(readsFile, ".fa") == basename(readsFile))){
             call shasta_t.convertToFasta {
                 input:
-                reads=readsFile
+                readfiles=readArray
             }
         }
         File readsFasta = select_first([convertToFasta.fasta, readsFile])
