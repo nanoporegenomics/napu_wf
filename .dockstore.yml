@@ -1,4 +1,4 @@
-versionon: 1.2
+version: 1.2
 workflows:
    -  name: cardEndToEndVcfMethyl
       subclass: WDL
