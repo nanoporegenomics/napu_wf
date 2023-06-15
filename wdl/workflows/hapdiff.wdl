@@ -6,7 +6,7 @@ workflow hapdiffWf {
 
     input {
         File referenceFile
-        File vntrAnnotations
+        File? vntrAnnotations
         File assemblyHap1
         File assemblyHap2
         Int minSvSize = 30
