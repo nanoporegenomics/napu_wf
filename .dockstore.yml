@@ -1,14 +1,23 @@
 version: 1.2
 workflows:
+   -  name: cardEndToEndVcfMethyl
+      subclass: WDL
+      primaryDescriptorPath: /wdl/workflows/cardEndToEndVcf.wdl
    -  name: pepperMarginDvWorkflow
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/pepper_margin_deepvariant.wdl
-   -  name: dipdiffWorkflow
+   -  name: hapdiffWorkflow
       subclass: WDL
-      primaryDescriptorPath: /wdl/workflows/dipdiff.wdl
+      primaryDescriptorPath: /wdl/workflows/hapdiff.wdl
    -  name: snifflesWorkflow
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/sniffles.wdl
    -  name: minimapWorkflow
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/minimap.wdl
+   -  name: marginPhase
+      subclass: WDL
+      primaryDescriptorPath: /wdl/workflows/marginPhase.wdl
+   -  name: shasta
+      subclass: WDL
+      primaryDescriptorPath: /wdl/tasks/shasta.wdl
