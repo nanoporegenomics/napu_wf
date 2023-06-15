@@ -66,6 +66,16 @@ To use the *in-memory* mode on Terra, the suggested inputs are:
 
 Then, the FASTA file produced by Shasta can be provided to the end-to-end workflow described above (defined at `wdl/workflows/cardEndToEndVcf.wdl` and deposited [on Dockstore](https://dockstore.org/workflows/github.com/jmonlong/card_nanopore_wf/cardEndToEndVcfMethyl:r10?tab=info)) using the optional input `shastaFasta`.
 
+### Running DeepVariant per chromosome and minimap2 alignment on chunks of reads
+
+Both of these tasks in the end-to-end pipeline take considerable amount of time when run on the whole genome. Running these tasks in parallel reduces time and cost. 
+
+DeepVariant can be run on each chromosome independently by providing a list of chromosomes as input to the end-to-end workflow. To run minimap2 alignments in parallel provide the end-to-end workflow with a number of reads per chunk to split the input reads.
+
+To run these tasks in parallel on Terra, the suggested inputs are:
+- `nbReadsPerChunk = 1000000` ( this can vary by input reads )
+- `chrs=["chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chr10", "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18", "chr19", "chr20", "chr21", "chr22", "chrX", "chrY", "chrM"]` (to make individual BAMs to DeepVariant)
+
 ### Quick demo
 
 ```
@@ -82,11 +92,10 @@ Input data requirements
 
 The pipeline was tested using 30-40x ONT sequencing using R9.4 pore with read N50 ~30kb.
 Basecalling and mehtylation calls were done using Guppy 6.1.2. The pipeline should
-work for similar or newer nanopore data. We are currently planning to release
-a special version of this pipeline for R10 ONT data.
+work for similar or newer nanopore data. This branch of the pipeline is for R10 ONT data with the option to provide multiple input read files.
 
-The input for end-to-end workflow is a single unmapped bam file with methylation tags
-produced by Guppy. Other workflows can take either unmapped bam or fastq file as input.
+The R10 input for end-to-end workflow is one or more mapped or unmapped bam files with methylation tags
+produced by Guppy or fastq files. No methylation information will be included when fastq files are provided as input. 
 
 Other kinds of input include reference genome and corresponding VNTR annotations (provided
 in this repository).
