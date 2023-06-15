@@ -1,6 +1,6 @@
 version 1.0
 
-import "../tasks/methyltagMinimap2.wdl" as minimap_methyl_t
+import "../tasks/minimap2.wdl" as minimap_t
 import "../tasks/modbam2bed.wdl" as modbam2bed_t
 import "../tasks/pepper-margin-dv.wdl" as pmdv_haplotag_t
 import "../tasks/sniffles.wdl" as sniffles_t
@@ -11,53 +11,214 @@ import "marginPhase.wdl" as margin_phase_wf
 
 workflow cardEndToEndVcfMethyl
 {
-	input {
-		File  inputUnphasedMethylBam	
-		File  referenceFasta
-		Int   threads
-		File  referenceVntrAnnotations = ""
-		String  sampleName = "sample"
-		String  referenceName = "ref"
-	}
+    input {
+        Array[File] inputReads  = []
+        File        referenceFasta
+        Int         threads
+        File?       referenceVntrAnnotations
+        File?       shastaFasta
+        Array[File] inputMappedBams = []
+        Int         nbReadsPerChunk = 0
+        String      sampleName = "sample"
+        Array[String] chrs = []
+    }
 
-	call minimap_methyl_t.fastqAlignAndSortBam as mm_align {
-		input:
-			unaligned_methyl_bam = inputUnphasedMethylBam,
-			ref_file = referenceFasta,
-			ref_name = referenceName,
-			sample = sampleName,
-			in_cores = threads
-	}
+    parameter_meta {
+        inputReads: "Array of Unmapped BAM/s or FASTQ file/s containing ONT R9 reads."
+        referenceFasta: "Reference"
+        threads: "Threads to pass to minimap2, DV, Margin, & Shasta"
+        referenceVntrAnnotations: "Optional vntr annotation input for sniffles"
+        shastaFasta: "Optional input Shasta assembly, assembly is skipped in workflow"
+        inputMappedBams: "Array of input sorted BAMs aligned to the reference"
+        sampleName: "Name of Sample"
+        nbReadsPerChunk: "Number of reads to put into a chunk for parallel alignment chunking"
+    }
 
-	call pmdv_haplotag_t.pepper_margin_dv_t as pmdvHap{
-		input:
-			threads = threads,
-			reference = referenceFasta,
-			bamAlignment = mm_align.out_bam,
-			#bamAlignmentBai = mm_align.out_bam_idx,
-			#output_prefix = inSampleName
-	}
-	
-	call modbam2bed_t.modbam2bed as modbam2bed {
-		input:
-			haplotaggedBam = pmdvHap.haplotaggedBam,
-			haplotaggedBamBai = pmdvHap.haplotaggedBamIdx,
-			ref = referenceFasta,
-			sample_name = sampleName,
-			ref_name = referenceName
-	}
+    ### Either align input, merge multiple mapped input, or reorganize single input
+    ## If only one mapped bam is provided just index it (and split into chromosomes if chrs is provided input)
+    if (length(inputMappedBams) == 1){
+        File inputBam = select_first(inputMappedBams)
+        call minimap_t.indexBAM as indexSingleInputBam{
+            input:
+                bam = inputBam,
+                chrs = chrs
+        }
+    }
+    # If more than one mapped bams are provided as input, merge them into one
+    if (length(inputMappedBams) > 1){
+        call minimap_t.mergeBAM as mergeInputBams{
+            input:
+            bams = inputMappedBams,
+            outname = sampleName,
+            chrs = chrs
+            }
+    }
+
+    ## If input ubam/fastq files are provided align the input reads
+    if (length(inputReads) > 0){
+        scatter (inputReadsFile in inputReads){
+
+            ##### Aligning the reads to the reference genome
+            ## Reads can be split into chunks to make shorter jobs that can be run on parallel preemptible instances
+            # However, if no chunks are asked for align the whole file
+            if(nbReadsPerChunk == 0){
+                call minimap_t.minimap2_t as mm_align {
+                    input:
+                        reads = inputReadsFile,
+                        reference = referenceFasta,
+                        threads = threads
+                }
+            }
+            # Split the reads and align them to the reference
+            if(nbReadsPerChunk > 0){
+                call minimap_t.splitReads {
+                    input:
+                        reads = inputReadsFile,
+                        readsPerChunk = nbReadsPerChunk
+                }
+                scatter (readChunk in splitReads.readChunks){
+                    call minimap_t.minimap2_t as mm_align_chunk {
+                        input:
+                            reads = readChunk,
+                            reference = referenceFasta,
+                            preemptible = 2,
+                            threads = threads
+                    }
+                }
+            }
+        }
+        if(nbReadsPerChunk == 0){
+            call minimap_t.mergeBAM as mergeAlignedBAMs {
+                input:
+                    bams = select_all(mm_align.bam),
+                    outname = sampleName,
+                    chrs=chrs
+            }
+        }
+        if(nbReadsPerChunk > 0){
+            call minimap_t.mergeBAM as mergeScatteredBAMs {
+                input:
+                    bams = flatten(select_all(mm_align_chunk.bam)),
+                    outname = sampleName,
+                    chrs=chrs
+            }
+        }
+        Array[File] chunkedReads = flatten(select_all(splitReads.readChunks))
+
+    }
+
+
+    ## Select aligned reads to the reference genome from the multiple possible inputs
+    File bamFile = select_first([inputBam, mergeInputBams.bam, mergeAlignedBAMs.bam, mergeScatteredBAMs.bam])
+    File bamFileIndex = select_first([indexSingleInputBam.bamIndex, mergeInputBams.bamIndex, mergeAlignedBAMs.bamIndex, mergeScatteredBAMs.bamIndex])
+
+
+    ##### Reference-based variant calling with DeepVariant
+    ## if the reads/BAMs were chunked by chromosomes, use directly those chunks
+    if(length(chrs) > 0 && nbReadsPerChunk > 0){
+        Array[File] bamChrs = select_first([mergeScatteredBAMs.bamPerChrs, mergeAlignedBAMs.bamPerChrs, indexSingleInputBam.bamPerChrs, mergeInputBams.bamPerChrs, mergeScatteredBAMs.bamPerChrs])
+        Array[File] bamChrsIndex = select_first([mergeScatteredBAMs.bamPerChrsIndex, mergeAlignedBAMs.bamPerChrsIndex, indexSingleInputBam.bamPerChrsIndex, mergeInputBams.bamPerChrsIndex, mergeScatteredBAMs.bamPerChrsIndex])
+        scatter (bamChr in zip(bamChrs, bamChrsIndex)){
+            call pmdv_haplotag_t.pepper_margin_dv_t as pmdvHap_chrs{
+                input:
+                    threads = threads,
+                    reference = referenceFasta,
+                    bamAlignment = bamChr.left,
+                    bamAlignmentIndex = bamChr.right,
+                    sampleName = sampleName,
+                    oneChr = true,
+                    preemptible = 2
+            }
+        }
+        # merge the per chr haplotagged bams
+        call minimap_t.mergeBAM as merge_PEPPER_DV_BAMs {
+            input:
+                bams = pmdvHap_chrs.haplotaggedBam,
+                outname = sampleName,
+            }
+
+        # merge the vcfs from each chromosome
+        call pmdv_haplotag_t.mergeVCFs{
+            input:
+                vcfFiles = pmdvHap_chrs.pepperVcf,
+                outname = sampleName
+        }
+    }
+
+    ## otherwise, one job for the whole-genome on the entire BAM
+    if(length(chrs) == 0 || nbReadsPerChunk == 0){
+        call pmdv_haplotag_t.pepper_margin_dv_t as pmdvHap{
+            input:
+                threads = threads,
+                reference = referenceFasta,
+                bamAlignment = bamFile,
+                bamAlignmentIndex = bamFileIndex,
+                sampleName = sampleName,
+                preemptible = 2
+        }
+    }
+
+    # isolate the haplotagged BAM from PEPPER_Margin_DeepVariant
+	File haplotaggedBam = select_first([merge_PEPPER_DV_BAMs.bam, pmdvHap.haplotaggedBam])
+	File haplotaggedBamIdx = select_first([merge_PEPPER_DV_BAMs.bamIndex, pmdvHap.haplotaggedBamIdx])
+
+    ##### estimate methylation at CpG sites
+    ## only if the input reads file was a BAM
+    if (length(inputMappedBams) > 0){
+        File mappedBAM1 = select_first(inputMappedBams)
+    }
+    if (length(inputReads) > 0){
+        File mappedRead1 = select_first(inputReads)
+    }
+    File inReadFile = select_first([mappedRead1, mappedBAM1])
+    if(basename(inReadFile, ".bam") != basename(inReadFile)){
+        call modbam2bed_t.modbam2bed as modbam2bed {
+            input:
+                haplotaggedBam = haplotaggedBam,
+                haplotaggedBamBai = haplotaggedBamIdx,
+                ref = referenceFasta,
+                sample_name = sampleName
+        }
+    }
 
 	call sniffles_t.sniffles_t as sniffles {
 		input:
-			threads = threads,
-			bamAlignment = pmdvHap.haplotaggedBam,
+			#threads = threads,
+			bamAlignment = haplotaggedBam,
+			bamAlignmentIndex = haplotaggedBamIdx,
 			vntrAnnotations = referenceVntrAnnotations
 	}
 
+    ##### De novo phased assembly
+
+    ## if any fastq reads are suppled as input use those for shasta
+    if(basename(inReadFile, ".bam") == basename(inReadFile)){
+        ## If one fastq is provided as input read/s store as a File
+        if (length(inputReads) == 1){
+            File readFile = select_first(inputReads)
+        }
+
+        ## or merge multiple unaligned read fastqs into a single File
+        if (length(inputReads) > 1){
+            call minimap_t.mergeFASTQ as mergeInReadsFQs{
+                input:
+                    reads = inputReads,
+                    outname = sampleName,
+            }
+        }
+        File singleReadsFastq = select_first([mergeInReadsFQs.fq, readFile])
+    }
+
+    # if any non-BAM reads are supplied as input use those for shasta
+    File shastaInputReads = select_first([singleReadsFastq, bamFile])
+
+    ## Run assembly
 	call denovo_asm_wf.structuralVariantsDenovoAssembly as asm {
 		input:
-			readsFile = inputUnphasedMethylBam,
-			threads = threads
+            readsFile = shastaInputReads,
+            chunkedReadsFiles=select_first([chunkedReads, []]),
+            shastaFasta = shastaFasta,
+            threads = threads
 	}
 
 	call hapdiff_t.hapdiff_t as hapdiff {
@@ -75,20 +236,21 @@ workflow cardEndToEndVcfMethyl
 			reference = referenceFasta
 	}
 
+    File phasedVCF = select_first([mergeVCFs.vcf, pmdvHap.pepperVcf])
 	call margin_phase_wf.runMarginPhase as margin_phase {
 		input:
-			smallVariantsFile = pmdvHap.pepperVcf,
+			smallVariantsFile = phasedVCF,
 			structuralVariantsFile = hapdiff.hapdiffUnphasedVcf,
 			refFile = referenceFasta,
-			bamFile = pmdvHap.haplotaggedBam,
+			bamFile = haplotaggedBam,
 			sampleName = sampleName
 	}
 
 	output {
-		File phasedMethylBam = pmdvHap.haplotaggedBam
-		File smallVariantsVcf = pmdvHap.pepperVcf
-		File methylationBed1 = modbam2bed.hap1bedOut
-		File methylationBed2 = modbam2bed.hap2bedOut
+		File phasedMethylBam = haplotaggedBam
+		File smallVariantsVcf = phasedVCF
+		File? methylationBed1 = modbam2bed.hap1bedOut
+		File? methylationBed2 = modbam2bed.hap2bedOut
 		File snifflesVcf = sniffles.snifflesVcf
 		File assemblyHap1 = asm.asmDual1
 		File assemblyHap2 = asm.asmDual2

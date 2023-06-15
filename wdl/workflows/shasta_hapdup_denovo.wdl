@@ -8,31 +8,68 @@ workflow structuralVariantsDenovoAssembly {
 
     input {
         File readsFile
+        File? shastaFasta
+        Array[File] chunkedReadsFiles = []
         Int threads
+        Int shastaDiskSizeGB = 1024
     }
+
 
     ### Shasta assembly ###
-    call shasta_t.shasta_t as shasta_t {
-        input:
-            #threads=threads,
-            reads=readsFile
+    ## skip if a shastaFasta is provided
+    Array[File] readArray = [readsFile]
+    if(!defined(shastaFasta)){
+        if ((basename(readsFile, ".fasta") == basename(readsFile)) && (basename(readsFile, ".fa") == basename(readsFile))){
+            call shasta_t.convertToFasta {
+                input:
+                readfiles=readArray
+            }
+        }
+        File readsFasta = select_first([convertToFasta.fasta, readsFile])
+        call shasta_t.shasta_t as shasta_t {
+            input:
+            reads=readsFasta,
+            diskSizeGb=shastaDiskSizeGB
+        }
+    }
+    File ambFasta = select_first([shasta_t.shastaFasta, shastaFasta])
+
+	### minimap2 alignment ###
+    if(length(chunkedReadsFiles) == 0){
+	    call minimap2_t.minimap2_t as minimap2 {
+		    input:
+			reads = readsFile,
+            reference=ambFasta,
+			useEqx=false,
+            threads = threads
+	    }
+    }
+    if(length(chunkedReadsFiles) > 0){
+        scatter (readChunk in chunkedReadsFiles){
+	        call minimap2_t.minimap2_t as minimap2_chunk {
+		        input:
+			    reads = readChunk,
+                reference=ambFasta,
+			    useEqx=false,
+                preemptible=2,
+			    threads = threads
+	        }
+        }
+
+        call minimap2_t.mergeBAM as mergeBAMhapdup {
+		    input:
+			bams = minimap2_chunk.bam
+	    }
     }
 
-	### minimap2 alignent ###
-    call minimap2_t.minimap2_t as minimap2 {
-        input:
-            threads=threads,
-            reference=shasta_t.shastaFasta,
-            reads=readsFile,
-            useEqx=false
-    }
+    File bamFile = select_first([minimap2.bam, mergeBAMhapdup.bam])
 
 	### hapdup
 	call hapdup_t.hapdup_t as hapdup_t {
 		input:
 			threads=threads,
-			alignedBam=minimap2.bam,
-			contigs=shasta_t.shastaFasta
+			alignedBam=bamFile,
+			contigs=ambFasta
 	}
 
 	output {
@@ -41,8 +78,8 @@ workflow structuralVariantsDenovoAssembly {
         File asmPhased1 = hapdup_t.hapdupPhased1
         File asmPhased2 = hapdup_t.hapdupPhased2
         File phaseBed1 = hapdup_t.hapdupPhaseBed1
-        File phaseBed2 = hapdup_t.hapdupPhaseBed2 
-		File shastaHaploid = shasta_t.shastaFasta
-		File shastaLog = shasta_t.shastaLog
+        File phaseBed2 = hapdup_t.hapdupPhaseBed2
+		File shastaHaploid = ambFasta
+		File? shastaLog = shasta_t.shastaLog
 	}
 }
