@@ -1,7 +1,7 @@
 CARD Nanopore Varaint Calling and Assembly Workflows
 ===================================================
 
-### Pipeline version: R9
+### Pipeline version: R9 with multiple input
 
 This repository contains pieplines for variant calling and de novo assembly of ONT data,
 optimized for [single-flowcell ONT sequencing protocol](https://dx.doi.org/10.17504/protocols.io.ewov1n93ygr2/v1).
@@ -11,7 +11,7 @@ the [Center for Alzheimer's and Related Dementias at NIH](https://card.nih.gov/)
 Versions for R9/R10 data
 ------------------------
 
-Please use either `r9` or `r10` branch for your corresponding data type.
+Please use either `r9` or `r10` branch for your corresponding data type. 
 
 Installation and Usage
 ---------------------
@@ -52,6 +52,34 @@ Cromwell could be configured to run on an HPC or cloud. This
 configuration is more involving and requires optimization for a particular environemnt.
 Please refer to the [corresponding manual](https://cromwell.readthedocs.io/en/stable/Configuring/) for details
 
+### Running the assembly with Shasta separately
+
+The Shasta assembler can be run in *in-memory* mode (faster/cheaper) or *disk-backed* mode (slower but doesn't require 
+as much memory).The end-to-end workflow uses the *disk-backed* mode by default because Terra can't (currently) launch 
+instances with more than 768 Gb of memory which might not be enough for some samples. However, because the *in-memory* 
+mode is much cheaper (~$20 vs ~$70), it might be worth attempting to run Shasta in *in-memory* mode first. Then, the 
+rest of the workflow could be run on the samples that worked, or the full workflow with the *disk-backed* mode on the few that failed.
+
+Shasta can be run separately with the workflow defined at `wdl/tasks/shasta.wdl` and deposited [on Dockstore](https://dockstore.org/workflows/github.com/jmonlong/card_nanopore_wf/shasta:r10?tab=info).
+To use the *in-memory* mode on Terra, the suggested inputs are:
+- `inMemory=true`
+- `diskSizeGB=1500` (needed to get high-memory instances on Terra)
+
+Then, the FASTA file produced by Shasta can be provided to the end-to-end workflow described above (defined at `wdl/workflows/cardEndToEndVcf.wdl` and deposited [on Dockstore](https://dockstore.org/workflows/github.com/jmonlong/card_nanopore_wf/cardEndToEndVcfMethyl:r10?tab=info)) using the optional input `shastaFasta`.
+
+### Running DeepVariant per chromosome and minimap2 alignment on chunks of reads
+
+Both of these tasks in the end-to-end pipeline take considerable amount of time when run on the whole genome. Running 
+these tasks in parallel reduces time and cost. 
+
+DeepVariant can be run on each chromosome independently by providing a list of chromosomes as input to the end-to-end 
+workflow. To run minimap2 alignments in parallel provide the end-to-end workflow with a number of reads per chunk to split the input reads.
+
+To run these tasks in parallel on Terra, the suggested inputs are:
+- `nbReadsPerChunk = 1000000` ( this can vary by input reads )
+- `chrs=["chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chr10", "chr11", "chr12", "chr13", 
+             "chr14", "chr15", "chr16", "chr17", "chr18", "chr19", "chr20", "chr21", "chr22", "chrX", "chrY", "chrM"]` 
+
 ### Quick demo
 
 ```
@@ -71,11 +99,11 @@ Basecalling and mehtylation calls were done using Guppy 6.1.2. The pipeline shou
 work for similar or newer nanopore data. We are currently planning to release
 a special version of this pipeline for R10 ONT data.
 
-The input for end-to-end workflow is a single unmapped bam file with methylation tags
-produced by Guppy. Other workflows can take either unmapped bam or fastq file as input.
+The input for this end-to-end workflow is one or more mapped or unmapped bam files with methylation tags
+produced by Guppy or fastq file as input.
 
 Other kinds of input include reference genome and corresponding VNTR annotations (provided
-in this repository).
+in this repository). A Shasta assembly fasta file can be provided as input if run separately *in-memory*.
 
 
 CARD manuscript data availability
