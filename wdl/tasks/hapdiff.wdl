@@ -6,7 +6,7 @@ task hapdiff_t {
     File ctgsMat
     File reference
     File vntrAnnotations = ""
-    String sampleId = "Sample"
+    String sample = "Sample"
     Int minSvSize = 25
     Int threads = 32
     Int memSizeGb = 128
@@ -27,7 +27,7 @@ task hapdiff_t {
     echo $TRF_STRING
 
 
-    hapdiff.py --reference ~{reference} ${TRF_STRING} --pat ~{ctgsPat} --mat ~{ctgsMat} --out-dir hapdiff -t ~{threads} --sv-size ~{minSvSize} --sample ~{sampleId} 2>&1 | tee hapdiff.log
+    hapdiff.py --reference ~{reference} ${TRF_STRING} --pat ~{ctgsPat} --mat ~{ctgsMat} --out-dir hapdiff -t ~{threads} --sv-size ~{minSvSize} --sample ~{sample} 2>&1 | tee hapdiff.log
   >>>
 
   output {
