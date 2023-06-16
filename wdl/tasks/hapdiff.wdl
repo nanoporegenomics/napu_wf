@@ -6,6 +6,7 @@ task hapdiff_t {
     File ctgsMat
     File reference
     File vntrAnnotations = ""
+    String sampleId = "Sample"
     Int minSvSize = 25
     Int threads = 32
     Int memSizeGb = 128
@@ -26,7 +27,7 @@ task hapdiff_t {
     echo $TRF_STRING
 
 
-    hapdiff.py --reference ~{reference} ${TRF_STRING} --pat ~{ctgsPat} --mat ~{ctgsMat} --out-dir hapdiff -t ~{threads} --sv-size ~{minSvSize} 2>&1 | tee hapdiff.log
+    hapdiff.py --reference ~{reference} ${TRF_STRING} --pat ~{ctgsPat} --mat ~{ctgsMat} --out-dir hapdiff -t ~{threads} --sv-size ~{minSvSize} --sample ~{sampleId} 2>&1 | tee hapdiff.log
   >>>
 
   output {
@@ -36,7 +37,7 @@ task hapdiff_t {
   }
 
   runtime {
-    docker: "mkolmogo/hapdiff:0.7"
+    docker: "mkolmogo/hapdiff:0.8"
     cpu: threads
     memory: memSizeGb + " GB"
     disks: "local-disk " + diskSizeGb + " SSD"
