@@ -138,7 +138,8 @@ workflow cardEndToEndVcfMethyl
 			ctgsPat = asm.asmDual1,
 			ctgsMat = asm.asmDual2,
 			reference = referenceFasta,
-			vntrAnnotations = referenceVntrAnnotations
+			vntrAnnotations = referenceVntrAnnotations,
+			sample = sampleName
 	}
 
 	call dipcall_t.dipcall_t as dipcall {

@@ -3,12 +3,15 @@ workflows:
    -  name: cardEndToEndVcfMethyl
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/cardEndToEndVcf.wdl
+   -  name: pepperMarginDvWorkflow
+      subclass: WDL
+      primaryDescriptorPath: /wdl/workflows/pepper_margin_deepvariant.wdl
+   -  name: hapdiffWorkflow
+      subclass: WDL
+      primaryDescriptorPath: /wdl/workflows/hapdiff.wdl
    -  name: dvMargin
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/dvMargin.wdl
-   -  name: dipdiffWorkflow
-      subclass: WDL
-      primaryDescriptorPath: /wdl/workflows/dipdiff.wdl
    -  name: snifflesWorkflow
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/sniffles.wdl
