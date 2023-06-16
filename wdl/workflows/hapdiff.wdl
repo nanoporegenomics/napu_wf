@@ -11,6 +11,7 @@ workflow hapdiffWf {
         File assemblyHap2
         Int minSvSize = 30
         Int threads = 32
+        String sampleName = "sample"
     }
 
 	### hapdiff
@@ -21,7 +22,8 @@ workflow hapdiffWf {
 			vntrAnnotations=vntrAnnotations,
 			ctgsPat=assemblyHap1,
 			ctgsMat=assemblyHap2,
-			minSvSize=minSvSize
+			minSvSize=minSvSize,
+			sample = sampleName
 	}
 
 	output {
