@@ -254,7 +254,7 @@ workflow cardEndToEndVcfMethyl
 		File? methylationBed2 = modbam2bed.hap2bedOut
 		File snifflesVcf = sniffles.snifflesVcf
         File shastaHaploid = asm.shastaHaploid
-        File shastaLog = asm.shastaLog
+        File? shastaLog = asm.shastaLog
 		File assemblyHap1 = asm.asmPhased1
 		File assemblyHap2 = asm.asmPhased2
         File asmHap1PhaseBed = asm.phaseBed1
