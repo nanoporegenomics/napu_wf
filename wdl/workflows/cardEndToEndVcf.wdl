@@ -260,7 +260,7 @@ workflow cardEndToEndVcfMethyl
         File asmHap1PhaseBed = asm.phaseBed1
         File asmHap2PhaseBed = asm.phaseBed2
         File assemblyDual1 = asm.asmDual1
-        File assemblyDual2 - asm.asmDual2
+        File assemblyDual2 = asm.asmDual2
 		File structuralVariantsVcf = hapdiff.hapdiffUnphasedVcf
 		File harmonizedVcf = margin_phase.out_margin_phase_svs
 		File asmDipcallVcf = dipcall.dipcallVcf
