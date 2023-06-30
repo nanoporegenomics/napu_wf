@@ -253,8 +253,14 @@ workflow cardEndToEndVcfMethyl
 		File? methylationBed1 = modbam2bed.hap1bedOut
 		File? methylationBed2 = modbam2bed.hap2bedOut
 		File snifflesVcf = sniffles.snifflesVcf
-		File assemblyHap1 = asm.asmDual1
-		File assemblyHap2 = asm.asmDual2
+        File shastaHaploid = asm.shastaHaploid
+        File shastaLog = asm.shastaLog
+		File assemblyHap1 = asm.asmPhased1
+		File assemblyHap2 = asm.asmPhased2
+        File asmHap1PhaseBed = asm.phaseBed1
+        File asmHap2PhaseBed = asm.phaseBed2
+        File assemblyDual1 = asm.asmDual1
+        File assemblyDual2 - asm.asmDual2
 		File structuralVariantsVcf = hapdiff.hapdiffUnphasedVcf
 		File harmonizedVcf = margin_phase.out_margin_phase_svs
 		File asmDipcallVcf = dipcall.dipcallVcf
