@@ -1,9 +1,9 @@
-CARD Nanopore Varaint Calling and Assembly Workflows
-===================================================
+Napu
+====
 
-### Pipeline version: R10
+### Pipelines version: R10
 
-This repository contains pieplines for variant calling and de novo assembly of ONT data,
+Napu (Nanopore Analysis Pipeline) is a collection of WDL workflows for variant calling and de novo assembly of ONT data,
 optimized for [single-flowcell ONT sequencing protocol](https://dx.doi.org/10.17504/protocols.io.ewov1n93ygr2/v1).
 The wet-lab/informatics protocol is now applied to sequence and characterize thousands of human brain genomes at 
 the [Center for Alzheimer's and Related Dementias at NIH](https://card.nih.gov/).
@@ -80,8 +80,8 @@ Make sure cromwell is installed and substitute the paths to cromwell and WDL wor
 Input data requirements
 -----------------------
 
-The pipeline was tested using 30-40x ONT sequencing using R9.4 pore with read N50 ~30kb.
-Basecalling and mehtylation calls were done using Guppy 6.1.2. The pipeline should
+Napu was tested using 30-40x ONT sequencing using R9.4 pore with read N50 ~30kb.
+Basecalling and mehtylation calls were done using Guppy 6.1.2. Napu should
 work for similar or newer nanopore data. We are currently planning to release
 a special version of this pipeline for R10 ONT data.
 
@@ -92,17 +92,17 @@ Other kinds of input include reference genome and corresponding VNTR annotations
 in this repository).
 
 
-CARD manuscript data availability
----------------------
+bioRxiv manuscript data availability
+------------------------------------
 
 The cell line data (HG002, HG0073 and HG02723) and openly available through this [Terra workspace](https://anvil.terra.bio/#workspaces/anvil-datastorage/ ANVIL_NIA_CARD_Coriell_Cell_Lines_Open). 
 
-Human brain sequencing datasets are under controlled access and require a dbGap application (phs001300.v4). Afterwards, the data will be available through the [restricted Terra workspace](https://anvil.terra.bio/#workspaces/ anvil-datastorage/ANVIL_NIA_CARD_LR_WGS_NABEC_GRU).
+Human brain sequencing datasets are under controlled access and require a dbGap application (phs001300.v4). Afterwards, the data will be available through the [restricted Terra workspace](https://anvil.terra.bio/#workspaces/anvil-datastorage/ANVIL_NIA_CARD_LR_WGS_NABEC_GRU).
 
 Pipeline description
 ---------------------
 
-The pipeline begins by generating a diploid de novo assembly using a combination of Shasta, 
+Napu begins by generating a diploid de novo assembly using a combination of Shasta, 
 which produces a haploid assembly and Hapdup, which generates locally phased diploid contigs. 
 We then use the generated assemblies to call structural variants (at least 50 bp in size) 
 against a given reference genome using a new assembly-to-reference pipeline called hapdiff.
@@ -132,7 +132,7 @@ The workflows are buit around the following tools:
 Credits
 -------
 
-The pipeline was developed at in collaboration between [UC Santa Cruz genomics institute](https://ucscgenomics.soe.ucsc.edu/)
+Napu was developed at in collaboration between [UC Santa Cruz genomics institute](https://ucscgenomics.soe.ucsc.edu/)
 and the [Cancer Data Science Laboratory](https://ccr.cancer.gov/cancer-data-science-laboratory), National Cancer Institute.
 
 Main code contributors.
