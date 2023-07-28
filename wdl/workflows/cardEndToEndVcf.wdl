@@ -133,7 +133,7 @@ workflow cardEndToEndVcfMethyl
         # merge the per chr haplotagged bams
         call minimap_t.mergeBAM as merge_PEPPER_DV_BAMs {
             input:
-                bams = pmdvHap_chrs.haplotaggedBam,
+                bams = select_all(pmdvHap_chrs.haplotaggedBam),
                 outname = sampleName,
             }
 
