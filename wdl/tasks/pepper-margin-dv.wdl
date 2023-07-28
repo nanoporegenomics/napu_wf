@@ -48,14 +48,18 @@ task pepper_margin_dv_t {
     fi
 
     run_pepper_margin_deepvariant call_variant -b reads.bam -f ref.fa -o `pwd` -t ~{threads} ~{pepperMode} --phased_output -s ~{sampleName} -p ~{sampleName}_PMDV_FINAL $REGION_ARG ~{extraArguments} 2>&1 | tee pmdv.log
-    samtools index -@ 10 ~{sampleName}_PMDV_FINAL.haplotagged.bam
+    if [[ -f "~{sampleName}_PMDV_FINAL.haplotagged.bam" ]]
+    then
+      samtools index -@ 10 ~{sampleName}_PMDV_FINAL.haplotagged.bam
+    fi
+
   >>>
 
   output {
 	File pepperVcf = "~{sampleName}_PMDV_FINAL.phased.vcf.gz"
 	File pepperLog = "pmdv.log"
-    File haplotaggedBam = "~{sampleName}_PMDV_FINAL.haplotagged.bam"
-    File haplotaggedBamIdx = "~{sampleName}_PMDV_FINAL.haplotagged.bam.bai"
+    File? haplotaggedBam = "~{sampleName}_PMDV_FINAL.haplotagged.bam"
+    File? haplotaggedBamIdx = "~{sampleName}_PMDV_FINAL.haplotagged.bam.bai"
   }
 
   runtime {
