@@ -4,6 +4,7 @@ workflow shasta {
 
     input {
         Array[File] readFiles = []
+        String shastaArgs = ""
         Boolean inMemory = false
         Int diskSizeGB = 1024
     }
@@ -32,6 +33,7 @@ workflow shasta {
         call shasta_t {
             input:
             reads=readsFasta,
+            shastaArgs=shastaArgs,
             diskSizeGb=diskSizeGB
         }
     }
@@ -50,6 +52,7 @@ workflow shasta {
 task shasta_t {
   input {
     File reads
+    String shastaArgs = ""
     Int threads = 96
     String shastaConfig = "/opt/shasta_config/Nanopore-CARD-Jan2022.conf"
     Int memSizeGb = 624
@@ -88,7 +91,7 @@ task shasta_t {
     #shasta --input $SHASTA_INPUT --config ~{shastaConfig} --threads ~{threads} 2>&1 | tee shasta.log
     
     #By default use disk caching
-    shasta --input $SHASTA_INPUT --config ~{shastaConfig} --threads ~{threads} --memoryMode filesystem --memoryBacking disk 2>&1 | tee shasta.log
+    shasta --input $SHASTA_INPUT --config ~{shastaConfig} --threads ~{threads} --memoryMode filesystem --memoryBacking disk ~{shastaArgs} 2>&1 | tee shasta.log
 
     tar -czvf shasta.log.tar.gz shasta.log ShastaRun/performance.log ShastaRun/stdout.log ShastaRun/AssemblySummary.html
   >>>
@@ -112,6 +115,7 @@ task shasta_t {
 task shasta_inmem_t {
   input {
     File reads
+    String shastaArgs = ""
     Int threads = 80
     String shastaConfig = "/opt/shasta_config/Nanopore-CARD-Jan2022.conf"
     Int memSizeGb = 768
@@ -147,7 +151,7 @@ task shasta_inmem_t {
       SHASTA_INPUT=${UNGZIPPED}
     fi
 
-    shasta --input $SHASTA_INPUT --config ~{shastaConfig} --threads ~{threads} 2>&1 | tee shasta.log
+    shasta --input $SHASTA_INPUT --config ~{shastaConfig} --threads ~{threads}  ~{shastaArgs} 2>&1 | tee shasta.log
 
     tar -czvf shasta.log.tar.gz shasta.log ShastaRun/performance.log ShastaRun/stdout.log ShastaRun/AssemblySummary.html
   >>>
