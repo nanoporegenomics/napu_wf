@@ -9,6 +9,7 @@ workflow structuralVariantsDenovoAssembly {
     input {
         File readsFile
         File? shastaFasta
+        String extraShastaArgs = ""
         Array[File] chunkedReadsFiles = []
         Int threads
         Int shastaDiskSizeGB = 1024
@@ -29,6 +30,7 @@ workflow structuralVariantsDenovoAssembly {
         call shasta_t.shasta_t as shasta_t {
             input:
             reads=readsFasta,
+            shastaArgs = extraShastaArgs,
             diskSizeGb=shastaDiskSizeGB
         }
     }
