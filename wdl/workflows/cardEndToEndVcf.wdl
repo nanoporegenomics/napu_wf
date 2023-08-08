@@ -21,6 +21,9 @@ workflow cardEndToEndVcfMethyl
         Int         nbReadsPerChunk = 0
         String      sampleName = "sample"
         Array[String] chrs = []
+        Boolean runModbam2bed = true
+        File? inputHaplotaggedBam
+        File? inputHaplotaggedBamIdx
     }
 
     parameter_meta {
@@ -32,6 +35,9 @@ workflow cardEndToEndVcfMethyl
         inputMappedBams: "Array of input sorted BAMs aligned to the reference"
         sampleName: "Name of Sample"
         nbReadsPerChunk: "Number of reads to put into a chunk for parallel alignment chunking"
+        chrs: "list of mapped chromosomes to run PMDV on, instead of calling variants whole genome"
+        inputHaplotaggedBam: "haplotagged BAM from a previous run, skips PMDV"
+        inputHaplotaggedBamIdx: "haplotagged BAM.bai file froma previous run"
     }
 
     ### Either align input, merge multiple mapped input, or reorganize single input
@@ -112,55 +118,57 @@ workflow cardEndToEndVcfMethyl
     File bamFile = select_first([inputBam, mergeInputBams.bam, mergeAlignedBAMs.bam, mergeScatteredBAMs.bam])
     File bamFileIndex = select_first([indexSingleInputBam.bamIndex, mergeInputBams.bamIndex, mergeAlignedBAMs.bamIndex, mergeScatteredBAMs.bamIndex])
 
+    if (!defined(inputHaplotaggedBam)){
+        ##### Reference-based variant calling with DeepVariant
+        ## if the reads/BAMs were chunked by chromosomes, use directly those chunks
+        if(length(chrs) > 0 && nbReadsPerChunk > 0){
+            Array[File] bamChrs = select_first([mergeScatteredBAMs.bamPerChrs, mergeAlignedBAMs.bamPerChrs, indexSingleInputBam.bamPerChrs, mergeInputBams.bamPerChrs, mergeScatteredBAMs.bamPerChrs])
+            Array[File] bamChrsIndex = select_first([mergeScatteredBAMs.bamPerChrsIndex, mergeAlignedBAMs.bamPerChrsIndex, indexSingleInputBam.bamPerChrsIndex, mergeInputBams.bamPerChrsIndex, mergeScatteredBAMs.bamPerChrsIndex])
+            scatter (bamChr in zip(bamChrs, bamChrsIndex)){
+                call pmdv_haplotag_t.pepper_margin_dv_t as pmdvHap_chrs{
+                    input:
+                        threads = threads,
+                        reference = referenceFasta,
+                        bamAlignment = bamChr.left,
+                        bamAlignmentIndex = bamChr.right,
+                        sampleName = sampleName,
+                        oneChr = true,
+                        preemptible = 2
+                }
+            }
+            # merge the per chr haplotagged bams
+            call minimap_t.mergeBAM as merge_PEPPER_DV_BAMs {
+                input:
+                    bams = select_all(pmdvHap_chrs.haplotaggedBam),
+                    outname = sampleName,
+                }
 
-    ##### Reference-based variant calling with DeepVariant
-    ## if the reads/BAMs were chunked by chromosomes, use directly those chunks
-    if(length(chrs) > 0 && nbReadsPerChunk > 0){
-        Array[File] bamChrs = select_first([mergeScatteredBAMs.bamPerChrs, mergeAlignedBAMs.bamPerChrs, indexSingleInputBam.bamPerChrs, mergeInputBams.bamPerChrs, mergeScatteredBAMs.bamPerChrs])
-        Array[File] bamChrsIndex = select_first([mergeScatteredBAMs.bamPerChrsIndex, mergeAlignedBAMs.bamPerChrsIndex, indexSingleInputBam.bamPerChrsIndex, mergeInputBams.bamPerChrsIndex, mergeScatteredBAMs.bamPerChrsIndex])
-        scatter (bamChr in zip(bamChrs, bamChrsIndex)){
-            call pmdv_haplotag_t.pepper_margin_dv_t as pmdvHap_chrs{
+            # merge the vcfs from each chromosome
+            call pmdv_haplotag_t.mergeVCFs{
+                input:
+                    vcfFiles = pmdvHap_chrs.pepperVcf,
+                    outname = sampleName
+            }
+        }
+
+        ## otherwise, one job for the whole-genome on the entire BAM
+        if(length(chrs) == 0 || nbReadsPerChunk == 0){
+            call pmdv_haplotag_t.pepper_margin_dv_t as pmdvHap{
                 input:
                     threads = threads,
                     reference = referenceFasta,
-                    bamAlignment = bamChr.left,
-                    bamAlignmentIndex = bamChr.right,
+                    bamAlignment = bamFile,
+                    bamAlignmentIndex = bamFileIndex,
                     sampleName = sampleName,
-                    oneChr = true,
                     preemptible = 2
             }
         }
-        # merge the per chr haplotagged bams
-        call minimap_t.mergeBAM as merge_PEPPER_DV_BAMs {
-            input:
-                bams = select_all(pmdvHap_chrs.haplotaggedBam),
-                outname = sampleName,
-            }
-
-        # merge the vcfs from each chromosome
-        call pmdv_haplotag_t.mergeVCFs{
-            input:
-                vcfFiles = pmdvHap_chrs.pepperVcf,
-                outname = sampleName
-        }
     }
 
-    ## otherwise, one job for the whole-genome on the entire BAM
-    if(length(chrs) == 0 || nbReadsPerChunk == 0){
-        call pmdv_haplotag_t.pepper_margin_dv_t as pmdvHap{
-            input:
-                threads = threads,
-                reference = referenceFasta,
-                bamAlignment = bamFile,
-                bamAlignmentIndex = bamFileIndex,
-                sampleName = sampleName,
-                preemptible = 2
-        }
-    }
 
     # isolate the haplotagged BAM from PEPPER_Margin_DeepVariant
-	File haplotaggedBam = select_first([merge_PEPPER_DV_BAMs.bam, pmdvHap.haplotaggedBam])
-	File haplotaggedBamIdx = select_first([merge_PEPPER_DV_BAMs.bamIndex, pmdvHap.haplotaggedBamIdx])
+	File haplotaggedBam = select_first([inputHaplotaggedBam, merge_PEPPER_DV_BAMs.bam, pmdvHap.haplotaggedBam])
+	File haplotaggedBamIdx = select_first([inputHaplotaggedBamIdx, merge_PEPPER_DV_BAMs.bamIndex, pmdvHap.haplotaggedBamIdx])
 
     ##### estimate methylation at CpG sites
     ## only if the input reads file was a BAM
@@ -171,7 +179,7 @@ workflow cardEndToEndVcfMethyl
         File mappedRead1 = select_first(inputReads)
     }
     File inReadFile = select_first([mappedRead1, mappedBAM1])
-    if(basename(inReadFile, ".bam") != basename(inReadFile)){
+    if(basename(inReadFile, ".bam") != basename(inReadFile) && runModbam2bed){
         call modbam2bed_t.modbam2bed as modbam2bed {
             input:
                 haplotaggedBam = haplotaggedBam,
