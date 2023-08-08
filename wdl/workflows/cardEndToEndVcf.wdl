@@ -24,6 +24,8 @@ workflow cardEndToEndVcfMethyl
         Boolean runModbam2bed = true
         File? inputHaplotaggedBam
         File? inputHaplotaggedBamIdx
+        File? inputPhasedVCF
+        File? singleInputMappedBamIdx
     }
 
     parameter_meta {
@@ -38,18 +40,23 @@ workflow cardEndToEndVcfMethyl
         chrs: "list of mapped chromosomes to run PMDV on, instead of calling variants whole genome"
         inputHaplotaggedBam: "haplotagged BAM from a previous run, skips PMDV"
         inputHaplotaggedBamIdx: "haplotagged BAM.bai file froma previous run"
+        inputPhasedVCF: "small variant PMDV VCF from previous run"
+        singleInputMappedBamIdx: "mapped BAM.bai from a previous run, skips indexing again"
     }
 
     ### Either align input, merge multiple mapped input, or reorganize single input
     ## If only one mapped bam is provided just index it (and split into chromosomes if chrs is provided input)
     if (length(inputMappedBams) == 1){
         File inputBam = select_first(inputMappedBams)
-        call minimap_t.indexBAM as indexSingleInputBam{
-            input:
-                bam = inputBam,
-                chrs = chrs
+        if (!defined(singleInputMappedBamIdx)){
+            call minimap_t.indexBAM as indexSingleInputBam{
+                input:
+                    bam = inputBam,
+                    chrs = chrs
+            }
         }
     }
+
     # If more than one mapped bams are provided as input, merge them into one
     if (length(inputMappedBams) > 1){
         call minimap_t.mergeBAM as mergeInputBams{
@@ -116,7 +123,7 @@ workflow cardEndToEndVcfMethyl
 
     ## Select aligned reads to the reference genome from the multiple possible inputs
     File bamFile = select_first([inputBam, mergeInputBams.bam, mergeAlignedBAMs.bam, mergeScatteredBAMs.bam])
-    File bamFileIndex = select_first([indexSingleInputBam.bamIndex, mergeInputBams.bamIndex, mergeAlignedBAMs.bamIndex, mergeScatteredBAMs.bamIndex])
+    File bamFileIndex = select_first([singleInputMappedBamIdx, indexSingleInputBam.bamIndex, mergeInputBams.bamIndex, mergeAlignedBAMs.bamIndex, mergeScatteredBAMs.bamIndex])
 
     if (!defined(inputHaplotaggedBam)){
         ##### Reference-based variant calling with DeepVariant
@@ -245,7 +252,7 @@ workflow cardEndToEndVcfMethyl
 			reference = referenceFasta
 	}
 
-    File phasedVCF = select_first([mergeVCFs.vcf, pmdvHap.pepperVcf])
+    File phasedVCF = select_first([inputPhasedVCF, mergeVCFs.vcf, pmdvHap.pepperVcf])
 	call margin_phase_wf.runMarginPhase as margin_phase {
 		input:
 			smallVariantsFile = phasedVCF,
