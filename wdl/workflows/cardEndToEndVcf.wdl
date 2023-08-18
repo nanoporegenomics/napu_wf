@@ -70,7 +70,8 @@ workflow cardEndToEndVcfMethyl
 		        bamAlignment = bamChr.left,
 		        bamAlignmentIndex = bamChr.right,
                 oneChr = true,
-                preemptible = 2
+                preemptible = 2,
+                sampleName = sampleName
 	        }
         }
         call dv_margin_t.mergeVCFs {
@@ -86,7 +87,8 @@ workflow cardEndToEndVcfMethyl
 		    threads = threads,
 		    reference = referenceFasta,
 		    bamAlignment = bamFile,
-		    bamAlignmentIndex = bamFileIndex
+		    bamAlignmentIndex = bamFileIndex,
+		    sampleName = sampleName
 	    }
     }
     ## Variant calls from DeepVariant

@@ -7,6 +7,7 @@ task dv_t {
 	  File bamAlignment
 	  File bamAlignmentIndex
       String dvModel = "ONT_R104"
+      String sampleName = "Sample"
       Boolean oneChr = false
 	  Int memSizeGb = 128
 	  Int diskSizeGb = 1024
@@ -46,6 +47,7 @@ task dv_t {
         --model_type ~{dvModel} \
         --ref ref.fa \
         --reads reads.bam \
+        --sample_name ~{sampleName} \
         --output_vcf dv.vcf.gz $REGION_ARG \
         --num_shards ~{threads}
   >>>
