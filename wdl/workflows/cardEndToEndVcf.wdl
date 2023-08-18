@@ -34,6 +34,7 @@ workflow cardEndToEndVcfMethyl
 			threads = threads,
 			reference = referenceFasta,
 			bamAlignment = mm_align.out_bam,
+			sampleName = sampleName
 			#bamAlignmentBai = mm_align.out_bam_idx,
 			#output_prefix = inSampleName
 	}

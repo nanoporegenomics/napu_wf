@@ -6,6 +6,7 @@ task pepper_margin_dv_t {
     File reference
 	File bamAlignment
 	String mapMode = "ont"
+	String sampleName = "Sample"
 	Int memSizeGb = 256
 	Int diskSizeGb = 1024
   }
@@ -19,7 +20,7 @@ task pepper_margin_dv_t {
     set -o xtrace
 
     samtools index -@ 10 ~{bamAlignment}
-    run_pepper_margin_deepvariant call_variant -b ~{bamAlignment} -f ~{reference} -o `pwd` -t ~{threads} ~{pepperMode} --phased_output -p PMDV_FINAL 2>&1 | tee pmdv.log
+    run_pepper_margin_deepvariant call_variant -b ~{bamAlignment} -f ~{reference} -o `pwd` -t ~{threads} ~{pepperMode} --sample_name ~{sampleName} --phased_output -p PMDV_FINAL 2>&1 | tee pmdv.log
     samtools index -@ 10 PMDV_FINAL.haplotagged.bam
   >>>
 
