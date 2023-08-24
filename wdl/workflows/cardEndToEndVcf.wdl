@@ -42,6 +42,7 @@ workflow cardEndToEndVcfMethyl
         inputHaplotaggedBamIdx: "haplotagged BAM.bai file froma previous run"
         inputPhasedVCF: "small variant PMDV VCF from previous run"
         singleInputMappedBamIdx: "mapped BAM.bai from a previous run, skips indexing again"
+        runModbam2bed: "modbam2bed boolean flag in preparation of switching to modkit"
     }
 
     ### Either align input, merge multiple mapped input, or reorganize single input
