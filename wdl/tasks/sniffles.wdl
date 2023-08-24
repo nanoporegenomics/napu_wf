@@ -8,7 +8,7 @@ task sniffles_t {
 	File? vntrAnnotations
 	Int minSvLen = 25
 	Int memSizeGb = 32
-	Int diskSizeGb = 256
+	Int diskSizeGb = round(5 * size(bamAlignment, 'G')) + 20 #256
 	File? resourceLogScript
   }
 

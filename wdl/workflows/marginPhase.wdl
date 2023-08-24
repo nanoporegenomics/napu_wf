@@ -81,7 +81,7 @@ task marginPhase {
         String dockerImage
         Int threads = 32
         Int memSizeGb = 128
-        Int diskSizeGb = 256
+        Int diskSizeGb = round(5 * size(bamFile, 'G')) + 20 #256
     }
     command <<<
         set -o pipefail
