@@ -3,10 +3,11 @@ CARD Nanopore Varaint Calling and Assembly Workflows
 
 ### Pipeline version: R9 with multiple input
 
-This repository contains pieplines for variant calling and de novo assembly of ONT data,
+This repository contains pipelines for variant calling and de novo assembly of ONT data,
 optimized for [single-flowcell ONT sequencing protocol](https://dx.doi.org/10.17504/protocols.io.ewov1n93ygr2/v1).
 The wet-lab/informatics protocol is now applied to sequence and characterize thousands of human brain genomes at 
-the [Center for Alzheimer's and Related Dementias at NIH](https://card.nih.gov/).
+the [Center for Alzheimer's and Related Dementias at NIH](https://card.nih.gov/). This pipeline version has more 
+optional input options that run modular peices of the pipeline more easily. 
 
 Versions for R9/R10 data
 ------------------------
