@@ -9,6 +9,7 @@ task sniffles_t {
 	Int minSvLen = 25
 	Int memSizeGb = 32
 	Int diskSizeGb = round(5 * size(bamAlignment, 'G')) + 20 #256
+    Int preemptible_in = 2
 	File? resourceLogScript
   }
 
@@ -38,7 +39,7 @@ task sniffles_t {
   }
 
   runtime {
-    preemptible: 2
+    preemptible: preemptible_in
     docker: "mkolmogo/card_sniffles:2.0.3"
     cpu: threads
 	memory: memSizeGb + " GB"

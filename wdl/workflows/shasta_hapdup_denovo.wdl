@@ -15,6 +15,7 @@ workflow structuralVariantsDenovoAssembly {
         Int threads
         Int shastaDiskSizeGB = 1024
         Int hapdupDiskSizeGB = 1024
+        Int preemptable = 2
     }
 
 
@@ -25,7 +26,8 @@ workflow structuralVariantsDenovoAssembly {
         if ((basename(readsFile, ".fasta") == basename(readsFile)) && (basename(readsFile, ".fa") == basename(readsFile))){
             call shasta_t.convertToFasta {
                 input:
-                readfiles=readArray
+                readfiles=readArray,
+                preemptable=preemptable
             }
         }
         # isolate reads and run shasta on disk
@@ -59,7 +61,7 @@ workflow structuralVariantsDenovoAssembly {
                     reads = readChunk,
                     reference=ambFasta,
                     useEqx=false,
-                    preemptible=2,
+                    preemptible=preemptable,
                     threads = threads
                 }
             }

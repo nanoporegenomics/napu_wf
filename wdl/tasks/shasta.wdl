@@ -178,6 +178,7 @@ task convertToFasta {
     Int threads = 4
     Int memSizeGb = 8
     Int diskSizeGb = 5 * round(size(readfiles, 'G')) + 50
+    Int preemptable = 2
   }
 
   String outname = sub(sub(basename(select_first(readfiles)), ".gz$", ""), ".bam", "")
@@ -212,7 +213,7 @@ task convertToFasta {
 
   runtime {
       docker: "quay.io/jmonlong/card_shasta@sha256:ce218dc133b2534f58f841bccd4b1d1d880c6ad62c1c321dd91bdd8d43e554f1"
-      preemptible: 2
+      preemptible: preemptable
       cpu: threads
       memory: memSizeGb + " GB"
       disks: "local-disk " + diskSizeGb + " SSD"

@@ -57,6 +57,7 @@ task splitReads {
         Int readsPerChunk
         Int threads = 8
         Int diskGb = 5 * round(size(reads, "G")) + 20
+        Int preemptible = 2
     }
 
     Int gzThreads = if threads > 1 then threads - 1 else 1
@@ -86,7 +87,7 @@ task splitReads {
         Array[File] readChunks = glob("fq_chunk.part.*")
     }
     runtime {
-        preemptible: 2
+        preemptible: preemptible
         time: 120
         cpu: threads
         memory: "4 GB"
@@ -103,6 +104,7 @@ task mergeBAM {
         Int threads = 8
         Int diskGb = round(5 * size(bams, 'G')) + 20
         Int memGb = 8
+        Int preemptible = 2
     }
 
     Boolean anyChrs = length(chrs) > 0
@@ -134,7 +136,7 @@ task mergeBAM {
         Array[File]? bamPerChrsIndex = glob("bamPerChrs/*.bam.bai")
     }
     runtime {
-        preemptible: 2
+        preemptible: preemptible
         time: 240
         memory: memGb + " GB"
         cpu: threads
@@ -195,6 +197,8 @@ task mergeFASTQ {
         Int threads = 8
         Int diskGb = round(3 * size(reads, 'G')) + 20
         Int memGb = 8
+        Int preemptible = 2
+
     }
 
     command <<<
@@ -210,7 +214,7 @@ task mergeFASTQ {
         File fq = "~{outname}.fastq.gz"
     }
     runtime {
-        preemptible: 2
+        preemptible: preemptible
         time: 240
         memory: memGb + " GB"
         cpu: threads
