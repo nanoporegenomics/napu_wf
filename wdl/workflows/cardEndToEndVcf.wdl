@@ -265,6 +265,7 @@ workflow cardEndToEndVcfMethyl
 
 	output {
 		File phasedMethylBam = haplotaggedBam
+        File phasedMethylBamBai = haplotaggedBamIdx
 		File smallVariantsVcf = phasedVCF
 		File? methylationBed1 = modbam2bed.hap1bedOut
 		File? methylationBed2 = modbam2bed.hap2bedOut
