@@ -5,6 +5,7 @@ task minimap2_t {
     Int threads
     File reference
     File reads
+    String sampleId = ""
     String mapMode = "map-ont"
     Boolean useMd = false
     Boolean useEqx = true
@@ -12,6 +13,8 @@ task minimap2_t {
     Int diskSizeGb = 1024
     Int kmerSize = 17
     String minibatchSize = "5G"
+    Boolean customAln = false
+    String customArgs = ""
     Int sortMemgb = "4"
     Int preemptible = 0
   }
@@ -29,17 +32,20 @@ task minimap2_t {
     if [ "${MM_INPUT: -3}" == "bam" ]
     then
       samtools fastq -TMm,Ml,MM,ML ~{reads} | \
-        minimap2 -ax ~{mapMode} ~{reference} - -k ~{kmerSize} -y -K ~{minibatchSize} -t ~{threads} ~{mdString} ~{eqxString} | samtools sort -@4 -m ~{sortMemgb}G > minimap2.bam
+        minimap2 -ax ~{mapMode} ~{reference} - -k ~{kmerSize} -y -K ~{minibatchSize} -t ~{threads} ~{mdString} ~{eqxString} | samtools sort -@4 -m ~{sortMemgb}G > ~{sampleId}minimap2.bam
+    elif ["${customAln}" == true ]
+    then
+      minimap2 ~{customArgs} -t ~{threads} ~{reference} ~{reads} | samtools sort -@4 -m ~{sortMemgb}G > ~{sampleId}minimap2.bam
     else
-      minimap2 -ax ~{mapMode} ~{reference} ~{reads} -k ~{kmerSize} -y -K ~{minibatchSize} -t ~{threads} ~{mdString} ~{eqxString} | samtools sort -@4 -m ~{sortMemgb}G > minimap2.bam
+      minimap2 -ax ~{mapMode} ~{reference} ~{reads} -k ~{kmerSize} -y -K ~{minibatchSize} -t ~{threads} ~{mdString} ~{eqxString} | samtools sort -@4 -m ~{sortMemgb}G > ~{sampleId}minimap2.bam
     fi
 
-    samtools index -@ ~{threads} minimap2.bam
+    samtools index -@ ~{threads} ~{sampleId}minimap2.bam
   >>>
 
   output {
-    File bam = "minimap2.bam"
-	File bamIndex = "minimap2.bam.bai"
+    File bam = "~{sampleId}minimap2.bam"
+	File bamIndex = "~{sampleId}minimap2.bam.bai"
   }
 
   runtime {
