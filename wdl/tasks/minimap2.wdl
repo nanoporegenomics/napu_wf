@@ -33,9 +33,9 @@ task minimap2_t {
     then
       samtools fastq -TMm,Ml,MM,ML ~{reads} | \
         minimap2 -ax ~{mapMode} ~{reference} - -k ~{kmerSize} -y -K ~{minibatchSize} -t ~{threads} ~{mdString} ~{eqxString} | samtools sort -@4 -m ~{sortMemgb}G > ~{sampleId}minimap2.bam
-    elif ["${customAln}" == true ]
+    elif [ ~{customAln} == true ]
     then
-      minimap2 ~{customArgs} -t ~{threads} ~{reference} ~{reads} | samtools sort -@4 -m ~{sortMemgb}G > ~{sampleId}minimap2.bam
+      minimap2 -a ~{customArgs} -t ~{threads} ~{reference} ~{reads} | samtools sort -@4 -m ~{sortMemgb}G > ~{sampleId}minimap2.bam
     else
       minimap2 -ax ~{mapMode} ~{reference} ~{reads} -k ~{kmerSize} -y -K ~{minibatchSize} -t ~{threads} ~{mdString} ~{eqxString} | samtools sort -@4 -m ~{sortMemgb}G > ~{sampleId}minimap2.bam
     fi
