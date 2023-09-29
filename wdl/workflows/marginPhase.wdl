@@ -105,11 +105,11 @@ task marginPhase {
         samtools index -@ ~{threads} ~{bamFile}
         samtools faidx ~{refFile}
         mkdir output/
-        margin phase ~{bamFile} ~{refFile} ~{combinedVcfFile} /opt/margin/params/phase/allParams.phase_vcf.ont.sv.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName} -M
-        bgzip output/~{sampleName}.phased.vcf
+        margin phase ~{bamFile} ~{refFile} ~{combinedVcfFile} /opt/margin/params/phase/allParams.phase_vcf.ont.sv.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName}_hvcf -M
+        bgzip output/~{sampleName}_hvcf.phased.vcf
     >>>
     output {
-        File phasedVcf = "output/~{sampleName}.phased.vcf.gz"
+        File phasedVcf = "output/~{sampleName}_hvcf.phased.vcf.gz"
         File? toplog = "top.log"
     }
 
