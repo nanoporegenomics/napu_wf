@@ -20,5 +20,6 @@ workflow minimapWorkflow {
 
 	output {
         File minimapBam = minimap2.bam
+        File minimapBamBai = minimap2.bamIndex
 	}
 }

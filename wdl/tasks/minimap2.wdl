@@ -44,8 +44,8 @@ task minimap2_t {
   >>>
 
   output {
-    File bam = "~{sampleId}minimap2.bam"
-	File bamIndex = "~{sampleId}minimap2.bam.bai"
+        File bam = "~{sampleId}minimap2.bam"
+        File bamIndex = "~{sampleId}minimap2.bam.bai"
   }
 
   runtime {
