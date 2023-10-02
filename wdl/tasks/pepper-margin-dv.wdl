@@ -56,7 +56,7 @@ task pepper_margin_dv_t {
   >>>
 
   output {
-	File pepperVcf = "~{sampleName}_PMDV.phased.vcf.gz"
+	File? pepperVcf = "~{sampleName}_PMDV.phased.vcf.gz"
 	File pepperLog = "pmdv.log"
     File? haplotaggedBam = "~{sampleName}_PMDV.haplotagged.bam"
     File? haplotaggedBamIdx = "~{sampleName}_PMDV.haplotagged.bam.bai"
