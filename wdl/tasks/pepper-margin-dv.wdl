@@ -47,7 +47,7 @@ task pepper_margin_dv_t {
         REGION_ARG="--region $CONTIG_ID"
     fi
 
-    run_pepper_margin_deepvariant call_variant -b reads.bam -f ref.fa -o `pwd` -t ~{threads} ~{pepperMode} --phased_output -s ~{sampleName} -p ~{sampleName}_PMDV_FINAL $REGION_ARG ~{extraArguments} 2>&1 | tee pmdv.log
+    run_pepper_margin_deepvariant call_variant -b reads.bam -f ref.fa -o `pwd` -t ~{threads} ~{pepperMode} --phased_output -s ~{sampleName} -p ~{sampleName}_PMDV $REGION_ARG ~{extraArguments} 2>&1 | tee pmdv.log
     if [[ -f "~{sampleName}_PMDV.haplotagged.bam" ]]
     then
       samtools index -@ 10 ~{sampleName}_PMDV.haplotagged.bam
@@ -60,7 +60,7 @@ task pepper_margin_dv_t {
 	File pepperLog = "pmdv.log"
     File? haplotaggedBam = "~{sampleName}_PMDV.haplotagged.bam"
     File? haplotaggedBamIdx = "~{sampleName}_PMDV.haplotagged.bam.bai"
-    File? pepperGVcf = "~{sampleName}_PMDV.phased.g.vcf.gz"
+    File? pepperGVcf = "~{sampleName}_PMDV.g.vcf.gz"
   }
 
   runtime {
