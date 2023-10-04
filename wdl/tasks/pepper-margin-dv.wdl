@@ -10,6 +10,7 @@ task pepper_margin_dv_t {
     String extraArguments = ""
 	String mapMode = "ont"
 	Boolean oneChr = false
+    Boolean gvcf = false
 	Int memSizeGb = 256
 	Int diskSizeGb = 1024
 	Int preemptible = 0
@@ -17,6 +18,7 @@ task pepper_margin_dv_t {
   }
 
   String pepperMode = if mapMode == "ont" then "--ont_r9_guppy5_sup" else "--hifi"
+  String gvcfArg = if gvcf then "--gvcf True" else ""
 
   command <<<
     set -o pipefail
@@ -47,7 +49,7 @@ task pepper_margin_dv_t {
         REGION_ARG="--region $CONTIG_ID"
     fi
 
-    run_pepper_margin_deepvariant call_variant -b reads.bam -f ref.fa -o `pwd` -t ~{threads} ~{pepperMode} --phased_output -s ~{sampleName} -p ~{sampleName}_PMDV $REGION_ARG ~{extraArguments} 2>&1 | tee pmdv.log
+    run_pepper_margin_deepvariant call_variant -b reads.bam -f ref.fa -o `pwd` -t ~{threads} ~{pepperMode} --phased_output -s ~{sampleName} -p ~{sampleName}_PMDV $REGION_ARG ~{gvcfArg} ~{extraArguments} 2>&1 | tee pmdv.log
     if [[ -f "~{sampleName}_PMDV.haplotagged.bam" ]]
     then
       samtools index -@ 10 ~{sampleName}_PMDV.haplotagged.bam
@@ -72,6 +74,7 @@ task pepper_margin_dv_t {
   }
 }
 
+
 task mergeVCFs {
   input {
     Array[File] vcfFiles
@@ -94,6 +97,39 @@ task mergeVCFs {
   output {
       File vcf = "~{outname}.vcf.gz"
       File vcfIndex = "~{outname}.vcf.gz.tbi"
+  }
+
+  runtime {
+    preemptible: 2
+    docker: "quay.io/biocontainers/bcftools@sha256:95c212df20552fc74670d8f16d20099d9e76245eda6a1a6cfff4bd39e57be01b"
+    cpu: 1
+    memory: memSizeGb + " GB"
+    disks: "local-disk " + diskSizeGb + " SSD"
+  }
+}
+
+task mergeGVCFs {
+  input {
+    Array[File] vcfFiles
+    String outname = "merged"
+    Int memSizeGb = 6
+    Int diskSizeGb = 5 * round(size(vcfFiles, 'G')) + 20
+  }
+
+  command <<<
+    set -o pipefail
+    set -e
+    set -u
+    set -o xtrace
+
+    mkdir bcftools.tmp
+    bcftools concat -n ~{sep=" " vcfFiles} | bcftools sort -T bcftools.tmp -O z -o ~{outname}.g.vcf.gz -
+    bcftools index -t -o ~{outname}.g.vcf.gz.tbi ~{outname}.g.vcf.gz
+  >>>
+
+  output {
+      File gvcf = "~{outname}.g.vcf.gz"
+      File gvcfIndex = "~{outname}.g.vcf.gz.tbi"
   }
 
   runtime {

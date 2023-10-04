@@ -148,7 +148,7 @@ workflow cardEndToEndVcfMethyl
             call minimap_t.mergeBAM as merge_PEPPER_DV_BAMs {
                 input:
                     bams = select_all(pmdvHap_chrs.haplotaggedBam),
-                    outname = sampleName,
+                    outname = sampleName
                 }
 
             # merge the vcfs from each chromosome
