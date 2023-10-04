@@ -11,6 +11,7 @@ workflow pepper_margin_dv_chrs {
         Array[File] bamChrsIdx
         File referenceFile
         Boolean gvcf = false
+        Boolean mergeBams = true
         String sampleName = ""
         Int threads
         Int preemptible = 0
@@ -29,12 +30,15 @@ workflow pepper_margin_dv_chrs {
             }
         }
 
-    # merge the per chr bams
-    call minimap_t.mergeBAM as merge_PEPPER_DV_BAMs {
-        input:
-            bams = select_all(pmdvHap_chrs.haplotaggedBam),
-            outname = sampleName
-        }
+    if (mergeBams){
+        # merge the per chr bams
+        call minimap_t.mergeBAM as merge_PEPPER_DV_BAMs {
+            input:
+                bams = select_all(pmdvHap_chrs.haplotaggedBam),
+                outname = sampleName
+            }
+    }
+
 
     # merge the per chr vcfs
     call pmdv_haplotag_t.mergeVCFs{
