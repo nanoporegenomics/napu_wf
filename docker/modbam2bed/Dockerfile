@@ -38,7 +38,7 @@ RUN wget https://github.com/attractivechaos/k8/releases/download/0.2.5/k8-0.2.5.
 WORKDIR /home/apps
 RUN git clone --recursive https://github.com/epi2me-labs/modbam2bed.git && \
     cd modbam2bed && \
-    make 
+    make
 
 
 ENV PATH="/home/apps/samtools-1.15.1:${PATH}"
