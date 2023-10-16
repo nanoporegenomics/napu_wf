@@ -50,6 +50,7 @@ task dv_t {
         --reads reads.bam \
         --sample_name ~{sampleName} \
         --output_vcf dv.vcf.gz $REGION_ARG \
+        --output_gvcf dv.g.vcf.gz \
         --num_shards ~{threads} ~{extraArguments}
   >>>
 
