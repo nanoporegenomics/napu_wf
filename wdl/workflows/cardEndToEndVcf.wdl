@@ -5,7 +5,9 @@ import "../tasks/dv-margin.wdl" as dv_margin_t
 import "../tasks/sniffles.wdl" as sniffles_t
 import "../tasks/hapdiff.wdl" as hapdiff_t
 import "../tasks/dipcall.wdl" as dipcall_t
-import "../tasks/modbam2bed.wdl" as modbam2bed_t
+    #TODO: changed this to modkit now test!
+#import "../tasks/modbam2bed.wdl" as modbam2bed_t
+import "../tasks/modkit.wdl" as modkit_t
 import "shasta_hapdup_denovo.wdl" as denovo_asm_wf
 import "marginPhase.wdl" as margin_phase_wf
 
@@ -169,7 +171,7 @@ workflow cardEndToEndVcfMethyl
     }
     File inReadFile = select_first([mappedRead1, mappedBAM1])
     if(basename(inReadFile, ".bam") != basename(inReadFile)){
-        call modbam2bed_t.modbam2bed as modbam2bed {
+        call modkit_t.modkit as modkit {
             input:
                 haplotaggedBam = margin_t.haplotaggedBam,
                 haplotaggedBamBai = margin_t.haplotaggedBamIdx,
@@ -258,8 +260,8 @@ workflow cardEndToEndVcfMethyl
         File assemblyDual2 = asm.asmDual2
         File structuralVariantsVcf = hapdiff.hapdiffUnphasedVcf
         File harmonizedVcf = margin_phase.out_margin_phase_svs
-        File? methylationBed1 = modbam2bed.hap1bedOut
-        File? methylationBed2 = modbam2bed.hap2bedOut
+        File? methylationBed1 = modkit.hap1bedOut
+        File? methylationBed2 = modkit.hap2bedOut
         File asmDipcallVcf = dipcall.dipcallVcf
     }
 }

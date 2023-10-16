@@ -9,9 +9,12 @@ workflow structuralVariantsDenovoAssembly {
     input {
         File readsFile
         File? shastaFasta
+        String extraShastaArgs = ""
         Array[File] chunkedReadsFiles = []
         Int threads
         Int shastaDiskSizeGB = 1024
+        Int hapdupDiskSizeGB = 1024
+        Int preemptable = 2
     }
 
     
@@ -22,13 +25,15 @@ workflow structuralVariantsDenovoAssembly {
         if ((basename(readsFile, ".fasta") == basename(readsFile)) && (basename(readsFile, ".fa") == basename(readsFile))){
             call shasta_t.convertToFasta {
                 input:
-                readfiles=readArray
+                readfiles=readArray,
+                preemptable=preemptable
             }
         }
         File readsFasta = select_first([convertToFasta.fasta, readsFile])
         call shasta_t.shasta_t as shasta_t {
             input:
             reads=readsFasta,
+            shastaArgs = extraShastaArgs,
             diskSizeGb=shastaDiskSizeGB
         }
     }
@@ -51,7 +56,7 @@ workflow structuralVariantsDenovoAssembly {
 			    reads = readChunk,
                 reference=ambFasta,
 			    useEqx=false,
-                preemptible=2,
+                preemptible=preemptible,
 			    threads = threads
 	        }
         }
@@ -69,8 +74,9 @@ workflow structuralVariantsDenovoAssembly {
 		input:
 			threads=threads,
 			alignedBam=bamFile,
-			contigs=ambFasta
-	}
+			contigs=ambFasta,
+			diskSizeGb=hapdupDiskSizeGB
+    }
 
 	output {
         File asmDual1 = hapdup_t.hapdupDual1
@@ -80,6 +86,7 @@ workflow structuralVariantsDenovoAssembly {
         File phaseBed1 = hapdup_t.hapdupPhaseBed1
         File phaseBed2 = hapdup_t.hapdupPhaseBed2 
 		File shastaHaploid = ambFasta
+        File? ShastaGFA = shasta_t.shastaGfa
 		File? shastaLog = shasta_t.shastaLog
 	}
 }
