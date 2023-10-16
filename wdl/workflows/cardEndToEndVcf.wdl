@@ -5,7 +5,7 @@ import "../tasks/dv-margin.wdl" as dv_margin_t
 import "../tasks/sniffles.wdl" as sniffles_t
 import "../tasks/hapdiff.wdl" as hapdiff_t
 import "../tasks/dipcall.wdl" as dipcall_t
-    #TODO: changed this to modkit now test!
+#changed this to modkit
 #import "../tasks/modbam2bed.wdl" as modbam2bed_t
 import "../tasks/modkit.wdl" as modkit_t
 import "shasta_hapdup_denovo.wdl" as denovo_asm_wf
