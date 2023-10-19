@@ -78,10 +78,12 @@ Other kinds of input include reference genome and corresponding VNTR annotations
 in this repository).
 
 
-bioRxiv manuscript data availability
-------------------------------------
+Napu manuscript data availability
+---------------------------------
 
-The cell line data (HG002, HG0073 and HG02723) and openly available through this [Terra workspace](https://anvil.terra.bio/#workspaces/anvil-datastorage/ ANVIL_NIA_CARD_Coriell_Cell_Lines_Open). 
+The cell line data (HG002, HG0073 and HG02723) and openly available through this [Terra workspace](https://anvil.terra.bio/#workspaces/anvil-datastorage/ANVIL_NIA_CARD_Coriell_Cell_Lines_Open). 
+If you don't have a Terra account, you can also download the cell line data from 
+[this mirror](https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=publications/Napu_paper_ONT_Coriell_SingleFC_2023/).
 
 Human brain sequencing datasets are under controlled access and require a dbGap application (phs001300.v4). Afterwards, the data will be available through the [restricted Terra workspace](https://anvil.terra.bio/#workspaces/anvil-datastorage/ANVIL_NIA_CARD_LR_WGS_NABEC_GRU).
 
@@ -131,8 +133,8 @@ Main code contributors.
 Citation
 --------
 Kolmogorov, Billingsley et al, "Scalable Nanopore sequencing of human genomes provides a 
-comprehensive view of haplotype-resolved variation and methylation". bioRxiv 2023
-[doi.org/10.1101/2023.01.12.523790](https://doi.org/10.1101/2023.01.12.523790)
+comprehensive view of haplotype-resolved variation and methylation". Nature Methods (2023).
+[doi:10.1038/s41592-023-01993-x](https://doi.org/10.1038/s41592-023-01993-x)
 
 
 License 
