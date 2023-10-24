@@ -42,11 +42,13 @@ workflow dvMargin {
             bamAlignment = bamFile,
             bamAlignmentIndex = bamIdxFile,
             vcfFile = dv_t.dvVcf,
+            gvcfFile = dv_t.dvgVcf,
             sampleName = sampleName
     }
 
     output {
         File phasedVcf = margin_t.phasedVcf
+        File phasedgVcf = margin_t.phasedgVcf
         File haplotaggedBam = margin_t.haplotaggedBam
         File haplotaggedBamBai = margin_t.haplotaggedBamIdx
     }

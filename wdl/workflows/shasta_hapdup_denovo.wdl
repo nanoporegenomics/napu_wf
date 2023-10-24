@@ -14,7 +14,7 @@ workflow structuralVariantsDenovoAssembly {
         Int threads
         Int shastaDiskSizeGB = 1024
         Int hapdupDiskSizeGB = 1024
-        Int preemptable = 2
+        Int preemptible = 2
     }
 
     
@@ -26,7 +26,7 @@ workflow structuralVariantsDenovoAssembly {
             call shasta_t.convertToFasta {
                 input:
                 readfiles=readArray,
-                preemptable=preemptable
+                preemptible=preemptible
             }
         }
         File readsFasta = select_first([convertToFasta.fasta, readsFile])

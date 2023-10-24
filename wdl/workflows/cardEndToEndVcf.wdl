@@ -132,6 +132,7 @@ workflow cardEndToEndVcfMethyl
         call dv_margin_t.mergeVCFs {
             input:
                 vcfFiles = chr_dv_t.dvVcf,
+                gvcfFiles = chr_dv_t.dvgVcf,
                 outname = sampleName
         }
     }
@@ -148,6 +149,7 @@ workflow cardEndToEndVcfMethyl
     }
     ## Variant calls from DeepVariant
     File dvVCF = select_first([mergeVCFs.vcf, dv_t.dvVcf])
+    File dvgVCF = select_first([mergeVCFs.gvcf, dv_t.dvgVcf])
 
     ##### Haplotag the reads
     call dv_margin_t.margin_t{
@@ -157,6 +159,7 @@ workflow cardEndToEndVcfMethyl
             bamAlignment = bamFile,
             bamAlignmentIndex = bamFileIndex,
             vcfFile = dvVCF,
+            gvcfFile = dvgVCF,
             sampleName = sampleName
     }
 
@@ -249,6 +252,7 @@ workflow cardEndToEndVcfMethyl
     output {
         File phasedBam = margin_t.haplotaggedBam
         File smallVariantsVcf = margin_t.phasedVcf
+        File smallVariantsgVcf = margin_t.phasedgVcf
         File snifflesVcf = sniffles.snifflesVcf
         File shastaHaploid = asm.shastaHaploid
         File? shastaLog = asm.shastaLog

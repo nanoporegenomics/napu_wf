@@ -56,6 +56,7 @@ task dv_t {
 
   output {
     File dvVcf = "dv.vcf.gz"
+    File dvgVcf = "dv.g.vcf.gz"
     File? toplog = "top.log"
   }
 
@@ -72,6 +73,7 @@ task margin_t {
   input {
     File reference
     File vcfFile
+    File gvcfFile
     File bamAlignment
     File bamAlignmentIndex
     String sampleName
@@ -105,11 +107,16 @@ task margin_t {
 
     bgzip output/~{sampleName}.phased.vcf
 
+    margin phase reads.bam ref.fa ~{gvcfFile} /opt/margin/params/phase/allParams.haplotag.ont-r104q20.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName}.g
+
+    bgzip output/~{sampleName}.g.phased.vcf
+
     samtools index -@ ~{threads} output/~{sampleName}.haplotagged.bam
   >>>
 
   output {
       File phasedVcf = "output/~{sampleName}.phased.vcf.gz"
+      File phasedgVcf = "output/~{sampleName}.g.phased.vcf.gz"
       File haplotaggedBam = "output/~{sampleName}.haplotagged.bam"
       File haplotaggedBamIdx = "output/~{sampleName}.haplotagged.bam.bai"
       File? toplog = "top.log"
@@ -127,6 +134,7 @@ task margin_t {
 task mergeVCFs {
   input {
     Array[File] vcfFiles
+    Array[File] gvcfFiles
     String outname = "merged"
     Int memSizeGb = 6
     Int diskSizeGb = 5 * round(size(vcfFiles, 'G')) + 20
@@ -139,13 +147,21 @@ task mergeVCFs {
     set -o xtrace
 
     mkdir bcftools.tmp
+    # vcf merging
     bcftools concat -n ~{sep=" " vcfFiles} | bcftools sort -T bcftools.tmp -O z -o ~{outname}.vcf.gz -
     bcftools index -t -o ~{outname}.vcf.gz.tbi ~{outname}.vcf.gz
+
+    # gvcf merging
+    mkdir bcftools.tmp
+    bcftools concat -n ~{sep=" " gvcfFiles} | bcftools sort -T bcftools.tmp -O z -o ~{outname}.g.vcf.gz -
+    bcftools index -t -o ~{outname}.g.vcf.gz.tbi ~{outname}.g.vcf.gz
   >>>
 
   output {
       File vcf = "~{outname}.vcf.gz"
       File vcfIndex = "~{outname}.vcf.gz.tbi"
+      File gvcf = "~{outname}.g.vcf.gz"
+      File gvcfIndex = "~{outname}.g.vcf.gz.tbi"
   }
 
   runtime {
