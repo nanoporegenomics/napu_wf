@@ -4,6 +4,7 @@ import sys
 
 mode = sys.argv[1]
 length_threshold = int(sys.argv[2])
+sample_name = sys.argv[3]
 
 for line in sys.stdin:
     if line.startswith("#"):

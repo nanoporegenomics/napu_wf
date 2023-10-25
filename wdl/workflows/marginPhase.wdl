@@ -54,9 +54,9 @@ task combineVcfs {
         SMALL_FILTERED=~{smallVariantsFile}_size_filtered.vcf
 
         #-f option supports unzgipped input
-        zcat -f ~{structuralVariantsFile} | python3 /opt/vcf_filter_size.py greater ~{svLengthCutoff} | bgzip > $SV_FILTERED
+        zcat -f ~{structuralVariantsFile} | python3 /opt/vcf_filter_size.py greater ~{svLengthCutoff} ~{sampleName} | bgzip > $SV_FILTERED
         tabix -p vcf $SV_FILTERED
-        zcat -f ~{smallVariantsFile} | python3 /opt/vcf_filter_size.py less ~{svLengthCutoff} | bgzip > $SMALL_FILTERED
+        zcat -f ~{smallVariantsFile} | python3 /opt/vcf_filter_size.py less ~{svLengthCutoff} ~{sampleName} | bgzip > $SMALL_FILTERED
         tabix -p vcf $SMALL_FILTERED
 
         bcftools concat -a $SMALL_FILTERED $SV_FILTERED -o ~{sampleName}.merged_small_svs.vcf
@@ -81,7 +81,7 @@ task marginPhase {
         String dockerImage
         Int threads = 32
         Int memSizeGb = 128
-        Int diskSizeGb = 256
+        Int diskSizeGb = round(5 * size(bamFile, 'G')) + 20 #256
     }
     command <<<
         set -o pipefail

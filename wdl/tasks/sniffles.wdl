@@ -2,37 +2,44 @@ version 1.0
 
 task sniffles_t {
   input {
-    Int threads
+    Int threads = 22
 	File bamAlignment
-	File vntrAnnotations = ""
+	File bamAlignmentIndex
+	File? vntrAnnotations
 	Int minSvLen = 25
-	Int memSizeGb = 128
-	Int diskSizeGb = 256
+	Int memSizeGb = 32
+	Int diskSizeGb = round(5 * size(bamAlignment, 'G')) + 20 #256
+    Int preemptible_in = 2
+	File? resourceLogScript
   }
-  
+
+  String trfString = if defined(vntrAnnotations) then "--tandem-repeats " else ""
   command <<<
     set -o pipefail
     set -e
     set -u
     set -o xtrace
 
-    TRF_STRING=""
-    if [ ! -z ~{vntrAnnotations} ]
+    ## run a recurrent "top" in the background to monitor resource usage
+    if [ ~{resourceLogScript} != "" ]
     then
-       TRF_STRING="--tandem-repeats ~{vntrAnnotations}"
+        bash ~{resourceLogScript} 20 top.log &
     fi
-    echo $TRF_STRING
 
-    samtools index -@ 10 ~{bamAlignment}
-    sniffles -i ~{bamAlignment} -v sniffles.vcf -t ~{threads} ${TRF_STRING} --minsvlen ~{minSvLen} 2>&1 | tee sniffles.log
+    ln -s ~{bamAlignment} reads.bam
+    ln -s ~{bamAlignmentIndex} reads.bam.bai
+
+    sniffles -i reads.bam -v sniffles.vcf -t ~{threads} ~{trfString}~{vntrAnnotations} --minsvlen ~{minSvLen} 2>&1 | tee sniffles.log
   >>>
 
   output {
 	File snifflesVcf = "sniffles.vcf"
 	File snifflesLog = "sniffles.log"
+	File? toplog = "top.log"
   }
 
   runtime {
+    preemptible: preemptible_in
     docker: "mkolmogo/card_sniffles:2.0.3"
     cpu: threads
 	memory: memSizeGb + " GB"

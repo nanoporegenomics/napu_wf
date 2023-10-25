@@ -5,29 +5,23 @@ task hapdiff_t {
     File ctgsPat
     File ctgsMat
     File reference
-    File vntrAnnotations = ""
+    File? vntrAnnotations
     String sample = "Sample"
     Int minSvSize = 25
     Int threads = 32
     Int memSizeGb = 128
     Int diskSizeGb = 256
+    String dockerContainer = "mkolmogo/hapdiff:0.8"
   }
 
+  String trfString = if defined(vntrAnnotations) then "--tandem-repeats " else ""
   command <<<
     set -o pipefail
     set -e
     set -u
     set -o xtrace
 
-    TRF_STRING=""
-    if [ ! -z ~{vntrAnnotations} ]
-    then
-       TRF_STRING="--tandem-repeats ~{vntrAnnotations}"
-    fi
-    echo $TRF_STRING
-
-
-    hapdiff.py --reference ~{reference} ${TRF_STRING} --pat ~{ctgsPat} --mat ~{ctgsMat} --out-dir hapdiff -t ~{threads} --sv-size ~{minSvSize} --sample ~{sample} 2>&1 | tee hapdiff.log
+    hapdiff.py --reference ~{reference} ~{trfString}~{vntrAnnotations} --pat ~{ctgsPat} --mat ~{ctgsMat} --out-dir hapdiff -t ~{threads} --sv-size ~{minSvSize} --sample ~{sample} 2>&1 | tee hapdiff.log
   >>>
 
   output {
@@ -37,7 +31,7 @@ task hapdiff_t {
   }
 
   runtime {
-    docker: "mkolmogo/hapdiff:0.8"
+    docker: dockerContainer
     cpu: threads
     memory: memSizeGb + " GB"
     disks: "local-disk " + diskSizeGb + " SSD"

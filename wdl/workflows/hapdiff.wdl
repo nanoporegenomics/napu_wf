@@ -6,7 +6,8 @@ workflow hapdiffWf {
 
     input {
         File referenceFile
-        File vntrAnnotations
+        File? vntrAnnotations
+		String sample = "Sample"
         File assemblyHap1
         File assemblyHap2
         Int minSvSize = 30
@@ -20,6 +21,7 @@ workflow hapdiffWf {
 			threads=threads,
 			reference=referenceFile,
 			vntrAnnotations=vntrAnnotations,
+			sample=sample,
 			ctgsPat=assemblyHap1,
 			ctgsMat=assemblyHap2,
 			minSvSize=minSvSize,
