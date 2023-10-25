@@ -24,3 +24,6 @@ workflows:
    -  name: shasta
       subclass: WDL
       primaryDescriptorPath: /wdl/tasks/shasta.wdl
+   -  name: shastaHapdup
+      subclass: WDL
+      primaryDescriptorPath: /wdl/workflows/shasta_hapdup_denovo.wdl
