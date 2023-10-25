@@ -36,15 +36,13 @@ RUN wget https://github.com/attractivechaos/k8/releases/download/0.2.5/k8-0.2.5.
 
 
 WORKDIR /home/apps
-RUN git clone --recursive https://github.com/epi2me-labs/modbam2bed.git && \
-    cd modbam2bed && \
-    make
-
+RUN wget https://github.com/nanoporetech/modkit/releases/download/v0.2.0/modkit_v0.2.0_centos7_x86_64.tar.gz && \
+    tar -xvzf modkit_v0.2.0_centos7_x86_64.tar.gz
 
 ENV PATH="/home/apps/samtools-1.15.1:${PATH}"
 ENV PATH="/home/apps/minimap2-2.24:/opt/minimap2/minimap2-2.24/misc:$PATH"
 ENV PATH="/home/apps/k8-0.2.5:$PATH"
-ENV PATH="/home/apps/modbam2bed:${PATH}"
+ENV PATH="/home/apps/dist:${PATH}"
 
 
 RUN mkdir -p /data

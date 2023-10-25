@@ -5,15 +5,15 @@ task minimap2_t {
     Int threads
     File reference
     File reads
-	String mapMode = "map-ont"
-	Boolean useMd = false
-	Boolean useEqx = true
-	Int memSizeGb = 128
-	Int diskSizeGb = 1024
-	  Int kmerSize = 17
-      String minibatchSize = "5G"
-      Int sortMemgb = "4"
-      Int preemptible = 0
+    String mapMode = "map-ont"
+    Boolean useMd = false
+    Boolean useEqx = true
+    Int memSizeGb = 128
+    Int diskSizeGb = 1024
+    Int kmerSize = 17
+    String minibatchSize = "5G"
+    Int sortMemgb = "4"
+    Int preemptible = 0
   }
 
   String mdString = if useMd then "--MD" else ""
@@ -106,6 +106,7 @@ task mergeBAM {
     }
 
     Boolean anyChrs = length(chrs) > 0
+
     command <<<
         set -o pipefail
         set -e
@@ -131,6 +132,82 @@ task mergeBAM {
         File bamIndex = "~{outname}.bam.bai"
         Array[File]? bamPerChrs = glob("bamPerChrs/*.bam")
         Array[File]? bamPerChrsIndex = glob("bamPerChrs/*.bam.bai")
+    }
+    runtime {
+        preemptible: 2
+        time: 240
+        memory: memGb + " GB"
+        cpu: threads
+        disks: "local-disk " + diskGb + " SSD"
+        docker: "biocontainers/samtools@sha256:3ff48932a8c38322b0a33635957bc6372727014357b4224d420726da100f5470"
+    }
+}
+
+task indexBAM {
+    input {
+        File bam
+        Array[String] chrs = []
+        Int threads = 8
+        Int diskGb = round(5 * size(bam, 'G')) + 20
+        Int memGb = 8
+    }
+    Boolean anyChrs = length(chrs) > 0
+    String outname = basename(bam, ".bam")
+    command <<<
+        set -o pipefail
+        set -e
+        set -u
+        set -o xtrace
+
+        ln -s ~{bam} reads.bam
+        samtools index reads.bam
+
+        ## split by chromosome, if any chrs specified
+        if [ ~{anyChrs} == true ]
+        then
+            mkdir bamPerChrs
+            while read -r chrn
+            do
+                samtools view -@ ~{threads} -h -O BAM reads.bam ${chrn} -o bamPerChrs/~{outname}.${chrn}.bam
+                samtools index bamPerChrs/~{outname}.${chrn}.bam
+            done < ~{write_lines(chrs)}
+        fi
+    >>>
+    output {
+        File bamIndex = "reads.bam.bai"
+        Array[File]? bamPerChrs = glob("bamPerChrs/*.bam")
+        Array[File]? bamPerChrsIndex = glob("bamPerChrs/*.bam.bai")
+    }
+    runtime {
+        preemptible: 2
+        time: 240
+        memory: memGb + " GB"
+        cpu: threads
+        disks: "local-disk " + diskGb + " SSD"
+        docker: "biocontainers/samtools@sha256:3ff48932a8c38322b0a33635957bc6372727014357b4224d420726da100f5470"
+    }
+}
+
+task mergeFASTQ {
+    input {
+        Array[File] reads
+        String outname = "merged"
+        Int threads = 8
+        Int diskGb = round(3 * size(reads, 'G')) + 20
+        Int memGb = 8
+    }
+
+    command <<<
+        set -o pipefail
+        set -e
+        set -u
+        set -o xtrace
+
+        cat ~{sep=" " reads} > ~{outname}.fastq.gz
+
+    >>>
+    output {
+        File fq = "~{outname}.fastq.gz"
     }
     runtime {
         preemptible: 2

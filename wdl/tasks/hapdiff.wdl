@@ -10,8 +10,8 @@ task hapdiff_t {
     Int minSvSize = 25
     Int threads = 32
     Int memSizeGb = 128
-      Int diskSizeGb = 256
-      String dockerContainer = "mkolmogo/hapdiff:0.8"
+    Int diskSizeGb = 256
+    String dockerContainer = "mkolmogo/hapdiff:0.8"
   }
 
   String trfString = if defined(vntrAnnotations) then "--tandem-repeats " else ""

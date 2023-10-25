@@ -8,7 +8,7 @@ Test locally, for example using [miniwdl](https://github.com/chanzuckerberg/mini
 ## End-to-end workflow (no methylation)
 miniwdl run --as-me  --copy-input-files wdl/workflows/cardEndToEndVcf.wdl -i test/test.input.endtoendfastq.json
 
-## End-to-end workflow (no methylation) cheaper by chunking reads (and preempting)
+## End-to-end workflow (no methylation) with multiple input FASTQs and cheaper by chunking reads (and preempting)
 miniwdl run --as-me  --copy-input-files wdl/workflows/cardEndToEndVcf.wdl -i test/test.input.endtoendfastq.chunks.json
 
 ## End-to-end workflow (no methylation) starting with an available assembly (e.g. from shasta workflow below)
@@ -16,6 +16,9 @@ miniwdl run --as-me  --copy-input-files wdl/workflows/cardEndToEndVcf.wdl -i tes
 
 ## End-to-end workflow with uBAM input (for methylation)
 miniwdl run --as-me  --copy-input-files wdl/workflows/cardEndToEndVcf.wdl -i test/test.input.endtoendfastq.ubam.json
+
+## End-to-end workflow with multiple mapped BAM input and chunking
+miniwdl run --as-me  --copy-input-files wdl/workflows/cardEndToEndVcf.wdl -i test/test.input.endtoendfastq.bam.json
 
 ## DV+margin workflow
 miniwdl run --as-me  --copy-input-files wdl/workflows/dvMargin.wdl -i test/test.input.dvmargin.json
