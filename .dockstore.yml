@@ -27,3 +27,6 @@ workflows:
    -  name: shastaHapdup
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/shasta_hapdup_denovo.wdl
+   -  name: modkit
+      subclass: WDL
+      primaryDescriptorPath: /wdl/workflows/modkit.wdl
