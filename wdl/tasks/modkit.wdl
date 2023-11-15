@@ -5,6 +5,7 @@ task modkit {
         File haplotaggedBam
         File haplotaggedBamBai
         File ref
+        File? regional_bed
         String sample_name
         String ref_name = "ref"
         String out_type_filter = "--cpg"
