@@ -5,6 +5,7 @@ task modkit {
         File haplotaggedBam
         File haplotaggedBamBai
         File ref
+        File? regional_bed
         String sample_name
         String ref_name = "ref"
         String out_type_filter = "--cpg"
@@ -27,6 +28,8 @@ task modkit {
     }
 
     String sample_name_ref = "~{sample_name}"+"_"+"~{ref_name}"
+    Boolean regionaly =  defined(regional_bed)
+
     command <<<
         # exit when a command fails, fail with unset variables, print commands before execution
         set -eux -o pipefail
@@ -46,8 +49,14 @@ task modkit {
 
         # note output format: https://nanoporetech.github.io/modkit/intro_bedmethyl.html
         # filtering threshold default 10-th percentile of calls https://github.com/nanoporetech/modkit/blob/master/filtering.md
-        # modkit command with reference on input reads
-        modkit pileup ~{out_type_filter} ~{partitionTag} --prefix ~{sample_name_ref} --ref ~{ref} --threads ~{threadCount} ~{extraArgs} reads.bam modkit_out
+        if [ ~{regionaly} == true ]
+        then
+            modkit pileup ~{out_type_filter} ~{partitionTag} --prefix ~{sample_name_ref} --ref ~{ref} \
+                   --threads ~{threadCount} --include-bed ~{regional_bed} ~{extraArgs} reads.bam modkit_out
+        else
+            # modkit command with reference on input reads
+            modkit pileup ~{out_type_filter} ~{partitionTag} --prefix ~{sample_name_ref} --ref ~{ref} --threads ~{threadCount} ~{extraArgs} reads.bam modkit_out
+        fi
         bgzip -@ ~{threadCount} modkit_out/~{sample_name_ref}_1.bed
         bgzip -@ ~{threadCount} modkit_out/~{sample_name_ref}_2.bed
         bgzip -@ ~{threadCount} modkit_out/~{sample_name_ref}_ungrouped.bed

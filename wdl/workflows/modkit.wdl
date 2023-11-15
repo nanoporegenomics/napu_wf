@@ -8,6 +8,7 @@ workflow modkit_wf
 		File  haplotaggedBam	
 		File  haplotaggedBamIdx
 		File  referenceFasta
+		File? regional_bed
 		String  sampleName = "sample"
 		String  referenceName = "ref"
 	}
@@ -18,7 +19,8 @@ workflow modkit_wf
 			haplotaggedBamBai = haplotaggedBamIdx,
 			ref = referenceFasta,
 			sample_name = sampleName,
-			ref_name = referenceName
+			ref_name = referenceName,
+			regional_bed = regional_bed
 	}
 
 	output {
