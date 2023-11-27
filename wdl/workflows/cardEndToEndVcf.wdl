@@ -268,5 +268,7 @@ workflow cardEndToEndVcfMethyl
         File? methylationBed1 = modkit.hap1bedOut
         File? methylationBed2 = modkit.hap2bedOut
         File asmDipcallVcf = dipcall.dipcallVcf
+        Array[File]? chr_bams = bamChrs
+        Array[File]? chr_bams_idx = bamChrsIndex
     }
 }
