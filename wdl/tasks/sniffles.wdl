@@ -41,7 +41,7 @@ task sniffles_t {
 
   runtime {
     preemptible: 2
-    docker: "mkolmogo/card_sniffles:2.0.3"
+    docker: "meredith705/card_sniffles:2.2"
     cpu: threads
     memory: memSizeGb + " GB"
     disks: "local-disk " + diskSizeGb + " SSD"
