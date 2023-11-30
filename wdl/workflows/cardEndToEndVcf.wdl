@@ -188,7 +188,8 @@ workflow cardEndToEndVcfMethyl
         input:
             bamAlignment = margin_t.haplotaggedBam,
             bamAlignmentIndex = margin_t.haplotaggedBamIdx,
-            vntrAnnotations = referenceVntrAnnotations
+            vntrAnnotations = referenceVntrAnnotations,
+            sample = sampleName
     }
 
     ##### De novo phased assembly
@@ -255,6 +256,7 @@ workflow cardEndToEndVcfMethyl
         File smallVariantsVcf = margin_t.phasedVcf
         File smallVariantsgVcf = margin_t.phasedgVcf
         File snifflesVcf = sniffles.snifflesVcf
+        File snifflesSnf = sniffles.snifflesSnf
         File shastaHaploid = asm.shastaHaploid
         File? shastaLog = asm.shastaLog
         File assemblyHap1 = asm.asmPhased1
