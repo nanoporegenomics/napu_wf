@@ -6,6 +6,7 @@ task sniffles_t {
     File bamAlignment
     File bamAlignmentIndex
     File? vntrAnnotations
+    String sample = "sniffles"
     Int minSvLen = 25
     Int memSizeGb = 32
     Int diskSizeGb = 256
@@ -28,12 +29,13 @@ task sniffles_t {
     ln -s ~{bamAlignment} reads.bam
     ln -s ~{bamAlignmentIndex} reads.bam.bai
     
-    sniffles -i reads.bam -v sniffles.vcf -t ~{threads} ~{trfString}~{vntrAnnotations} --minsvlen ~{minSvLen} 2>&1 | tee sniffles.log
+    sniffles -i reads.bam -v ~{sample}.vcf -t ~{threads} ~{trfString}~{vntrAnnotations} --minsvlen ~{minSvLen} 2>&1 | tee sniffles.log
   >>>
 
   output {
-    File snifflesVcf = "sniffles.vcf"
-    File snifflesLog = "sniffles.log"
+    File snifflesVcf = "~{sample}.vcf"
+    File snifflesLog = "~{sample}.log"
+    File snifflesSnf = "~{sample}.snf"
     File? toplog = "top.log"
   }
 
