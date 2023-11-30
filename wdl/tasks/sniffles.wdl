@@ -29,7 +29,7 @@ task sniffles_t {
     ln -s ~{bamAlignment} reads.bam
     ln -s ~{bamAlignmentIndex} reads.bam.bai
     
-    sniffles -i reads.bam -v ~{sample}.vcf -t ~{threads} ~{trfString}~{vntrAnnotations} --minsvlen ~{minSvLen} 2>&1 | tee sniffles.log
+    sniffles -i reads.bam -v ~{sample}.vcf -t ~{threads} ~{trfString}~{vntrAnnotations} --minsvlen ~{minSvLen} 2>&1 | tee ~{sample}.log
   >>>
 
   output {
