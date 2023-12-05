@@ -29,12 +29,12 @@ task sniffles_t {
     ln -s ~{bamAlignment} reads.bam
     ln -s ~{bamAlignmentIndex} reads.bam.bai
     
-    sniffles -i reads.bam -v ~{sample}.vcf --snf ~{sample}.snf -t ~{threads} ~{trfString}~{vntrAnnotations} --minsvlen ~{minSvLen} 2>&1 | tee ~{sample}.log
+    sniffles -i reads.bam -v ~{sample}.sniffles.vcf --snf ~{sample}.snf -t ~{threads} ~{trfString}~{vntrAnnotations} --minsvlen ~{minSvLen} 2>&1 | tee ~{sample}.sniffles.log
   >>>
 
   output {
-    File snifflesVcf = "~{sample}.vcf"
-    File snifflesLog = "~{sample}.log"
+    File snifflesVcf = "~{sample}.sniffles.vcf"
+    File snifflesLog = "~{sample}.sniffles.log"
     File snifflesSnf = "~{sample}.snf"
     File? toplog = "top.log"
   }
