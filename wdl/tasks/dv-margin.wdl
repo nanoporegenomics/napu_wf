@@ -136,8 +136,8 @@ task mergeVCFs {
     Array[File] vcfFiles
     Array[File] gvcfFiles
     String outname = "merged"
-    Int memSizeGb = 6
-    Int diskSizeGb = 5 * round(size(vcfFiles, 'G')) + 5 * round(size(gvcfFiles, 'G')) + 20
+    Int memSizeGb = 64
+    Int diskSizeGb = 5 * round(size(vcfFiles, 'G')) + 5 * round(size(gvcfFiles, 'G')) + 500
   }  
 
   command <<<
