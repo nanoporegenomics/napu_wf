@@ -9,8 +9,9 @@ workflow modbamtools_wf
 		File  haplotaggedBam
 		File  haplotaggedBamIdx
 		File  referenceFasta
-		File regional_bed
+		File  regional_bed
 		String  sampleName = "sample"
+		String  regionName = "bed_region"
 		String  referenceName = "ref"
 	}
 
@@ -21,7 +22,8 @@ workflow modbamtools_wf
 			ref = referenceFasta,
 			sample_name = sampleName,
 			ref_name = referenceName,
-			regional_bed = regional_bed
+			regional_bed = regional_bed,
+			region_type = regionName
 	}
 
 	output {
