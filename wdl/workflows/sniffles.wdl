@@ -6,6 +6,8 @@ workflow snifflesWf {
 
     input {
         File bamAlignment
+        File bamAlignmentIndex
+        String sample
         File vntrAnnotations
         Int threads
     }
@@ -15,6 +17,8 @@ workflow snifflesWf {
         input:
             threads=threads,
 			bamAlignment=bamAlignment,
+            bamAlignmentIndex=bamAlignmentIndex,
+            sample=sample,
 			vntrAnnotations=vntrAnnotations
     }
 
