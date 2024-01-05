@@ -8,12 +8,14 @@ workflow snifflesWf {
         File bamAlignment
         File vntrAnnotations
         Int threads
+        String sample = "sniffles"
     }
 
 	### Sniffles
     call sniffles_t.sniffles_t as sniffles_t {
         input:
             threads=threads,
+            sample=sample,
 			bamAlignment=bamAlignment,
 			vntrAnnotations=vntrAnnotations
     }

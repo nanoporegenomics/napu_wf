@@ -6,6 +6,7 @@ task sniffles_t {
 	File bamAlignment
 	File bamAlignmentIndex
 	File? vntrAnnotations
+    String sample = "sniffles"
 	Int minSvLen = 25
 	Int memSizeGb = 32
 	Int diskSizeGb = round(5 * size(bamAlignment, 'G')) + 20 #256
@@ -29,18 +30,19 @@ task sniffles_t {
     ln -s ~{bamAlignment} reads.bam
     ln -s ~{bamAlignmentIndex} reads.bam.bai
 
-    sniffles -i reads.bam -v sniffles.vcf -t ~{threads} ~{trfString}~{vntrAnnotations} --minsvlen ~{minSvLen} 2>&1 | tee sniffles.log
+    sniffles -i reads.bam -v ~{sample}.sniffles.vcf --snf ~{sample}.snf -t ~{threads} ~{trfString}~{vntrAnnotations} --minsvlen ~{minSvLen} 2>&1 | tee sniffles.log
   >>>
 
   output {
-	File snifflesVcf = "sniffles.vcf"
-	File snifflesLog = "sniffles.log"
+	File snifflesVcf = "~{sample}.sniffles.vcf"
+    File snifflesLog = "~{sample}.sniffles.log"
+    File snifflesSnf = "~{sample}.snf"
 	File? toplog = "top.log"
   }
 
   runtime {
     preemptible: preemptible_in
-    docker: "mkolmogo/card_sniffles:2.0.3"
+    docker: "meredith705/card_sniffles:2.2"
     cpu: threads
 	memory: memSizeGb + " GB"
 	disks: "local-disk " + diskSizeGb + " SSD"

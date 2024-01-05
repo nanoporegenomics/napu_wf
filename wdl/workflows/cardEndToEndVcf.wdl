@@ -202,6 +202,7 @@ workflow cardEndToEndVcfMethyl
 			#threads = threads,
 			bamAlignment = haplotaggedBam,
 			bamAlignmentIndex = haplotaggedBamIdx,
+            sample = sampleName,
 			vntrAnnotations = referenceVntrAnnotations
 	}
 
@@ -267,9 +268,11 @@ workflow cardEndToEndVcfMethyl
 		File phasedMethylBam = haplotaggedBam
         File phasedMethylBamBai = haplotaggedBamIdx
 		File smallVariantsVcf = phasedVCF
+        File smallVariantsgVcf = pmdvHap.pepperGVcf
 		File? methylationBed1 = modbam2bed.hap1bedOut
 		File? methylationBed2 = modbam2bed.hap2bedOut
 		File snifflesVcf = sniffles.snifflesVcf
+        File snifflesSnf = sniffles.snifflesSnf
         File shastaHaploid = asm.shastaHaploid
         File? shastaGFA = asm.shastaGFA
         File? shastaLog = asm.shastaLog
@@ -282,5 +285,7 @@ workflow cardEndToEndVcfMethyl
 		File structuralVariantsVcf = hapdiff.hapdiffUnphasedVcf
 		File harmonizedVcf = margin_phase.out_margin_phase_svs
 		File asmDipcallVcf = dipcall.dipcallVcf
+        Array[File]? chr_bams = bamChrs
+        Array[File]? chr_bams_idx = bamChrsIndex
 	}
 }
