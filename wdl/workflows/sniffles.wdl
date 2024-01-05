@@ -22,5 +22,6 @@ workflow snifflesWf {
 
 	output {
         File structuralVariantsSniffles = sniffles_t.snifflesVcf
+        File snifflesSnf = sniffles_t.snifflesSnf
 	}
 }
