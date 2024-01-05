@@ -268,7 +268,7 @@ workflow cardEndToEndVcfMethyl
 		File phasedMethylBam = haplotaggedBam
         File phasedMethylBamBai = haplotaggedBamIdx
 		File smallVariantsVcf = phasedVCF
-        File smallVariantsgVcf = pmdvHap.pepperGVcf
+        File? smallVariantsgVcf = pmdvHap.pepperGVcf
 		File? methylationBed1 = modbam2bed.hap1bedOut
 		File? methylationBed2 = modbam2bed.hap2bedOut
 		File snifflesVcf = sniffles.snifflesVcf
