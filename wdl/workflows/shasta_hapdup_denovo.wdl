@@ -12,6 +12,7 @@ workflow structuralVariantsDenovoAssembly {
         File? asmAlignedBam
         String extraShastaArgs = ""
         Array[File] chunkedReadsFiles = []
+        Boolean shastaInMem = false
         Int threads
         Int shastaDiskSizeGB = 1024
         Int hapdupDiskSizeGB = 1024
@@ -30,17 +31,30 @@ workflow structuralVariantsDenovoAssembly {
                 preemptable=preemptable
             }
         }
-        # isolate reads and run shasta on disk
         File readsFasta = select_first([convertToFasta.fasta, readsFile])
-        call shasta_t.shasta_t as shasta_t {
-            input:
-            reads=readsFasta,
-            shastaArgs = extraShastaArgs,
-            diskSizeGb=shastaDiskSizeGB
+        if (shastaInMem){
+            #  run shasta in memory
+            call shasta_t.shasta_inmem_t as shasta_inmem_t {
+                input:
+                reads=readsFasta,
+                shastaArgs = extraShastaArgs,
+                diskSizeGb=shastaDiskSizeGB
+            }
         }
+
+        if (!shastaInMem){
+            # run shasta on disk
+            call shasta_t.shasta_t as shasta_t {
+                input:
+                reads=readsFasta,
+                shastaArgs = extraShastaArgs,
+                diskSizeGb=shastaDiskSizeGB
+            }
+        }
+
     }
     # isolate shasta assembly
-    File ambFasta = select_first([shasta_t.shastaFasta, shastaFasta])
+    File ambFasta = select_first([shasta_inmem_t.shastaFasta, shasta_t.shastaFasta, shastaFasta])
 
     if (!defined(asmAlignedBam)){
         ### minimap2 alignment ###
@@ -85,6 +99,9 @@ workflow structuralVariantsDenovoAssembly {
             diskSizeGb=hapdupDiskSizeGB
 	}
 
+    File shastasGFA = select_first([shasta_t.shastaGfa, shasta_inmem_t.shastaGfa])
+    File shastasLOG = select_first([shasta_t.shastaLog, shasta_inmem_t.shastaLog])
+
 	output {
         File asmDual1 = hapdup_t.hapdupDual1
         File asmDual2 = hapdup_t.hapdupDual2
@@ -93,7 +110,8 @@ workflow structuralVariantsDenovoAssembly {
         File phaseBed1 = hapdup_t.hapdupPhaseBed1
         File phaseBed2 = hapdup_t.hapdupPhaseBed2
 		File shastaHaploid = ambFasta
-        File? shastaGFA = shasta_t.shastaGfa
-		File? shastaLog = shasta_t.shastaLog
+        File? shastaGFA = shastasGFA
+		File? shastaLog = shastasLOG
+
 	}
 }

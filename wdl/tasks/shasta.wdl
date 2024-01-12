@@ -25,6 +25,7 @@ workflow shasta {
         call shasta_inmem_t {
             input:
             reads=readsFasta,
+            shastaArgs=shastaArgs,
             diskSizeGb=diskSizeGB
         }
     }
