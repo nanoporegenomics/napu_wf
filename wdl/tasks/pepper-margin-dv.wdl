@@ -138,5 +138,6 @@ task mergeGVCFs {
     cpu: 1
     memory: memSizeGb + " GB"
     disks: "local-disk " + diskSizeGb + " SSD"
+    runtime_minutes: 720
   }
 }

@@ -54,6 +54,7 @@ task minimap2_t {
 	memory: memSizeGb + " GB"
 	disks: "local-disk " + diskSizeGb + " SSD"
     preemptible: preemptible
+    runtime_minutes: 720
   }
 }
 
@@ -99,6 +100,7 @@ task splitReads {
         memory: "4 GB"
         disks: "local-disk " + diskGb + " SSD"
         docker: "quay.io/jmonlong/minimap2_samtools:v2.24_v1.16.1_pigz"
+        runtime_minutes: 120
     }
 }
 
@@ -148,6 +150,7 @@ task mergeBAM {
         cpu: threads
         disks: "local-disk " + diskGb + " SSD"
         docker: "biocontainers/samtools@sha256:3ff48932a8c38322b0a33635957bc6372727014357b4224d420726da100f5470"
+        runtime_minutes: 120
     }
 }
 
@@ -193,6 +196,7 @@ task indexBAM {
         cpu: threads
         disks: "local-disk " + diskGb + " SSD"
         docker: "biocontainers/samtools@sha256:3ff48932a8c38322b0a33635957bc6372727014357b4224d420726da100f5470"
+        runtime_minutes: 120
     }
 }
 
@@ -226,5 +230,6 @@ task mergeFASTQ {
         cpu: threads
         disks: "local-disk " + diskGb + " SSD"
         docker: "biocontainers/samtools@sha256:3ff48932a8c38322b0a33635957bc6372727014357b4224d420726da100f5470"
+        runtime_minutes: 120
     }
 }

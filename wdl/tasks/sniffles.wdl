@@ -44,7 +44,8 @@ task sniffles_t {
     preemptible: preemptible_in
     docker: "meredith705/card_sniffles:2.2"
     cpu: threads
-	memory: memSizeGb + " GB"
-	disks: "local-disk " + diskSizeGb + " SSD"
+    memory: memSizeGb + " GB"
+    disks: "local-disk " + diskSizeGb + " SSD"
+    runtime_minutes: 120
   }
 }

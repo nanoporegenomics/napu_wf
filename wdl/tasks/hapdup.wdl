@@ -39,5 +39,6 @@ task hapdup_t {
     cpu: threads
     memory: memSizeGb + " GB"
     disks: "local-disk " + diskSizeGb + " SSD"
+    runtime_minutes: 1440
   }
 }

@@ -62,5 +62,6 @@ task modbam2bed {
         disks: "local-disk " + diskSizeGB + " SSD"
         docker: dockerImage
         preemptible: 2
+        runtime_minutes: 320
     }
 }
