@@ -117,9 +117,9 @@ task shasta_inmem_t {
   input {
     File reads
     String shastaArgs = ""
-    Int threads = 80
+    Int threads = 64
     String shastaConfig = "/opt/shasta_config/Nanopore-R10-Fast-Nov2022.conf"
-    Int memSizeGb = 768
+    Int memSizeGb = 1400
     Int diskSizeGb = 1125
     String cpuPlatform = "AMD Rome"
   }
