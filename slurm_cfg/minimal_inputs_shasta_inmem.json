@@ -1,0 +1,8 @@
+{
+  "cardEndToEndVcfMethyl.inputReads": ["READS.bam"],
+  "cardEndToEndVcfMethyl.referenceFasta": "REFERENCE.fa",
+  "cardEndToEndVcfMethyl.referenceVntrAnnotations": "NAPU_DIR/vntr_annotations/human_GRCh38_no_alt_analysis_set.trf.bed",
+  "cardEndToEndVcfMethyl.threads": 28,
+  "cardEndToEndVcfMethyl.sampleName": "HG002",
+  "cardEndToEndVcfMethyl.shastaInMem": true
+}
