@@ -1,7 +1,7 @@
 Napu
 ====
 
-### Pipelines version: R10
+### Pipelines version: R10 Slurm
 
 Napu (Nanopore Analysis Pipeline) is a collection of WDL workflows for variant calling and de novo assembly of ONT data,
 optimized for [single-flowcell ONT sequencing protocol](https://dx.doi.org/10.17504/protocols.io.ewov1n93ygr2/v1).
@@ -12,6 +12,57 @@ Versions for R9/R10 data
 ------------------------
 
 Please use either `r9` or `r10` branch for your corresponding data type.
+
+Running Napu on Slurm
+---------------------
+
+This version of the pipeline was tailored to run on NIH Biowulf cluster,
+but in theory should be easily adopted to any other Slurm configuration.
+
+Instuctions how to run end2end pipeline. First, clone the respoitory (substitute to r10 if needed)
+
+```
+git clone https://github.com/nanoporegenomics/napu_wf/tree/r9_slurm
+```
+
+The following cromwell configuration was tailroed for running with Singularity.
+It will attempt to use cache location defined in `SINGULARITY_CACHEDIR`. If not defined,
+it will use pre-existing system cache. If you need to do any modifications, you can check:
+
+```
+vim slurm_cfg/cromwell_singularity.cfg
+```
+
+Then, set up a working directory where Napu will write all its output (which can be 100s of Gb!).
+Copy template config files:
+
+```
+WORKDIR=XXX
+mkdir $WORKDIR
+cp slurm_cfg/minimal_inputs_shasta_inmem.json $WORKDIR
+cp slurm_cfg/napu_slurm.sh $WORKDIR
+cd $WORKDIR
+```
+
+Then, modify the inputs configuration file. It contains paths to input files
+(use absolute paths) and some other mandatory parameters. 
+
+```
+vim minimal_inputs_shasta_inmem.json
+```
+
+Finally, modify the Slurm submission script, by adding paths to
+input json file, Cromwell configuration, Napu workflow file and working directory.
+
+```
+vim napu_slurm.sh
+```
+
+Finally, run the workflow:
+
+```
+sbatch --time 48:0:0 -c 4 --mem 8g napu_slurm.sh
+```
 
 Installation and Usage
 ---------------------
