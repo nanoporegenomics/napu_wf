@@ -109,6 +109,7 @@ task shasta_t {
     memory: memSizeGb + " GB"
     disks: "local-disk " + diskSizeGb + " LOCAL"
     #cpuPlatform: "Intel Cascade Lake"
+    runtime_minutes: 720
   }
 }
 
@@ -166,9 +167,11 @@ task shasta_inmem_t {
   runtime {
     docker: "quay.io/jmonlong/card_shasta@sha256:ce218dc133b2534f58f841bccd4b1d1d880c6ad62c1c321dd91bdd8d43e554f1"
     cpu: threads
+    queue: "largemem"
     memory: memSizeGb + " GB"
     disks: "local-disk " + diskSizeGb + " LOCAL"
     cpuPlatform: cpuPlatform
+    runtime_minutes: 720
   }
 }
 
@@ -217,5 +220,6 @@ task convertToFasta {
       cpu: threads
       memory: memSizeGb + " GB"
       disks: "local-disk " + diskSizeGb + " SSD"
+      runtime_minutes: 240
   }
 }

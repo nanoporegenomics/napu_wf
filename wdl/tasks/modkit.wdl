@@ -76,6 +76,7 @@ task modkit {
         disks: "local-disk " + diskSizeGB + " SSD"
         docker: dockerImage
         preemptible: 2
+        runtime_minutes: 320
     }
 }
 
@@ -141,6 +142,7 @@ task modbamtools {
         cpu: threadCount
         memory: memSizeGB + " GB"
         disks: "local-disk " + diskSizeGB + " SSD"
+        runtime_minutes: 360
       }
 }
 

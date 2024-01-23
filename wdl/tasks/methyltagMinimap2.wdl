@@ -68,5 +68,6 @@ task fastqAlignAndSortBam {
         memory: in_mem + " GB"
         cpu: in_cores
         disks: "local-disk " + in_disk + " SSD"
+        runtime_minutes: 720
     }
 }

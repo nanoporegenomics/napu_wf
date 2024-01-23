@@ -45,5 +45,6 @@ task sniffles_t {
     cpu: threads
     memory: memSizeGb + " GB"
     disks: "local-disk " + diskSizeGb + " SSD"
+    runtime_minutes: 120
   }
 }

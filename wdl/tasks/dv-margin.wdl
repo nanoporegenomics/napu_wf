@@ -66,6 +66,7 @@ task dv_t {
     cpu: threads
     memory: memSizeGb + " GB"
     disks: "local-disk " + diskSizeGb + " SSD"
+    runtime_minutes: 2880
   }
 }
 
@@ -128,6 +129,7 @@ task margin_t {
     cpu: threads
     memory: memSizeGb + " GB"
     disks: "local-disk " + diskSizeGb + " SSD"
+    runtime_minutes: 480
   }
 }
 
@@ -170,5 +172,6 @@ task mergeVCFs {
     cpu: 1
     memory: memSizeGb + " GB"
     disks: "local-disk " + diskSizeGb + " SSD"
+    runtime_minutes: 120
   }
 }
