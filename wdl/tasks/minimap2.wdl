@@ -114,7 +114,7 @@ task mergeBAM {
         set -o xtrace
 
         samtools merge -f -p -c --threads ~{threads} ~{outname}.bam ~{sep=" " bams}
-        samtools index ~{outname}.bam
+        samtools index -@ ~{threads} ~{outname}.bam
 
         ## split by chromosome, if any chrs specified
         if [ ~{anyChrs} == true ]
@@ -123,7 +123,7 @@ task mergeBAM {
             while read -r chrn
             do
                 samtools view -@ ~{threads} -h -O BAM ~{outname}.bam ${chrn} -o bamPerChrs/~{outname}.${chrn}.bam
-                samtools index bamPerChrs/~{outname}.${chrn}.bam
+                samtools index -@ ~{threads} bamPerChrs/~{outname}.${chrn}.bam
             done < ~{write_lines(chrs)}
         fi
     >>>
@@ -139,7 +139,7 @@ task mergeBAM {
         memory: memGb + " GB"
         cpu: threads
         disks: "local-disk " + diskGb + " SSD"
-        docker: "biocontainers/samtools@sha256:3ff48932a8c38322b0a33635957bc6372727014357b4224d420726da100f5470"
+        docker: "quay.io/jmonlong/minimap2_samtools:v2.24_v1.16.1_pigz"
     }
 }
 
@@ -160,7 +160,7 @@ task indexBAM {
         set -o xtrace
 
         ln -s ~{bam} reads.bam
-        samtools index reads.bam
+        samtools index -@ ~{threads} reads.bam
 
         ## split by chromosome, if any chrs specified
         if [ ~{anyChrs} == true ]
@@ -169,7 +169,7 @@ task indexBAM {
             while read -r chrn
             do
                 samtools view -@ ~{threads} -h -O BAM reads.bam ${chrn} -o bamPerChrs/~{outname}.${chrn}.bam
-                samtools index bamPerChrs/~{outname}.${chrn}.bam
+                samtools index -@ ~{threads} bamPerChrs/~{outname}.${chrn}.bam
             done < ~{write_lines(chrs)}
         fi
     >>>
@@ -184,7 +184,7 @@ task indexBAM {
         memory: memGb + " GB"
         cpu: threads
         disks: "local-disk " + diskGb + " SSD"
-        docker: "biocontainers/samtools@sha256:3ff48932a8c38322b0a33635957bc6372727014357b4224d420726da100f5470"
+        docker: "quay.io/jmonlong/minimap2_samtools:v2.24_v1.16.1_pigz"
     }
 }
 
@@ -215,6 +215,6 @@ task mergeFASTQ {
         memory: memGb + " GB"
         cpu: threads
         disks: "local-disk " + diskGb + " SSD"
-        docker: "biocontainers/samtools@sha256:3ff48932a8c38322b0a33635957bc6372727014357b4224d420726da100f5470"
+        docker: "quay.io/jmonlong/minimap2_samtools:v2.24_v1.16.1_pigz"
     }
 }
