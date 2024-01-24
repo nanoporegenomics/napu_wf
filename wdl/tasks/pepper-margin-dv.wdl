@@ -36,6 +36,6 @@ task pepper_margin_dv_t {
     cpu: threads
     memory: memSizeGb + " GB"
     disks: "local-disk " + diskSizeGb + " SSD"
-    runtime_minutes: 720
+    runtime_minutes: 2880
   }
 }
