@@ -13,6 +13,8 @@ WORKFLOW=PATH_TO_cardEndToEndVcf.wdl
 WORKDIR=PATH_TO_ECEX_DIR
 WF_INPUTS=PATH_TO_INPUT_JSON
 
+export SINGULARITY_CACHEDIR=${WORKDIR}/singularity-cache
+
 module load cromwell singularity
 ulimit -u 10240 -n 16384
 cd ${WORKDIR}

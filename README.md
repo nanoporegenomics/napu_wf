@@ -36,7 +36,7 @@ vim slurm_cfg/cromwell_singularity.cfg
 ```
 
 Then, set up a working directory where Napu will write all its output (which can be 100s of Gb!).
-Copy template config files:
+The directory should be write-accessible. Copy template config files:
 
 ```
 WORKDIR=XXX
@@ -55,6 +55,9 @@ vim minimal_inputs_shasta_inmem.json
 
 Finally, modify the Slurm submission script, by adding paths to
 input json file, Cromwell configuration, Napu workflow file and working directory.
+
+Note that Singularity cache will be set up in the working directory. You can
+change this behavior by modifying the script.
 
 ```
 vim napu_slurm.sh
