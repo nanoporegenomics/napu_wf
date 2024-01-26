@@ -180,11 +180,11 @@ task plot_ML_hist {
             --force --prefix ~{sample} -o output_dir/
 
         # Plot
-        Rscript /opt/scripts/plot-dist.R output_dir/~{sample}_probabilities.tsv output_dir/~{sample}.ML_hist.png
+#        Rscript /opt/scripts/plot-dist.R output_dir/~{sample}_probabilities.tsv output_dir/~{sample}.ML_hist.png
     >>>
 
     output {
-        File out = "output_dir/~{sample}.ML_hist.png"
+#        File out = "output_dir/~{sample}.ML_hist.png"
         File out_ML_tsv = "output_dir/~{sample}_probabilities.tsv"
     }
 
@@ -192,7 +192,7 @@ task plot_ML_hist {
         memory: memSizeGB + " GB"
         cpu: threadCount
         disks: "local-disk " + diskSizeGB + " SSD"
-        docker: "quay.io/shnegi/modkit:latest"
+        docker: "meredith705/modkit:latest"
         preemptible: 1
     }
 }
