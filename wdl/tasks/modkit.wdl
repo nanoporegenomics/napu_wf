@@ -9,7 +9,8 @@ task modkit {
         String sample_name
         String ref_name = "ref"
         String out_type_filter = "--cpg"
-        String partitionTag = "--partition-tag HP"
+#        String partitionTag = "--partition-tag HP"
+        Boolean partitionTag
         String? extraArgs = ""
         Int memSizeGB = 64
         Int threadCount = 64
@@ -51,22 +52,31 @@ task modkit {
         # filtering threshold default 10-th percentile of calls https://github.com/nanoporetech/modkit/blob/master/filtering.md
         if [ ~{regionaly} == true ]
         then
-            modkit pileup ~{out_type_filter} ~{partitionTag} --prefix ~{sample_name_ref} --ref ~{ref} \
-                   --threads ~{threadCount} --include-bed ~{regional_bed} ~{extraArgs} reads.bam modkit_out
+            modkit pileup ~{out_type_filter} ~{true="--partition-tag HP" false="" partitionTag} --prefix ~{sample_name_ref} --ref ~{ref} \
+                   --threads ~{threadCount} --include-bed ~{regional_bed} --only-tabs ~{extraArgs} reads.bam modkit_out
+
+
         else
             # modkit command with reference on input reads
-            modkit pileup ~{out_type_filter} ~{partitionTag} --prefix ~{sample_name_ref} --ref ~{ref} --threads ~{threadCount} ~{extraArgs} reads.bam modkit_out
+            modkit pileup ~{out_type_filter} ~{true="--partition-tag HP" false="" partitionTag} --prefix ~{sample_name_ref} --ref ~{ref} --threads ~{threadCount} --only-tabs ~{extraArgs} reads.bam modkit_out
         fi
-        bgzip -@ ~{threadCount} modkit_out/~{sample_name_ref}_1.bed
-        bgzip -@ ~{threadCount} modkit_out/~{sample_name_ref}_2.bed
-        bgzip -@ ~{threadCount} modkit_out/~{sample_name_ref}_ungrouped.bed
+
+        if [ ~{partitionTag} == true ]
+        then
+            bgzip -@ ~{threadCount} modkit_out/~{sample_name_ref}_1.bed
+            bgzip -@ ~{threadCount} modkit_out/~{sample_name_ref}_2.bed
+            bgzip -@ ~{threadCount} modkit_out/~{sample_name_ref}_ungrouped.bed
+        else
+            bgzip -@ ~{threadCount} modkit_out/~{sample_name_ref}_1.bed
+        fi
 
     >>>
 
         output {
-            File hap1bedOut      = "modkit_out/~{sample_name_ref}_1.bed.gz"
-            File hap2bedOut      = "modkit_out/~{sample_name_ref}_2.bed.gz"
+            File? hap1bedOut      = "modkit_out/~{sample_name_ref}_1.bed.gz"
+            File? hap2bedOut      = "modkit_out/~{sample_name_ref}_2.bed.gz"
             File? ungroupedBedOut      = "modkit_out/~{sample_name_ref}_ungrouped.bed.gz"
+            File? wholeGenomeOut  = "modkit_out/~{sample_name_ref}.bed"
             File? toplog = "top.log"
     }
 
@@ -144,4 +154,46 @@ task modbamtools {
       }
 }
 
+task plot_ML_hist {
+    input {
+        File modbam
+        File modbam_index
+        String sample
+        Int buckets = 128
+        Int memSizeGB = 50
+        Int threadCount = 64
+        Int diskSizeGB = 5*round(size(modbam, "GB")) + 20
+    }
+
+    command <<<
+        set -eux -o pipefail
+        set -o xtrace
+
+        # link the modbam to make sure it's index can be found
+        ln -s ~{modbam} input.bam
+        ln -s ~{modbam_index} input.bam.bai
+
+        # Generate ML distribution (Default: 128 buckets)
+        mkdir output_dir/
+        modkit sample-probs input.bam -t ~{threadCount} \
+            --only-mapped --hist ~{"--buckets " + buckets} \
+            --force --prefix ~{sample} -o output_dir/
+
+        # Plot
+        Rscript /opt/scripts/plot-dist.R output_dir/~{sample}_probabilities.tsv output_dir/~{sample}.ML_hist.png
+    >>>
+
+    output {
+        File out = "output_dir/~{sample}.ML_hist.png"
+        File out_ML_tsv = "output_dir/~{sample}_probabilities.tsv"
+    }
+
+    runtime {
+        memory: memSizeGB + " GB"
+        cpu: threadCount
+        disks: "local-disk " + diskSizeGB + " SSD"
+        docker: "quay.io/shnegi/modkit:latest"
+        preemptible: 1
+    }
+}
 
