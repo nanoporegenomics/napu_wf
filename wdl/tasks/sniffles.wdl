@@ -6,11 +6,11 @@ task sniffles_t {
 	File bamAlignment
 	File bamAlignmentIndex
 	File? vntrAnnotations
-    String sample = "sniffles"
+      String sample = "sniffles"
 	Int minSvLen = 25
 	Int memSizeGb = 32
 	Int diskSizeGb = round(5 * size(bamAlignment, 'G')) + 20 #256
-    Int preemptible_in = 2
+      Int preemptible_in = 2
 	File? resourceLogScript
   }
 
@@ -34,10 +34,10 @@ task sniffles_t {
   >>>
 
   output {
-	File snifflesVcf = "~{sample}.sniffles.vcf"
-    File? snifflesLog = "~{sample}.sniffles.log"
-    File snifflesSnf = "~{sample}.snf"
-	File? toplog = "top.log"
+      File snifflesVcf = "~{sample}.sniffles.vcf"
+      File? snifflesLog = "~{sample}.sniffles.log"
+      File snifflesSnf = "~{sample}.snf"
+      File? toplog = "top.log"
   }
 
   runtime {
