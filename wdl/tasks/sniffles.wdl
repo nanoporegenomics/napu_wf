@@ -35,7 +35,7 @@ task sniffles_t {
 
   output {
 	File snifflesVcf = "~{sample}.sniffles.vcf"
-    File snifflesLog = "~{sample}.sniffles.log"
+    File? snifflesLog = "~{sample}.sniffles.log"
     File snifflesSnf = "~{sample}.snf"
 	File? toplog = "top.log"
   }
