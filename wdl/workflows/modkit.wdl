@@ -43,6 +43,7 @@ workflow modkit_wf
 		File? methylationBed1 = modkit.hap1bedOut
 		File? methylationBed2 = modkit.hap2bedOut
 		File? methylationBedUngrouped = modkit.ungroupedBedOut
+		File? methylationBed = modkit.wholeGenomeOut
 		File? ML_histogram = plot_ML_hist.out
 		File? ML_tsv = plot_ML_hist.out_ML_tsv
 	}
