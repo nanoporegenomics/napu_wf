@@ -1,7 +1,8 @@
 version 1.0
 
 import "../tasks/minimap2.wdl" as minimap_t
-import "../tasks/modbam2bed.wdl" as modbam2bed_t
+#import "../tasks/modbam2bed.wdl" as modbam2bed_t
+import "../tasks/modkit.wdl" as modkit_t
 import "../tasks/pepper-margin-dv.wdl" as pmdv_haplotag_t
 import "../tasks/sniffles.wdl" as sniffles_t
 import "../tasks/hapdiff.wdl" as hapdiff_t
@@ -22,7 +23,11 @@ workflow cardEndToEndVcfMethyl
         Int         nbReadsPerChunk = 0
         String      sampleName = "sample"
         Array[String] chrs = []
-        Boolean runModbam2bed = true
+        Boolean runModkit = true
+        Boolean runAssembly = true
+        Boolean gvcf = false        # pass this to pmdv, instead of setting one in the task
+        File? inputAsmDual1
+        File? inputAsmDual2
         File? inputHaplotaggedBam
         File? inputHaplotaggedBamIdx
         File? inputPhasedVCF
@@ -43,7 +48,7 @@ workflow cardEndToEndVcfMethyl
         inputHaplotaggedBamIdx: "haplotagged BAM.bai file froma previous run"
         inputPhasedVCF: "small variant PMDV VCF from previous run"
         singleInputMappedBamIdx: "mapped BAM.bai from a previous run, skips indexing again"
-        runModbam2bed: "modbam2bed boolean flag in preparation of switching to modkit"
+        runModkit: "runModkit boolean flag to run modkit"
     }
 
     ### Either align input, merge multiple mapped input, or reorganize single input
@@ -158,6 +163,15 @@ workflow cardEndToEndVcfMethyl
                     vcfFiles = pmdvHap_chrs.pepperVcf,
                     outname = sampleName
             }
+
+            # if creating gvcf's merge those as well
+            if (gvcf){
+                call pmdv_haplotag_t.mergeGVCFs as merge_pmdv_gvcfs{
+                    input:
+                        vcfFiles = select_all(pmdvHap_chrs.pepperGVcf),
+                        outname = sampleName
+                }
+            }
         }
 
         ## otherwise, one job for the whole-genome on the entire BAM
@@ -178,6 +192,10 @@ workflow cardEndToEndVcfMethyl
     # isolate the haplotagged BAM from PEPPER_Margin_DeepVariant
 	File haplotaggedBam = select_first([inputHaplotaggedBam, merge_PEPPER_DV_BAMs.bam, pmdvHap.haplotaggedBam])
 	File haplotaggedBamIdx = select_first([inputHaplotaggedBamIdx, merge_PEPPER_DV_BAMs.bamIndex, pmdvHap.haplotaggedBamIdx])
+    # if gvcf select first the whole genome or per chrom merged gvcf
+    if (gvcf){
+        File outputGVCF = select_first([pmdvHap.pepperGVcf, merge_pmdv_gvcfs.gvcf])
+    }
 
     ##### estimate methylation at CpG sites
     ## only if the input reads file was a BAM
@@ -187,9 +205,9 @@ workflow cardEndToEndVcfMethyl
     if (length(inputReads) > 0){
         File mappedRead1 = select_first(inputReads)
     }
-    File inReadFile = select_first([mappedRead1, mappedBAM1])
-    if(basename(inReadFile, ".bam") != basename(inReadFile) && runModbam2bed){
-        call modbam2bed_t.modbam2bed as modbam2bed {
+    File inReadFile = select_first([mappedRead1, mappedBAM1, inputHaplotaggedBam])
+    if(basename(inReadFile, ".bam") != basename(inReadFile) && runModkit){
+        call modkit_t.modkit as modkit {
             input:
                 haplotaggedBam = haplotaggedBam,
                 haplotaggedBamBai = haplotaggedBamIdx,
@@ -231,19 +249,20 @@ workflow cardEndToEndVcfMethyl
     File shastaInputReads = select_first([singleReadsFastq, bamFile])
 
     ## Run assembly
-	call denovo_asm_wf.structuralVariantsDenovoAssembly as asm {
-		input:
-            readsFile = shastaInputReads,
-            chunkedReadsFiles=select_first([chunkedReads, []]),
-            shastaFasta = shastaFasta,
-            shastaInMem = shastaInMem,
-            threads = threads
-	}
-
+    if (runAssembly){
+        call denovo_asm_wf.structuralVariantsDenovoAssembly as asm {
+            input:
+                readsFile = shastaInputReads,
+                chunkedReadsFiles=select_first([chunkedReads, []]),
+                shastaFasta = shastaFasta,
+                shastaInMem = shastaInMem,
+                threads = threads
+        }
+    }
 	call hapdiff_t.hapdiff_t as hapdiff {
 		input:
-			ctgsPat = asm.asmDual1,
-			ctgsMat = asm.asmDual2,
+			ctgsPat = select_first([asm.asmDual1, inputAsmDual1]),
+			ctgsMat = select_first([asm.asmDual2, inputAsmDual2]),
 			reference = referenceFasta,
 			vntrAnnotations = referenceVntrAnnotations,
             sample = sampleName
@@ -251,8 +270,8 @@ workflow cardEndToEndVcfMethyl
 
 	call dipcall_t.dipcall_t as dipcall {
 		input:
-			ctgsPat = asm.asmDual1,
-			ctgsMat = asm.asmDual2,
+			ctgsPat = select_first([asm.asmDual1, inputAsmDual1]),
+			ctgsMat = select_first([asm.asmDual2, inputAsmDual2]),
 			reference = referenceFasta
 	}
 
@@ -270,20 +289,21 @@ workflow cardEndToEndVcfMethyl
 		File phasedMethylBam = haplotaggedBam
         File phasedMethylBamBai = haplotaggedBamIdx
 		File smallVariantsVcf = phasedVCF
-        File? smallVariantsgVcf = pmdvHap.pepperGVcf
-		File? methylationBed1 = modbam2bed.hap1bedOut
-		File? methylationBed2 = modbam2bed.hap2bedOut
+        File? smallVariantsgVcf = outputGVCF
+		File? methylationBed1 = modkit.hap1bedOut
+		File? methylationBed2 = modkit.hap2bedOut
+        File? methylationBedUng = modkit.ungroupedBedOut
 		File snifflesVcf = sniffles.snifflesVcf
         File snifflesSnf = sniffles.snifflesSnf
-        File shastaHaploid = asm.shastaHaploid
+        File? shastaHaploid = asm.shastaHaploid
         File? shastaGFA = asm.shastaGFA
         File? shastaLog = asm.shastaLog
-		File assemblyHap1 = asm.asmPhased1
-		File assemblyHap2 = asm.asmPhased2
-        File asmHap1PhaseBed = asm.phaseBed1
-        File asmHap2PhaseBed = asm.phaseBed2
-        File assemblyDual1 = asm.asmDual1
-        File assemblyDual2 = asm.asmDual2
+		File? assemblyHap1 = asm.asmPhased1
+		File? assemblyHap2 = asm.asmPhased2
+        File? asmHap1PhaseBed = asm.phaseBed1
+        File? asmHap2PhaseBed = asm.phaseBed2
+        File? assemblyDual1 = asm.asmDual1
+        File? assemblyDual2 = asm.asmDual2
 		File structuralVariantsVcf = hapdiff.hapdiffUnphasedVcf
 		File harmonizedVcf = margin_phase.out_margin_phase_svs
 		File asmDipcallVcf = dipcall.dipcallVcf
