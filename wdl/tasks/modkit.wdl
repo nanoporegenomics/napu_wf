@@ -67,7 +67,7 @@ task modkit {
             bgzip -@ ~{threadCount} modkit_out/~{sample_name_ref}_2.bed
             bgzip -@ ~{threadCount} modkit_out/~{sample_name_ref}_ungrouped.bed
         else
-            bgzip -@ ~{threadCount} modkit_out/~{sample_name_ref}_1.bed
+            bgzip -@ ~{threadCount} modkit_out/~{sample_name_ref}.bed
         fi
 
     >>>
