@@ -27,3 +27,7 @@ workflows:
    -  name: shastaHapdup
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/shasta_hapdup_denovo.wdl
+   - name: glnexus
+      subclass: WDL
+      primaryDescriptorPath: cohort_wdl/workflows/glnexus.wdl
+
