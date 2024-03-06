@@ -34,5 +34,5 @@ workflows:
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/modbamtools.wdl
    - name: glnexus
-        subclass: WDL
-        primaryDescriptorPath: cohort_wdl/workflows/glnexus.wdl
+      subclass: WDL
+      primaryDescriptorPath: cohort_wdl/workflows/glnexus.wdl
