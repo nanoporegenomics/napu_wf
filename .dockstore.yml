@@ -30,4 +30,6 @@ workflows:
    -  name: glnexus
       subclass: WDL
       primaryDescriptorPath: /wdl/cohort_wdl/workflows/glnexus.wdl
-
+   -  name: jasmine
+      subclass: WDL
+      primaryDescriptorPath: /wdl/cohort_wdl/workflows/jasmine.wdl
