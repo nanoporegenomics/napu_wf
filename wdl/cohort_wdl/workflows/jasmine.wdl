@@ -59,28 +59,42 @@ task jasmine_merge {
         # pipeline for Jasmine
         # https://github.com/mkirsche/Jasmine/tree/master/pipeline
 
-        # Normalize SV types in each sample
-        jasmine --preprocess_only --pre_normalize file_list=~{write_lines(vcfFiles)}
-
-        # Mark high-confidence callset (high-specificity callset) in each sample
-        jasmine file_list=~{write_lines(vcfFiles)} --preprocess_only --mark_specific \
-            spec_reads=~{specReads} spec_len=~{specLen}
-
-        # make an empty file to store intra sample merged vcfs
+        # vcfs must not be compressed
         touch files.txt
         for vcf in ~{sep=" " select_all(vcfFiles)}
         do
-            echo $vcf
             echo
-            jasmine file_list=$vcf max_dist=200 \
-                --allow_intrasample out_file=$vcf.intraSampleMerged.vcf \
-                --nonlinear_dist --comma_filelist
-            echo $vcf.intraSampleMerged.vcf >> files.txt
+            echo decompress $vcf
+            bgzip -d $vcf
+            echo ${vcf:0:-3} >> files.txt
         done
+
+        echo new files?
+        cat files.txt
+        echo
+
+        # Normalize SV types in each sample
+        jasmine --preprocess_only --pre_normalize file_list=files.txt
+        #~{write_lines(vcfFiles)}
+
+        # Mark high-confidence callset (high-specificity callset) in each sample
+        jasmine file_list=files.txt --preprocess_only --mark_specific \
+            spec_reads=~{specReads} spec_len=~{specLen}
+
+        # make an empty file to store intra sample merged vcfs
+        touch intrasample_files.txt
+
+        while IFS= read -r vfilename; do
+            echo $vfilename
+            jasmine file_list=$vfilename max_dist=200 \
+                --allow_intrasample out_file=$vfilename.intraSampleMerged.vcf \
+                --nonlinear_dist --comma_filelist
+            echo $vfilename.intraSampleMerged.vcf >> intrasample_files.txt
+        done < files.txt
 
         #### Merge SVs across samples ####
         echo starting merge
-        jasmine --output_genotypes file_list=files.txt out_file=~{out_name}.cohort.merged.vcf
+        jasmine --output_genotypes file_list=intrasample_files.txt out_file=~{out_name}.cohort.merged.vcf
 
         # Convert insertions back to duplications
         echo convert insertions
