@@ -26,6 +26,7 @@ workflow run_jasmine{
     output{
         File? merged_sv_vcf = jasmine.merged_sv_vcf
         File? merged_sv_vcf_tbi = jasmine.merged_sv_vcf_tbi
+        File? all_merged_sv_vcf = jasmine.all_merged_sv_vcf
     }
 }
 
@@ -101,15 +102,19 @@ task jasmine_merge {
         jasmine --dup_to_ins --postprocess_only out_file=~{out_name}.cohort.merged.vcf
 
         # Remove low-confidence or imprecise calls:
+        # this caused the error - probably the sort
         cat ~{out_name}.cohort.merged.vcf | grep -v 'IMPRECISE;' | grep -v 'IS_SPECIFIC=0' \
-            | bcftools sort | bgzip -@ ~{threadCount} > ~{out_name}.cohort.merged.conf.vcf.gz
+            | bgzip -@ ~{threadCount} > ~{out_name}.cohort.merged.conf.vcf.gz
 
         tabix ~{out_name}.cohort.merged.conf.vcf.gz
 
+        # compress the merged vcf, prior to selecting only confidant variants
+        bgzip -@ ~{threadCount} ~{out_name}.cohort.merged.vcf
 
     >>>
 
         output {
+            File? all_merged_sv_vcf = "~{out_name}.cohort.merged.vcf.gz"
             File? merged_sv_vcf = "~{out_name}.cohort.merged.conf.vcf.gz"
             File? merged_sv_vcf_tbi = "~{out_name}.cohort.merged.conf.vcf.gz.tbi"
     }
