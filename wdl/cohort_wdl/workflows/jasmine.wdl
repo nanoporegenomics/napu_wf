@@ -106,10 +106,10 @@ task jasmine_merge {
         cat ~{out_name}.cohort.merged.vcf | grep -v 'IMPRECISE;' | grep -v 'IS_SPECIFIC=0' \
             | bgzip -@ ~{threadCount} > ~{out_name}.cohort.merged.conf.vcf.gz
 
-        tabix ~{out_name}.cohort.merged.conf.vcf.gz
+        #tabix ~{out_name}.cohort.merged.conf.vcf.gz
 
         # compress the merged vcf, prior to selecting only confidant variants
-        bgzip -@ ~{threadCount} ~{out_name}.cohort.merged.vcf
+        #bgzip -@ ~{threadCount} ~{out_name}.cohort.merged.vcf
 
     >>>
 
