@@ -3,8 +3,10 @@ MAINTAINER Mikhail Kolmogorov, mkolmogo@ucsc.edu
 RUN apt-get update && \
 	DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata && \
 	apt-get install -y cmake git make gcc g++ autoconf bzip2 wget tabix libz-dev libncurses5-dev libbz2-dev liblzma-dev && \
-	DEBIAN_FRONTEND="noninteractive" apt-get install -y python3.10 && \
 	apt-get clean
+RUN apt update && \
+    DEBIAN_FRONTEND="noninteractive" apt install -y python3.10
+
 
 #RUN pip install sniffles
 RUN update-alternatives --install /usr/bin/python3 python /usr/bin/python3.10 2
