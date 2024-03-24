@@ -26,7 +26,7 @@ RUN wget https://github.com/samtools/samtools/releases/download/1.9/samtools-1.9
 
 
 WORKDIR /opt/sniffles
-RUN git clone https://github.com/fritzsedlazeck/Sniffles/tree/master && \
+RUN git clone https://github.com/fritzsedlazeck/Sniffles.git && \
     mv /opt/sniffles/Sniffles/src/sniffles/sniffles /opt/sniffles/Sniffles/src/sniffles2 && \
     touch /opt/sniffles/Sniffles/src/utils/__init__.py
 
