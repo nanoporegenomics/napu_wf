@@ -7,7 +7,6 @@ RUN apt-get update && \
 	apt-get clean
 
 #RUN pip install sniffles
-RUN update-alternatives  --set python /usr/bin/python3.10
 
 WORKDIR /opt
 COPY ./trf_annotations /opt/trf_annotations
