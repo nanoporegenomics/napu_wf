@@ -29,6 +29,8 @@ task hapdiff_t {
     File hapdiffUnphasedVcf = "hapdiff/hapdiff_unphased.vcf.gz"
     File hapdiffPhasedVcf = "hapdiff/hapdiff_phased.vcf.gz"
     File confidentBed = "hapdiff/confident_regions.bed"
+    File alignmentBedHap1 = "hapdiff/aln_coverage_pat.bed"
+    File alignmentBedHap2 = "hapdiff/aln_coverage_mat.bed"
     File hapdiffLog = "hapdiff.log"
   }
 
