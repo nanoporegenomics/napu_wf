@@ -11,7 +11,7 @@ task hapdiff_t {
     Int threads = 32
     Int memSizeGb = 128
     Int diskSizeGb = 256
-    String dockerContainer = "mkolmogo/hapdiff:0.8"
+    String dockerContainer = "mkolmogo/hapdiff:0.9"
   }
 
   String trfString = if defined(vntrAnnotations) then "--tandem-repeats " else ""
@@ -22,11 +22,13 @@ task hapdiff_t {
     set -o xtrace
 
     hapdiff.py --reference ~{reference} ~{trfString}~{vntrAnnotations} --pat ~{ctgsPat} --mat ~{ctgsMat} --out-dir hapdiff -t ~{threads} --sv-size ~{minSvSize} --sample ~{sample} 2>&1 | tee hapdiff.log
+
   >>>
 
   output {
     File hapdiffUnphasedVcf = "hapdiff/hapdiff_unphased.vcf.gz"
     File hapdiffPhasedVcf = "hapdiff/hapdiff_phased.vcf.gz"
+    File confidentBed = "hapdiff/confident_regions.bed"
     File hapdiffLog = "hapdiff.log"
   }
 
