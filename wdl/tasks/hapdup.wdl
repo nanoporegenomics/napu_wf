@@ -8,7 +8,7 @@ task hapdup_t {
     String readType = "ont"
     Int memSizeGb = 256
     Int diskSizeGb = 1024
-    String dockerContainer = "mkolmogo/hapdup:0.11"
+    String dockerContainer = "mkolmogo/hapdup:0.12"
   }
 
   command <<<
