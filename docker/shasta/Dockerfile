@@ -6,7 +6,7 @@ RUN apt-get update && \
 	apt-get install -y samtools && \
 	apt-get clean
 
-ARG SHASTA_VER=0.11.1
+ARG SHASTA_VER=0.14.0
 RUN wget https://github.com/paoloshasta/shasta/releases/download/$SHASTA_VER/shasta-Linux-$SHASTA_VER && \
 	chmod +x shasta-Linux-$SHASTA_VER && \
 	cp shasta-Linux-$SHASTA_VER /usr/bin/shasta
