@@ -1,0 +1,160 @@
+#!/usr/bin/env python3
+
+import pandas as pd
+import os
+import sys
+import gzip
+import gcsfs
+from datetime import datetime
+import argparse
+
+
+"""
+Script to merge individual cpg sites across CARD cohorts
+
+inputs: a TSV with samples as rows, first column is sample ID
+        haplotype 1 modkit bed files 
+
+example: python3 merge_modkit_beds_allCpGs.py -i NABEC_cohort_methyl_012025.tsv -o out_HarmPhase_methylationBeds
+
+        
+This script reads in data using gs links so you must authenticate using: 
+gcloud auth application-default login
+or 
+gcloud auth application-default login --no-launch-browser
+
+Author: Melissa Meredith
+3/2025
+"""
+
+def log_time(message):
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}")
+
+def read_in_gslinks(tsvfile):
+    """
+    Function reads in a tsv of gcp links to phased modkit files, 
+        columns must be named out_HarmPhase_methylationBed1_GRCh38 and 
+        out_HarmPhase_methylationBed2_GRCh38
+    """
+
+    log_time(f"Reading in methylation gs links from {tsvfile}")
+    delimiter="\t"
+    if tsvfile[-4:]!=".tsv":
+        print('is input file not a .tsv?')
+        sys.exit(-1)
+
+    try:
+        input_df = pd.read_csv(tsvfile, sep=delimiter)
+    except Exception as e:
+        log_time(f"Error reading TSV: {e}")
+        sys.exit(-1)
+
+    hap1_links = input_df['out_HarmPhase_methylationBed1_GRCh38'].to_list()
+    hap2_links = input_df['out_HarmPhase_methylationBed2_GRCh38'].to_list()
+
+    log_time('done')
+    return hap1_links, hap2_links
+
+def merge_beds(gslinks, outputdir, haplotype):
+    """
+    Function reads in each modkit bed and stores the valid coverage, 
+    number of reads with mods at each position and the modified fraction
+    column. The individual dataframes are merged together based on chromosomal 
+    position. Every 10 samples the dataframe is written to disk. 
+    """
+
+    log_time('Innitialize gcs sytem')
+    # initialize GCS FileSystem
+    fs = gcsfs.GCSFileSystem()
+
+    # empty dataframe to fill with cpg data
+    combined_df = pd.DataFrame()
+
+    for i, file in enumerate(gslinks, 1):
+
+        print('file', file)
+        if not isinstance(file, str):
+            log_time(f"Invalid file entry at line {i}. Skipping...")
+            continue
+
+        # get sample name from the file path ex: NABEC_KEN-1066_FTX_GRCh38_2.bed.gz
+        sample_name = file.split('/')[-1].replace('.bed.gz', '')
+        log_time(f'Processing file: {sample_name}')
+
+        try:
+            # open GCS file and read using gzip 
+            with fs.open(file, 'rb') as f:
+                with gzip.open(f, 'rt') as gz_file:
+                    df = pd.read_csv(gz_file, sep='\t', header=None, usecols=[0, 1, 2, 9, 10, 11],
+                                      names=['chrom', 'start', 'end', 'validCov', 'modFraction','modReads'])
+        except Exception as e:
+            log_time(f"Error reading {sample_name}: {e}")
+            log_time(f"Make sure you authenticated your google account with 'gcloud auth application-default login --no-launch-browser'")
+
+
+        # rename columns to include sample id
+        df.rename(columns={'validCov': f'{sample_name}_validCov', 'modFraction': f'{sample_name}_modFraction', 'modReads': f'{sample_name}_modReads'}, inplace=True)
+        
+        # merge with combined dataframe using first 3 columns as index
+        if combined_df.empty:
+            combined_df = df
+        else:
+            # make this an outter merge to keep all positions measured by any sample 
+            combined_df = pd.merge(combined_df, df, on=['chrom', 'start', 'end'], how='outer')
+
+        log_time(f'Completed {sample_name}')
+
+        # write out the merged df every 10 samples to prevent loosing all merged data
+        if i%10==0:
+            log_time(f'writing out combined file with {i} samples')
+            combined_df.to_csv(f'{outputdir}/combined_methylation_{haplotype}.tsv', sep="\t", index=False)
+
+    log_time('Filling in zeros')
+    # fill missing values with a 0 for zero coverage/measurements of that position
+    combined_df = combined_df.fillna(0)
+
+    log_time('making output tsv')
+    # save the combined data to CSV
+    combined_df.to_csv(f'{outputdir}/combined_methylation_{haplotype}.tsv', sep="\t", index=False)
+
+
+if __name__ == "__main__":
+
+    # Make an argument parser
+    parser = argparse.ArgumentParser(description="Merge methylBeds from Modkit across cohorts.")
+    parser.add_argument(
+        "-i","--in_tsv_file",
+        type=str,
+        required=True,
+        help="Path to the input gs link TSV file with header. The first column should be the sample IDs, subsequent columns are haplotype1 and hap2 file links."
+    )
+
+    parser.add_argument(
+        "-o","--output_directory",
+        type=str,
+        required=True,
+        help="name of output directory."
+    )
+
+    if len(sys.argv) == 1:
+        parser.print_help(sys.stderr)
+        sys.exit(1)
+
+    # Parse arguments
+    args = parser.parse_args()
+
+    # Read in the gs links from imput tsv
+    hap1_gs, hap2_gs = read_in_gslinks(args.in_tsv_file)
+    
+    # Create output directory
+    output_dir = args.output_directory
+    os.makedirs(output_dir, exist_ok=True)
+    log_time(f"Output directory ensured at: {output_dir}")
+
+    # Merge the data within each haplotype
+    # methylation matches Variant genoytpes - not methylation status 
+    merge_beds(hap1_gs, output_dir, 'hap1')
+    merge_beds(hap2_gs, output_dir, 'hap2')
+
+
+
