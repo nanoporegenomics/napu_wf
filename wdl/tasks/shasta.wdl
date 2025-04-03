@@ -45,6 +45,7 @@ workflow shasta {
         File fasta = shastaFasta
         File gfa = shastaGfa
         File log = shastaLog
+        File readsFasta = readsFasta
     }
 }
 
