@@ -88,30 +88,30 @@ workflow structuralVariantsDenovoAssembly {
 
 
     }
-	
+    
 
     File bamFile = select_first([minimap2.bam, mergeBAMhapdup.bam, readAlign])
 
-	### hapdup
-	call hapdup_t.hapdup_t as hapdup_t {
-		input:
-			threads=threads,
-			alignedBam=bamFile,
-			contigs=ambFasta,
-			diskSizeGb=hapdupDiskSizeGB
+    ### hapdup
+    call hapdup_t.hapdup_t as hapdup_t {
+        input:
+            threads=threads,
+            alignedBam=bamFile,
+            contigs=ambFasta,
+            diskSizeGb=hapdupDiskSizeGB
     }
 
-	output {
+    output {
         File asmDual1 = hapdup_t.hapdupDual1
         File asmDual2 = hapdup_t.hapdupDual2
         File asmPhased1 = hapdup_t.hapdupPhased1
         File asmPhased2 = hapdup_t.hapdupPhased2
         File phaseBed1 = hapdup_t.hapdupPhaseBed1
         File phaseBed2 = hapdup_t.hapdupPhaseBed2 
-		File shastaHaploid = ambFasta
+        File shastaHaploid = ambFasta
         File readsMappedToAssembly = bamFile
         #File? shastaGfa = shastaGfa_t
-		#File? shastaLog = shastaLog_t
+        #File? shastaLog = shastaLog_t
         #File? shastaHtml = shastaHtml_t
-	}
+    }
 }
