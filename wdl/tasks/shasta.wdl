@@ -69,7 +69,7 @@ task shasta_t {
     String shastaConfig = "/opt/shasta_config/Nanopore-R10-Fast-Nov2022.conf"
     Int memSizeGb = 624
     Int diskSizeGb = 1125
-    String dockerImage = "meredith705/shasta:latest"
+    String dockerImage = "meredith705/shasta@sha256:f0b2350446e5772232bbd027ad3f27414d20fd5b26d4a57ca73281593b1e21a2"
   }
 
   command <<<
@@ -179,7 +179,7 @@ task shasta_inmem_t {
 
   #This is optimized for GCP/Terra environemnt to get maximum available RAM. May need to adjust for other cloud environemnts or HPC
   runtime {
-    docker: "meredith705/shasta:latest"
+    docker: "meredith705/shasta@sha256:f0b2350446e5772232bbd027ad3f27414d20fd5b26d4a57ca73281593b1e21a2"
     cpu: threads
     memory: memSizeGb + " GB"
     disks: "local-disk " + diskSizeGb + " LOCAL"
@@ -230,7 +230,7 @@ task convertToFastq {
   }
 
   runtime {
-      docker: "meredith705/shasta:latest"
+      docker: "meredith705/shasta@sha256:f0b2350446e5772232bbd027ad3f27414d20fd5b26d4a57ca73281593b1e21a2"
       preemptible: preemptible
       cpu: threads
       memory: memSizeGb + " GB"
@@ -279,7 +279,7 @@ task convertToFasta {
   }
 
   runtime {
-      docker: "meredith705/shasta:latest"
+      docker: "meredith705/shasta@sha256:f0b2350446e5772232bbd027ad3f27414d20fd5b26d4a57ca73281593b1e21a2"
       preemptible: preemptible
       cpu: threads
       memory: memSizeGb + " GB"
