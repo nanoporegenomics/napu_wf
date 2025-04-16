@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 MAINTAINER Mikhail Kolmogorov, mkolmogo@ucsc.edu
 RUN apt-get update && \
 	DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata && \
