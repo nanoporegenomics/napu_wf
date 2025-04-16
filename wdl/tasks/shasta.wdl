@@ -6,18 +6,30 @@ workflow shasta {
         Array[File] readFiles = []
         String shastaArgs = ""
         Boolean inMemory = false
+        Boolean qScoreCutoff = false
         Int diskSizeGB = 1024
     }
     
     File readsFile = select_first(readFiles)
 
-    if ((basename(readsFile, ".fasta") == basename(readsFile)) && (basename(readsFile, ".fa") == basename(readsFile))){
+    if(qScoreCutoff){
+      # convert to fastq to remove reads below QscoreMin
+      call convertToFastq {
+            input:
+            readfiles=readFiles
+        }
+    }
+
+    if(!qScoreCutoff){
+      if ((basename(readsFile, ".fasta") == basename(readsFile)) && (basename(readsFile, ".fa") == basename(readsFile))){
         call convertToFasta {
             input:
             readfiles=readFiles
         }
     }
-    File readsFasta = select_first([convertToFasta.fasta, readsFile])
+    }
+    
+    File readsFasta = select_first([convertToFastq.fastq, convertToFasta.fasta, readsFile])
 
     if(inMemory){
         call shasta_inmem_t {
@@ -45,7 +57,7 @@ workflow shasta {
         File fasta = shastaFasta
         File gfa = shastaGfa
         File log = shastaLog
-        File readsFasta = readsFasta
+        File readsToFasta = readsFasta
     }
 }
 
@@ -174,6 +186,58 @@ task shasta_inmem_t {
     cpuPlatform: cpuPlatform
   }
 }
+
+task convertToFastq {
+  input {
+    Array[File] readfiles = []
+    Int QscoreMin = 10
+    Int threads = 4
+    Int memSizeGb = 8
+    Int diskSizeGb = 5 * round(size(readfiles, 'G')) + 50
+    Int preemptible = 2
+  }
+
+  String outname = sub(sub(basename(select_first(readfiles)), ".gz$", ""), ".bam", "")
+  command <<<
+    set -o pipefail
+    set -e
+    set -u
+    set -o xtrace
+
+    for READS in ~{sep=' ' readfiles}
+    do
+      if [ "${READS: -3}" == ".gz" ]
+      then
+        if [ "${READS: -4}" == "q.gz" ]
+        then
+          zcat $READS | awk '{if(NR%4==1) {printf(">%s\n",substr($0,2));} else if(NR%4==2) print;}' >> ~{outname}.fasta
+        else
+          zcat $READS >> ~{outname}.fasta
+        fi
+      fi
+
+      if [ "${READS: -3}" == "bam" ]
+      then
+        #samtools fasta -@ ~{threads} $READS >> ~{outname}.fasta
+        # after converting to fastq and chopping, maybe pipe back? do we still need quality values?
+        samtools fastq -@ ~{threads} $READS | chopper -t ~{threads} -q ~{QscoreMin} | bgzip >> ~{outname}.Q~{QscoreMin}.fastq.gz
+      fi
+    done;
+  >>>
+
+  output {
+    File fastq = "~{outname}.Q~{QscoreMin}.fastq.gz"
+  }
+
+  runtime {
+      docker: "meredith705/shasta:latest"
+      preemptible: preemptible
+      cpu: threads
+      memory: memSizeGb + " GB"
+      disks: "local-disk " + diskSizeGb + " SSD"
+  }
+}
+
 
 task convertToFasta {
   input {
