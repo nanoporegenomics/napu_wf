@@ -15,7 +15,7 @@ RUN wget https://github.com/paoloshasta/shasta/releases/download/$SHASTA_VER/sha
 ARG CHOPPER_VER=0.9.2
 RUN wget https://github.com/wdecoster/chopper/releases/download/v$CHOPPER_VER/chopper-linux.zip && \
 	unzip chopper-linux.zip && \
-	chmod +x chopper
+	chmod +x chopper && \
 	cp chopper /usr/bin/chopper
 
 
