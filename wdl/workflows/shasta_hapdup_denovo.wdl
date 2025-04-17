@@ -110,7 +110,7 @@ workflow structuralVariantsDenovoAssembly {
         File phaseBed2 = hapdup_t.hapdupPhaseBed2 
         File shastaHaploid = ambFasta
         File readsMappedToAssembly = bamFile
-        File? readsFasta = readsFasta
+        File? readsToFasta = readsFasta
         #File? shastaGfa = shastaGfa_t
         #File? shastaLog = shastaLog_t
         #File? shastaHtml = shastaHtml_t
