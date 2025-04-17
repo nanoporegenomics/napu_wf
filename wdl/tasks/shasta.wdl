@@ -7,6 +7,7 @@ workflow shasta {
         String shastaArgs = ""
         Boolean inMemory = false
         Boolean qScoreCutoff = false
+        Int preemptible = 2
         Int diskSizeGB = 1024
     }
     
@@ -17,6 +18,7 @@ workflow shasta {
       call convertToFastq {
             input:
             readfiles=readFiles
+            preemptible=preemptible
         }
     }
 
@@ -24,7 +26,8 @@ workflow shasta {
       if ((basename(readsFile, ".fasta") == basename(readsFile)) && (basename(readsFile, ".fa") == basename(readsFile))){
         call convertToFasta {
             input:
-            readfiles=readFiles
+            readfiles=readFiles,
+            preemptible=preemptible
         }
     }
     }
@@ -191,7 +194,7 @@ task convertToFastq {
   input {
     Array[File] readfiles = []
     Int QscoreMin = 10
-    Int threads = 4
+    Int threads = 10
     Int memSizeGb = 8
     Int diskSizeGb = 5 * round(size(readfiles, 'G')) + 50
     Int preemptible = 2
