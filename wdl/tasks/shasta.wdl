@@ -17,7 +17,7 @@ workflow shasta {
       # convert to fastq to remove reads below QscoreMin
       call convertToFastq {
             input:
-            readfiles=readFiles
+            readfiles=readFiles,
             preemptible=preemptible
         }
     }
