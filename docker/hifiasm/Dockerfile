@@ -16,7 +16,7 @@ RUN wget https://github.com/chhylp123/hifiasm/archive/refs/tags/$HIFIASM_VER.zip
 	make 
 
 
-
+ENV PATH="/opt/hifiasm-$HIFIASM_VER:$PATH"
 
 WORKDIR /opt
 
