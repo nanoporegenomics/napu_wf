@@ -42,3 +42,7 @@ workflows:
    -  name: bedtoolsMapwf
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/bedtoolsMap.wdl
+   -  name: hifiasmWf
+      subclass: WDL
+      primaryDescriptorPath: /wdl/tasks/hifiasm.wdl
+      
