@@ -5,8 +5,6 @@ version 1.0
 workflow combineAndUpload {
     input {
         Array[File] unphasedMappedBAMs
-        File phasedBAM 
-        File unmappedBAM
         File altchroms_file
         String sample 
         String staging_gs_bucket
@@ -18,8 +16,6 @@ workflow combineAndUpload {
     call indexMergeUpload {
         input:
         unphasedMappedBAMs=unphasedMappedBAMs,
-        phasedBAM=phasedBAM,
-        unmappedBAM=unmappedBAM,
         altchroms_file=altchroms_file,
         sample=sample
 
@@ -27,6 +23,7 @@ workflow combineAndUpload {
 
     output {
         String trackerString = indexMergeUpload.trackerString
+        File readcount = indexMergeUpload.readcount
 
     }
 }
@@ -38,8 +35,6 @@ task indexMergeUpload {
 
     input {
         Array[File] unphasedMappedBAMs
-        File phasedBAM 
-        File unmappedBAM
         File altchroms_file
         String sample
         String staging_gs_bucket
@@ -75,24 +70,34 @@ task indexMergeUpload {
         # 3: convert the tmp.sam to a bam
         samtools view -b -@ ~{threads} tmp.extracted_reads.sam | samtools sort -@ ~{threads} - > tmp.alt_reads.bam
 
-        # 4: get haplotagged bam, and unmapped and merge with tmp.alt_reads.bam
-        samtools merge -@ ~{threads} -o - ~{phasedBAM} tmp.alt_reads.bam ~{unmappedBAM} | samtools sort -@ ~{threads} - > ~{outname}
+        # 4: get haplotagged bam, and unmapped bam
+        phasedBAM="~{staging_gs_bucket}/data_files/~{sample}/reads/~{sample}.bam"
+        unmappedBAM="~{staging_gs_bucket}/data_files/~{sample}/reads/~{sample}.unmappedGRCh38.bam"
+
+        # 5: merge the unmapped BAM with the alts
+        gsutil cat ${unmappedBAM} | samtools merge -o tmp.~{sample}.unmapped.alts.bam - tmp.alt_reads.bam
+
+        # 5: merge the haplotagged BAM with the unmapped.alts
+        gsutil cat ${phasedBAM} | samtools merge -@ ~{threads} -o - - tmp.~{sample}.unmapped.alts.bam | samtools sort -@~{threads} - > ~{outname}
+
 
         # 5: index the merged BAM
         samtools index -@ ~{threads} ~{outname}
 
         # 6: move to staging workspace
-        gsutil ls "~{staging_gs_bucket}"
-        #gsutil cp ~{outname} "~{staging_gs_bucket}"/data_files/"~{sample}"/reads/"~{sample}".GRCh38.bam
-        #gsutil cp ~{outname}.bai "~{staging_gs_bucket}"/data_files/"~{sample}"/reads/"~{sample}".GRCh38.bam.bai
+        gsutil ls "~{staging_gs_bucket}"/data_files/"~{sample}"/reads/
+        gsutil cp ~{outname} "~{staging_gs_bucket}"/data_files/"~{sample}"/reads/"~{sample}".GRCh38.bam
+        gsutil cp ~{outname}.bai "~{staging_gs_bucket}"/data_files/"~{sample}"/reads/"~{sample}".GRCh38.bam.bai
+        gsutil ls "~{staging_gs_bucket}"/data_files/"~{sample}"/reads/
 
-        
+        samtools view -@ ~{threads} -c ~{outname} > readcount.txt
 
 
     >>>
 
     output {
         String trackerString = "~{tracker_string}"
+        File readcount = "readcount.txt"
     }
 
     runtime {
