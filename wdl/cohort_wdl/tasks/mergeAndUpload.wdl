@@ -48,7 +48,7 @@ task indexMergeUpload {
     }
 
     String outname = "~{sample}"+".GRCh38.bam"
-    String tracker_string = "{sample_id}.GRCh38.bam\tWGS\tBAM\t#\t#\t{sample_id}.GRCh38.bam\t{staging_gs_bucket}/data_files/{sample_id}/reads/{sample_id}.GRCh38.bam\tGRCh38\n"
+    String tracker_string = "~{sample_id}.GRCh38.bam\tWGS\tBAM\t#\t#\t~{sample_id}.GRCh38.bam\t~{staging_gs_bucket}/data_files/~{sample_id}/reads/~{sample_id}.GRCh38.bam\tGRCh38\n"
     File firstReadFile = select_first(unphasedMappedBAMs)
 
     command <<<
