@@ -4,7 +4,7 @@ version 1.0
 
 workflow combineAndUpload {
     input {
-        Array[File] unphasedMappedBAMs = []
+        Array[File] unphasedMappedBAMs
         File phasedBAM 
         File unmappedBAM
         File altchroms_file
@@ -22,6 +22,7 @@ workflow combineAndUpload {
         unmappedBAM=unmappedBAM,
         altchroms_file=altchroms_file,
         sample=sample
+
     }
 
     output {
@@ -81,7 +82,7 @@ task indexMergeUpload {
         samtools index -@ ~{threads} ~{outname}
 
         # 6: move to staging workspace
-        gsutil ls "~{staging_gs_bucket}"/data_files/"~{sample}"/reads/
+        gsutil ls "~{staging_gs_bucket}"
         #gsutil cp ~{outname} "~{staging_gs_bucket}"/data_files/"~{sample}"/reads/"~{sample}".GRCh38.bam
         #gsutil cp ~{outname}.bai "~{staging_gs_bucket}"/data_files/"~{sample}"/reads/"~{sample}".GRCh38.bam.bai
 
