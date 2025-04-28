@@ -62,7 +62,7 @@ task indexMergeUpload {
             samtools index -@ ~{threads} ${bam}
 
             # append the alt reads to tmp sam for easy concatination 
-            samtools view -@ ~{threads} ${bam} $(cat ~{altchroms_file}) >> tmp.alt_reads.sam
+            samtools view -@ ~{threads} ${bam} $(cat ~{altchroms_file}) >> tmp.extracted_reads.sam
 
         done
 
