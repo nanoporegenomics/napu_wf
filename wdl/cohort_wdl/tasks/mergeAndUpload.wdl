@@ -24,6 +24,7 @@ workflow combineAndUpload {
     output {
         String trackerString = indexMergeUpload.trackerString
         File readcount = indexMergeUpload.readcount
+        File trackerfile = indexMergeUpload.trackerfile
 
     }
 }
@@ -92,12 +93,15 @@ task indexMergeUpload {
 
         samtools view -@ ~{threads} -c ~{outname} > readcount.txt
 
+        echo ~{tracker_string} > trackerfile.txt
+
 
     >>>
 
     output {
         String trackerString = "~{tracker_string}"
         File readcount = "readcount.txt"
+        File trackerfile = "trackerfile.txt"
     }
 
     runtime {
