@@ -21,7 +21,8 @@ workflow combineAndUpload {
         input:
         unphasedMappedBAMs=unphasedMappedBAMs,
         altchroms_file=altchroms_file,
-        sample=sample
+        sample=sample,
+        staging_gs_bucket=staging_gs_bucket
 
         }
     }
@@ -32,7 +33,8 @@ workflow combineAndUpload {
         unphasedMappedBAM=unphasedMappedBAM,
         unphasedMappedBAI=unphasedMappedBAI,
         altchroms_file=altchroms_file,
-        sample=sample
+        sample=sample,
+        staging_gs_bucket=staging_gs_bucket
 
         }
     }
@@ -77,7 +79,7 @@ task indexMergeUpload_coh2 {
         samtools view -H ~{unphasedMappedBAM} > tmp.extracted_reads.sam
 
         # 2: get alts from unphasedMappedBAMs array append reads (no header) to the tmp sam
-        echo "indexing and extracting ${bam}"
+        echo "indexing and extracting "
 
         # append the alt reads to tmp sam for easy concatination 
         samtools view -@ ~{threads} ~{unphasedMappedBAM} $(cat ~{altchroms_file}) >> tmp.extracted_reads.sam
@@ -108,7 +110,7 @@ task indexMergeUpload_coh2 {
 
         samtools view -@ ~{threads} -c ~{outname} > readcount.txt
 
-        echo "~{tracker_string}" > trackerfile.txt
+        echo $(echo ~{tracker_string}) > trackerfile.txt
 
 
     >>>
