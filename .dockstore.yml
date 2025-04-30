@@ -48,4 +48,6 @@ workflows:
    -  name: mergeUploadGCP
       subclass: WDL
       primaryDescriptorPath: /wdl/cohort_wdl/tasks/mergeAndUpload.wdl
-      
+   -  name: checkUploadReadCount
+      subclass: WDL
+      primaryDescriptorPath: /wdl/cohort_wdl/tasks/checkUploadReadCount.wdl      
