@@ -142,6 +142,7 @@ task indexMergeUpload {
         String sample
         String staging_gs_bucket
         Boolean findUnmapped
+        String filesuffix = ""
         Int memSizeGB = 40
         Int threads = 12
         Int diskSizeGB = 2 * round(size(unphasedMappedBAMs, "GB")) + 40
@@ -184,7 +185,7 @@ task indexMergeUpload {
         samtools view -b -@ ~{threads} tmp.extracted_reads.sam | samtools sort -@ ~{threads} - > tmp.alt_reads.bam
 
         # 4: get haplotagged bam, and unmapped bam
-        phasedBAM="~{staging_gs_bucket}/data_files/~{sample}/reads/~{sample}.bam"
+        phasedBAM="~{staging_gs_bucket}/data_files/~{sample}/reads/~{sample}.~{filesuffix}bam"
 
         if [[ ~{findUnmapped} == "false" ]]
         then
