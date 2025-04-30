@@ -196,12 +196,16 @@ task indexMergeUpload {
 
             # 6: merge the haplotagged BAM with the unmapped.alts
             #gsutil cat ${phasedBAM} | samtools merge -@ ~{threads} -o - - tmp.~{sample}.unmapped.alts.bam | samtools sort -@~{threads} -o ~{outname}
-            gsutil cat ${phasedBAM} | samtools merge -@ ~{threads} -o ~{outname} - tmp.~{sample}.unmapped.alts.bam 
+            #gsutil cat ${phasedBAM} | samtools merge -@ ~{threads} -o ~{outname} - tmp.~{sample}.unmapped.alts.bam 
+            gsutil cp ${phasedBAM} ./~{sample}.bam
+            samtools merge -@ ~{threads} -o ~{outname} ~{sample}.bam tmp.~{sample}.unmapped.alts.bam
 
         else
             # 6: merge the haplotagged BAM with the alts
             #gsutil cat ${phasedBAM} | samtools merge -@ ~{threads} -o - - tmp.alt_reads.bam | samtools sort -@~{threads} -o ~{outname}
-            gsutil cat ${phasedBAM} | samtools merge -@ ~{threads} -o ~{outname} - tmp.alt_reads.bam
+            #gsutil cat ${phasedBAM} | samtools merge -@ ~{threads} -o ~{outname} - tmp.alt_reads.bam
+            gsutil cp ${phasedBAM} ./~{sample}.bam
+            samtools merge -@ ~{threads} -o ~{outname} ~{sample}.bam tmp.alt_reads.bam
         fi
         
 
