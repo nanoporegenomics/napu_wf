@@ -192,7 +192,9 @@ task indexMergeUpload {
             unmappedBAM="~{staging_gs_bucket}/data_files/~{sample}/reads/~{sample}.unmappedGRCh38.bam"
 
             # 5: merge the unmapped BAM with the alts
-            gsutil cat ${unmappedBAM} | samtools merge -o tmp.~{sample}.unmapped.alts.bam - tmp.alt_reads.bam
+            #gsutil cat ${unmappedBAM} | samtools merge -o tmp.~{sample}.unmapped.alts.bam - tmp.alt_reads.bam
+            gsutil cp ${unmappedBAM} ./~{sample}.unmappedGRCh38.bam 
+            samtools merge -o tmp.~{sample}.unmapped.alts.bam ~{sample}.unmappedGRCh38.bam tmp.alt_reads.bam
 
             # 6: merge the haplotagged BAM with the unmapped.alts
             #gsutil cat ${phasedBAM} | samtools merge -@ ~{threads} -o - - tmp.~{sample}.unmapped.alts.bam | samtools sort -@~{threads} -o ~{outname}
