@@ -185,7 +185,7 @@ task indexMergeUpload {
         samtools view -b -@ ~{threads} tmp.extracted_reads.sam | samtools sort -@ ~{threads} - > tmp.alt_reads.bam
 
         # 4: get haplotagged bam, and unmapped bam
-        phasedBAM="~{staging_gs_bucket}/data_files/~{sample}/reads/~{sample}.~{filesuffix}bam"
+        phasedBAM="~{staging_gs_bucket}/data_files/~{sample}/reads/~{sample}~{filesuffix}.bam"
 
         if [[ ~{findUnmapped} == "false" ]]
         then
