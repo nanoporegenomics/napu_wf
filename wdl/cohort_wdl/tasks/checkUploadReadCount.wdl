@@ -60,7 +60,7 @@ task checkUploadedReads_coh2 {
         String staging_gs_bucket
         Int memSizeGB = 40
         Int threads = 12
-        Int diskSizeGB = 2 #3 * round(size(unphasedMappedBAM, "GB")) + 40
+        Int diskSizeGB = round(size(unphasedMappedBAM, "GB")) + 40
     }
 
 
@@ -69,7 +69,7 @@ task checkUploadedReads_coh2 {
         set -eux -o pipefail
 
         #1 : count reads in the unphased bam
-        samtools view ~{unphasedMappedBAM} | cut -f1 | sort | uniq -c > ~{sample}.readsInUnphasedBam.chr.txt
+        samtools view -@ ~{threads} ~{unphasedMappedBAM} | cut -f1 | sort | uniq -c > ~{sample}.readsInUnphasedBam.chr.txt
 
         #2 : number of reads in unphased bam
         echo "unphased_aln _unphased_read count" > ~{sample}.numReads.txt
@@ -77,7 +77,7 @@ task checkUploadedReads_coh2 {
 
         #3 : count reads in the uploaded bam
         uploadedBAM="~{staging_gs_bucket}/data_files/~{sample}/reads/~{sample}.haplotagged.bam" 
-        samtools view ${uploadedBAM} | cut -f1 | sort | uniq -c > ~{sample}.readsInUploadedBam.chr.txt
+        gsutil cat ${uploadedBAM} | samtools view -@ ~{threads} | cut -f1 | sort | uniq -c > ~{sample}.readsInUploadedBam.chr.txt
 
         #2 : number of reads in unphased bam
         echo "uploaded_aln uploaded_read count" >> ~{sample}.numReads.txt
@@ -108,7 +108,6 @@ task checkUploadedReads {
 
     input {
         Array[File] unphasedMappedBAMs
-        File altchroms_file
         String sample
         String staging_gs_bucket
         Boolean findUnmapped
@@ -139,7 +138,7 @@ task checkUploadedReads {
 
         #4 : count reads in the uploaded bam
         uploadedBAM="~{staging_gs_bucket}/data_files/~{sample}/reads/~{sample}~{filesuffix}.bam" 
-        samtools view ${uploadedBAM} | cut -f1 | sort | uniq -c > ~{sample}.readsInUploadedBam.chr.txt
+        gsutil cat ${uploadedBAM} | samtools view -@ ~{threads} | cut -f1 | sort | uniq -c > ~{sample}.readsInUploadedBam.chr.txt
 
         #5 : number of reads in unphased bam
         echo "uploaded_aln uploaded_read count" >> ~{sample}.numReads.txt
