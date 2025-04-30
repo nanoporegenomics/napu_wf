@@ -77,7 +77,7 @@ task checkUploadedReads_coh2 {
 
         #3 : count reads in the uploaded bam
         uploadedBAM="~{staging_gs_bucket}/data_files/~{sample}/reads/~{sample}.haplotagged.bam" 
-        samtools view ~{uploadedBAM} | cut -f1 | sort | uniq -c > ~{sample}.readsInUploadedBam.chr.txt
+        samtools view ${uploadedBAM} | cut -f1 | sort | uniq -c > ~{sample}.readsInUploadedBam.chr.txt
 
         #2 : number of reads in unphased bam
         echo "uploaded_aln uploaded_read count" >> ~{sample}.numReads.txt
@@ -139,12 +139,13 @@ task checkUploadedReads {
 
         #4 : count reads in the uploaded bam
         uploadedBAM="~{staging_gs_bucket}/data_files/~{sample}/reads/~{sample}~{filesuffix}.bam" 
-        samtools view ~{uploadedBAM} | cut -f1 | sort | uniq -c > ~{sample}.readsInUploadedBam.chr.txt
+        samtools view ${uploadedBAM} | cut -f1 | sort | uniq -c > ~{sample}.readsInUploadedBam.chr.txt
 
         #5 : number of reads in unphased bam
         echo "uploaded_aln uploaded_read count" >> ~{sample}.numReads.txt
         awk '{sum += $1; count++} END {print sum, count}' ~{sample}.readsInUploadedBam.chr.txt >> ~{sample}.numReads.txt
 
+    >>>
 
         output {
         File origionalReadsPerChr = "~{sample}.readsInUnphasedBam.chr.txt"
