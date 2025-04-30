@@ -173,6 +173,8 @@ task indexMergeUpload {
             then
                 echo "find unmapped reads"
                 samtools view -f 4 -@ ~{threads} ${bam} >> tmp.extracted_reads.sam
+                echo "unmapped reads ${bam}" >> readcount.txt
+                samtools view -c -f 4 -@ ~{threads} ${bam} >> readcount.txt
             fi
 
         done
@@ -192,14 +194,15 @@ task indexMergeUpload {
             gsutil cat ${unmappedBAM} | samtools merge -o tmp.~{sample}.unmapped.alts.bam - tmp.alt_reads.bam
 
             # 6: merge the haplotagged BAM with the unmapped.alts
-            gsutil cat ${phasedBAM} | samtools merge -@ ~{threads} -o - - tmp.~{sample}.unmapped.alts.bam | samtools sort -@~{threads} - > ~{outname}
+            gsutil cat ${phasedBAM} | samtools merge -@ ~{threads} -o - - tmp.~{sample}.unmapped.alts.bam | samtools sort -@~{threads} -o ~{outname}
 
         else
             # 6: merge the haplotagged BAM with the alts
-            gsutil cat ${phasedBAM} | samtools merge -@ ~{threads} -o - - tmp.alt_reads.bam | samtools sort -@~{threads} - > ~{outname}
+            #gsutil cat ${phasedBAM} | samtools merge -@ ~{threads} -o - - tmp.alt_reads.bam | samtools sort -@~{threads} -o ~{outname}
+            gsutil cat ${phasedBAM} | samtools merge -@ ~{threads} -o ~{outname} - tmp.alt_reads.bam
         fi
         
-        
+
         # 5: index the merged BAM
         samtools index -@ ~{threads} ~{outname}
 
@@ -209,7 +212,7 @@ task indexMergeUpload {
         gsutil cp ~{outname}.bai "~{staging_gs_bucket}"/data_files/"~{sample}"/reads/"~{sample}".GRCh38.bam.bai
         gsutil ls "~{staging_gs_bucket}"/data_files/"~{sample}"/reads/
 
-        samtools view -@ ~{threads} -c ~{outname} > readcount.txt
+        samtools view -@ ~{threads} -c ~{outname} >> readcount.txt
 
         echo $(echo ~{tracker_string}) > trackerfile.txt
 
