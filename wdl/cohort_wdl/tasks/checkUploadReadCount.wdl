@@ -83,6 +83,9 @@ task checkUploadedReads_coh2 {
         echo "uploaded_aln uploaded_read count" >> ~{sample}.numReads.txt
         awk '{sum += $1; count++} END {print sum, count}' ~{sample}.readsInUploadedBam.chr.txt >> ~{sample}.numReads.txt
 
+        echo "uploaded_chr_aln_count" >> ~{sample}.numReads.txt
+        gsutil cat ${uploadedBAM} | samtools view -@ ~{threads} | cut -f3 | sort | uniq -c >> ~{sample}.numReads.txt
+
 
     >>>
 
@@ -147,7 +150,7 @@ task checkUploadedReads {
         awk '{sum += $1; count++} END {print sum, count}' ~{sample}.readsInUploadedBam.chr.txt >> ~{sample}.numReads.txt
 
         echo "uploaded_chr_aln_count" >> ~{sample}.numReads.txt
-        gsutil cat ${uploadedBAM} | samtools view -@ ~{threads} | cut -f3 | sort | uniq -c > ~{sample}.readsInUploadedBam.chr.txt
+        gsutil cat ${uploadedBAM} | samtools view -@ ~{threads} | cut -f3 | sort | uniq -c >> ~{sample}.numReads.txt
 
     >>>
 
