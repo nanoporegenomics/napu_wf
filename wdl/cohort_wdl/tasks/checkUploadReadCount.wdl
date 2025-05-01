@@ -136,6 +136,8 @@ task checkUploadedReads {
         echo "unphased_aln _unphased_read count" > ~{sample}.numReads.txt
         awk '{sum += $1; count++} END {print sum, count}' ~{sample}.readsInUnphasedBam.chr.txt >> ~{sample}.numReads.txt
 
+
+
         #4 : count reads in the uploaded bam
         uploadedBAM="~{staging_gs_bucket}/data_files/~{sample}/reads/~{sample}~{filesuffix}.bam" 
         gsutil cat ${uploadedBAM} | samtools view -@ ~{threads} | cut -f1 | sort | uniq -c > ~{sample}.readsInUploadedBam.chr.txt
@@ -143,6 +145,9 @@ task checkUploadedReads {
         #5 : number of reads in unphased bam
         echo "uploaded_aln uploaded_read count" >> ~{sample}.numReads.txt
         awk '{sum += $1; count++} END {print sum, count}' ~{sample}.readsInUploadedBam.chr.txt >> ~{sample}.numReads.txt
+
+        echo "uploaded_chr_aln_count" >> ~{sample}.numReads.txt
+        gsutil cat ${uploadedBAM} | samtools view -@ ~{threads} | cut -f3 | sort | uniq -c > ~{sample}.readsInUploadedBam.chr.txt
 
     >>>
 
