@@ -76,12 +76,12 @@ task checkUploadedReads_coh2 {
         awk '{sum += $1; count++} END {print sum, count}' ~{sample}.readsInUnphasedBam.chr.txt >> ~{sample}.numReads.txt
 
         #3 : count reads in the uploaded bam
-        uploadedBAM="~{staging_gs_bucket}/data_files/~{sample}/reads/~{sample}.haplotagged.bam" 
-        gsutil cat ${uploadedBAM} | samtools view -@ ~{threads} | cut -f1 | sort | uniq -c > ~{sample}.readsInUploadedBam.chr.txt
+        #uploadedBAM="~{staging_gs_bucket}/data_files/~{sample}/reads/~{sample}.haplotagged.bam" 
+        #gsutil cat ${uploadedBAM} | samtools view -@ ~{threads} | cut -f1 | sort | uniq -c > ~{sample}.readsInUploadedBam.chr.txt
 
         #3.5 : count reads in the uploaded merged bam
         upmergedBAM="~{staging_gs_bucket}/data_files/~{sample}/reads/~{sample}.GRCh38.bam" 
-        gsutil cat ${uploadedBAM} | samtools view -@ ~{threads} | cut -f1 | sort | uniq -c > ~{sample}.readsInUpMergedBam.chr.txt
+        gsutil cat ${upmergedBAM} | samtools view -@ ~{threads} | cut -f1 | sort | uniq -c > ~{sample}.readsInUpMergedBam.chr.txt
 
         #2 : number of reads in merged bam
         echo "uploaded_aln uploaded_read count" >> ~{sample}.numReads.txt
@@ -94,15 +94,15 @@ task checkUploadedReads_coh2 {
         echo "uploaded_chr_aln_count" >> ~{sample}.numReads.txt
         gsutil cat ${upmergedBAM} | samtools view -@ ~{threads} | cut -f3 | sort | uniq -c >> ~{sample}.numReads.txt
 
-        echo "uploaded_chr_aln_count" >> ~{sample}.numReads.txt
-        gsutil cat ${uploadedBAM} | samtools view -@ ~{threads} | cut -f3 | sort | uniq -c >> ~{sample}.numReads.txt
+        #echo "uploaded_chr_aln_count" >> ~{sample}.numReads.txt
+        #gsutil cat ${uploadedBAM} | samtools view -@ ~{threads} | cut -f3 | sort | uniq -c >> ~{sample}.numReads.txt
 
 
     >>>
 
     output {
         File origionalReadsPerChr = "~{sample}.readsInUnphasedBam.chr.txt"
-        File uploadedReadsPerChr = "~{sample}.readsInUploadedBam.chr.txt"
+        #File uploadedReadsPerChr = "~{sample}.readsInUploadedBam.chr.txt"
         File upmergedReadsPerChr = "~{sample}.readsInUpMergedBam.chr.txt"
         File readcount = "~{sample}.numReads.txt"
 
