@@ -78,28 +78,31 @@ task indexMergeUpload_coh2 {
         set -eux -o pipefail
 
         #1 : get the header from the first unphased bam into a tmp.sam to append all thre reads to
-        samtools view -H ~{unphasedMappedBAM} > tmp.extracted_reads.sam
+        #samtools view -H ~{unphasedMappedBAM} > tmp.extracted_reads.sam
 
         # 2: get alts from unphasedMappedBAMs array append reads (no header) to the tmp sam
-        echo "indexing and extracting "
+        #echo "indexing and extracting "
 
         # append the alt reads to tmp sam for easy concatination 
-        samtools view -@ ~{threads} ~{unphasedMappedBAM} $(cat ~{altchroms_file}) >> tmp.extracted_reads.sam
+        #samtools view -@ ~{threads} ~{unphasedMappedBAM} $(cat ~{altchroms_file}) >> tmp.extracted_reads.sam
 
 
         # 3: convert the tmp.sam to a bam
-        samtools view -b -@ ~{threads} tmp.extracted_reads.sam | samtools sort -@ ~{threads} - > tmp.alt_reads.bam
+        #samtools view -b -@ ~{threads} tmp.extracted_reads.sam | samtools sort -@ ~{threads} - > tmp.alt_reads.bam
 
         # 4: get haplotagged bam, and unmapped bam
         phasedBAM="~{staging_gs_bucket}/data_files/~{sample}/reads/~{sample}.haplotagged.bam" 
         unmappedBAM="~{staging_gs_bucket}/data_files/~{sample}/reads/~{sample}.unmappedGRCh38.bam"
 
         # 5: merge the unmapped BAM with the alts
-        gsutil cat ${unmappedBAM} | samtools merge -o tmp.~{sample}.unmapped.alts.bam - tmp.alt_reads.bam
+        #gsutil cat ${unmappedBAM} | samtools merge -o tmp.~{sample}.unmapped.alts.bam - tmp.alt_reads.bam
 
-        # 5: merge the haplotagged BAM with the unmapped.alts
-        gsutil cat ${phasedBAM} | samtools merge -@ ~{threads} -o - - tmp.~{sample}.unmapped.alts.bam | samtools sort -@~{threads} - > ~{outname}
+        # 5: merge the haplotagged BAM with the unmapped.bam
+        gsutil cp ${phasedBAM} ./~{sample}.haplotagged.bam
+        gsutil cp ${unmappedBAM} ./~{sample}.unmappedGRCh38.bam
 
+
+        samtools merge -@ ~{threads} -o ~{outname} ~{sample}.haplotagged.bam ~{sample}.unmappedGRCh38.bam 
 
         # 5: index the merged BAM
         samtools index -@ ~{threads} ~{outname}
