@@ -91,6 +91,7 @@ task checkUploadedReads_coh2 {
         echo "upmerged_aln upmerged_read count" >> ~{sample}.numReads.txt
         awk '{sum += $1; count++} END {print sum, count}' ~{sample}.readsInUpMergedBam.chr.txt >> ~{sample}.numReads.txt
 
+        # number of reads in merged bam including unmapped
         echo "uploaded_chr_aln_count" >> ~{sample}.numReads.txt
         gsutil cat ${upmergedBAM} | samtools view -@ ~{threads} | cut -f3 | sort | uniq -c >> ~{sample}.numReads.txt
 

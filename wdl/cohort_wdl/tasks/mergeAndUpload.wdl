@@ -101,7 +101,7 @@ task indexMergeUpload_coh2 {
         gsutil cp ${phasedBAM} ./~{sample}.haplotagged.bam
         gsutil cp ${unmappedBAM} ./~{sample}.unmappedGRCh38.bam
 
-
+        # merge unmapped and haplotagged bams
         samtools merge -@ ~{threads} -o ~{outname} ~{sample}.haplotagged.bam ~{sample}.unmappedGRCh38.bam 
 
         # 5: index the merged BAM
