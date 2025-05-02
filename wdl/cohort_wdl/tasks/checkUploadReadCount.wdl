@@ -38,12 +38,12 @@ workflow combineAndUpload {
     
 
     File origionalReadsPerChr = select_first([checkUploadedReads.origionalReadsPerChr, checkUploadedReads_coh2.origionalReadsPerChr])
-    File uploadedReadsPerChr = select_first([checkUploadedReads.uploadedReadsPerChr, checkUploadedReads_coh2.uploadedReadsPerChr])
+    File upmergedReadsPerChr = select_first([checkUploadedReads.uploadedReadsPerChr, checkUploadedReads_coh2.upmergedReadsPerChr])
     File readcount = select_first([checkUploadedReads.readcount, checkUploadedReads_coh2.readcount])
 
     output {
         File origionalReadsPerChrf = origionalReadsPerChr
-        File uploadedReadsPerChrf = uploadedReadsPerChr
+        File uploadedReadsPerChrf = upmergedReadsPerChr
         File readcountf = readcount
 
     }
