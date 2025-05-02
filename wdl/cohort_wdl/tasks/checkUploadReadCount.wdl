@@ -79,9 +79,20 @@ task checkUploadedReads_coh2 {
         uploadedBAM="~{staging_gs_bucket}/data_files/~{sample}/reads/~{sample}.haplotagged.bam" 
         gsutil cat ${uploadedBAM} | samtools view -@ ~{threads} | cut -f1 | sort | uniq -c > ~{sample}.readsInUploadedBam.chr.txt
 
-        #2 : number of reads in unphased bam
+        #3.5 : count reads in the uploaded merged bam
+        upmergedBAM="~{staging_gs_bucket}/data_files/~{sample}/reads/~{sample}.GRCh38.bam" 
+        gsutil cat ${uploadedBAM} | samtools view -@ ~{threads} | cut -f1 | sort | uniq -c > ~{sample}.readsInUpMergedBam.chr.txt
+
+        #2 : number of reads in merged bam
         echo "uploaded_aln uploaded_read count" >> ~{sample}.numReads.txt
         awk '{sum += $1; count++} END {print sum, count}' ~{sample}.readsInUploadedBam.chr.txt >> ~{sample}.numReads.txt
+
+        #2.5 : number of reads in unphased bam
+        echo "upmerged_aln upmerged_read count" >> ~{sample}.numReads.txt
+        awk '{sum += $1; count++} END {print sum, count}' ~{sample}.readsInUpMergedBam.chr.txt >> ~{sample}.numReads.txt
+
+        echo "uploaded_chr_aln_count" >> ~{sample}.numReads.txt
+        gsutil cat ${upmergedBAM} | samtools view -@ ~{threads} | cut -f3 | sort | uniq -c >> ~{sample}.numReads.txt
 
         echo "uploaded_chr_aln_count" >> ~{sample}.numReads.txt
         gsutil cat ${uploadedBAM} | samtools view -@ ~{threads} | cut -f3 | sort | uniq -c >> ~{sample}.numReads.txt
@@ -92,6 +103,7 @@ task checkUploadedReads_coh2 {
     output {
         File origionalReadsPerChr = "~{sample}.readsInUnphasedBam.chr.txt"
         File uploadedReadsPerChr = "~{sample}.readsInUploadedBam.chr.txt"
+        File upmergedReadsPerChr = "~{sample}.readsInUpMergedBam.chr.txt"
         File readcount = "~{sample}.numReads.txt"
 
     }
