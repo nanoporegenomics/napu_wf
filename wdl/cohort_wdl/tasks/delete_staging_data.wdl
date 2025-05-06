@@ -35,6 +35,7 @@ task deletehaplotagged_coh2 {
         String staging_gs_bucket
         Int memSizeGB = 2
         Int diskSizeGB = 2
+        Int threads = 1
     }
 
     command <<<
@@ -75,6 +76,7 @@ task deletehaplotagged_coh1 {
         String filesuffix = ""
         Int memSizeGB = 2
         Int diskSizeGB = 2
+        Int threads = 1
     }
 
     command <<<
