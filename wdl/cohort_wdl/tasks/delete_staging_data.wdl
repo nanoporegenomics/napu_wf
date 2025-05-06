@@ -10,7 +10,7 @@ workflow deleteStagedData {
     }
 
     if (cohortnum=="1"){
-        call indexMergeUpload {
+        call deletehaplotagged_coh1 {
         input:
         sample=sample,
         staging_gs_bucket=staging_gs_bucket
@@ -26,10 +26,10 @@ workflow deleteStagedData {
         }
     }
 
-    File outfile = select_first([deletehaplotagged_coh1.outfile, deletehaplotagged_coh2.outfile])
+    File outfilet = select_first([deletehaplotagged_coh1.outfile, deletehaplotagged_coh2.outfile])
 
     output {
-        File outfile = outfile
+        File outfile = outfilet
     }    
 
 }
