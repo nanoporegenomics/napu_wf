@@ -24,6 +24,12 @@ workflow deleteStagedData {
         staging_gs_bucket=staging_gs_bucket
 
         }
+    }
+
+    File outfile = select_first([deletehaplotagged_coh1.outfile, deletehaplotagged_coh2.outfile])
+
+    output {
+        File outfile = outfile
     }    
 
 }
@@ -54,10 +60,12 @@ task deletehaplotagged_coh2 {
         # delete the .unmappedGRCh38.bam
         gsutil rm ${unmappedBAM}
 
-        gsutil ls "~{staging_gs_bucket}"/data_files/"~{sample}"/reads/
+        gsutil ls "~{staging_gs_bucket}"/data_files/"~{sample}"/reads/ > ~{sample}.outfile.txt
     >>>
 
-
+    output {
+        File outfile = "~{sample}.outfile.txt"
+        }
 
     runtime {
         memory: memSizeGB + " GB"
@@ -95,10 +103,12 @@ task deletehaplotagged_coh1 {
         # delete the .unmappedGRCh38.bam
         gsutil rm ${unmappedBAM}
 
-        gsutil ls "~{staging_gs_bucket}"/data_files/"~{sample}"/reads/
+        gsutil ls -lh "~{staging_gs_bucket}"/data_files/"~{sample}"/reads/ > ~{sample}.outfile.txt
     >>>
 
-
+    output {
+        File outfile = "~{sample}.outfile.txt"
+        }
 
     runtime {
         memory: memSizeGB + " GB"
