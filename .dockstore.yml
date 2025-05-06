@@ -50,4 +50,8 @@ workflows:
       primaryDescriptorPath: /wdl/cohort_wdl/tasks/mergeAndUpload.wdl
    -  name: checkUploadReadCount
       subclass: WDL
-      primaryDescriptorPath: /wdl/cohort_wdl/tasks/checkUploadReadCount.wdl      
+      primaryDescriptorPath: /wdl/cohort_wdl/tasks/checkUploadReadCount.wdl  
+   -  name: deleteStagingData
+      subclass: WDL
+      primaryDescriptorPath: /wdl/cohort_wdl/tasks/delete_staging_data.wdl     
+      
