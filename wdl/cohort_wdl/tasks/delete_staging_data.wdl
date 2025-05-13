@@ -91,7 +91,7 @@ task deletehaplotagged_coh1 {
 
         set -eux -o pipefail
 
-        # 1: get haplotagged bam, and unmapped bam
+        # 1: get haplotagged bam, and unmapped bam : all samples will have this
         phasedBAM="~{staging_gs_bucket}/data_files/~{sample}/reads/~{sample}~{filesuffix}.bam"
         unmappedBAM="~{staging_gs_bucket}/data_files/~{sample}/reads/~{sample}.unmappedGRCh38.bam"
 
@@ -102,6 +102,11 @@ task deletehaplotagged_coh1 {
 
         # delete the .unmappedGRCh38.bam
         gsutil rm ${unmappedBAM}
+
+        # some samples will have chrM
+        chrmBAM="~{staging_gs_bucket}/data_files/~{sample}/reads/~{sample}.chrM_GRCh38.bam"
+        # delete the .chrM.bam
+        gsutil rm ${chrmBAM}
 
         gsutil ls -lh "~{staging_gs_bucket}"/data_files/"~{sample}"/reads/ > ~{sample}.outfile.txt
     >>>
@@ -118,3 +123,10 @@ task deletehaplotagged_coh1 {
     }
 
 }    
+
+
+
+
+
+
+
