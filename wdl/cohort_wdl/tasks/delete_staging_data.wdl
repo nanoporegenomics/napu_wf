@@ -107,7 +107,7 @@ task deletehaplotagged_coh1 {
         chrmBAM="~{staging_gs_bucket}/data_files/~{sample}/reads/~{sample}.chrM_GRCh38.bam"
 
         # check if chrM exists: 
-        if gustil ls ${chrmBAM} > /dev/null 2>&1; then
+        if gsutil ls ${chrmBAM} > /dev/null 2>&1; then
             echo "ChrM file exists"
             # delete the .chrM.bam
             gsutil rm ${chrmBAM}
