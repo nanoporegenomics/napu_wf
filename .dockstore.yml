@@ -54,4 +54,7 @@ workflows:
    -  name: deleteStagingData
       subclass: WDL
       primaryDescriptorPath: /wdl/cohort_wdl/tasks/delete_staging_data.wdl     
+   -  name: pilotUpload
+      subclass: WDL
+      primaryDescriptorPath: /wdl/cohort_wdl/tasks/pilotSampleUploads.wdl     
       
