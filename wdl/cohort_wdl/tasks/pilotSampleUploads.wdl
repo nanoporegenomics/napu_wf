@@ -97,16 +97,22 @@ task uploadStagingData{
         echo -e "~{sample}.modkit_unphased\tWGS\tbed\t#\t#\t~{sample}_GRCh38.bed.gz\t~{staging_gs_bucket}/data_files/~{sample}/methylation/~{sample}_GRCh38.bed.gz\tGRCh38\n" >> trackerfile.txt
 
         # methylBED hap1
-        gsutil cp ~{modkitBed_1} "~{staging_gs_bucket}"/data_files/"~{sample}"/methylation/
-        echo -e "~{sample}.modkit_hap1\tWGS\tbed\t#\t#\t~{sample}_GRCh38_1.bed.gz\t~{staging_gs_bucket}/data_files/~{sample}/methylation/~{sample}_GRCh38_1.bed.gz\tGRCh38\n" >> trackerfile.txt
+        if [[ -f "~{modkitBed_1}" ]]; then
+            gsutil cp ~{modkitBed_1} "~{staging_gs_bucket}"/data_files/"~{sample}"/methylation/
+            echo -e "~{sample}.modkit_hap1\tWGS\tbed\t#\t#\t~{sample}_GRCh38_1.bed.gz\t~{staging_gs_bucket}/data_files/~{sample}/methylation/~{sample}_GRCh38_1.bed.gz\tGRCh38\n" >> trackerfile.txt
+        fi
 
         # methylBED hap2
-        gsutil cp ~{modkitBed_2} "~{staging_gs_bucket}"/data_files/"~{sample}"/methylation/
-        echo -e "~{sample}.modkit_hap2\tWGS\tbed\t#\t#\t~{sample}_GRCh38_2.bed.gz\t~{staging_gs_bucket}/data_files/~{sample}/methylation/~{sample}_GRCh38_2.bed.gz\tGRCh38\n" >> trackerfile.txt
+        if [[ -f "~{modkitBed_2}" ]]; then
+            gsutil cp ~{modkitBed_2} "~{staging_gs_bucket}"/data_files/"~{sample}"/methylation/
+            echo -e "~{sample}.modkit_hap2\tWGS\tbed\t#\t#\t~{sample}_GRCh38_2.bed.gz\t~{staging_gs_bucket}/data_files/~{sample}/methylation/~{sample}_GRCh38_2.bed.gz\tGRCh38\n" >> trackerfile.txt
+        fi
 
         # methylBED ungrouped phased
-        gsutil cp ~{modkitBed_ungrouped} "~{staging_gs_bucket}"/data_files/"~{sample}"/methylation/
-        echo -e "~{sample}.modkit_ungrouped\tWGS\tbed\t#\t#\t~{sample}_GRCh38_ungrouped.bed.gz\t~{staging_gs_bucket}/data_files/~{sample}/methylation/~{sample}_GRCh38_ungrouped.bed.gz\tGRCh38\n" >> trackerfile.txt
+        if [[ -f "~{modkitBed_ungrouped}" ]]; then
+            gsutil cp ~{modkitBed_ungrouped} "~{staging_gs_bucket}"/data_files/"~{sample}"/methylation/
+            echo -e "~{sample}.modkit_ungrouped\tWGS\tbed\t#\t#\t~{sample}_GRCh38_ungrouped.bed.gz\t~{staging_gs_bucket}/data_files/~{sample}/methylation/~{sample}_GRCh38_ungrouped.bed.gz\tGRCh38\n" >> trackerfile.txt
+        fi
 
         #variant_calls
         # harmonized svs snvs
@@ -195,7 +201,7 @@ task indexMergeUpload {
         samtools index -@ ~{threads} ~{outname}
 
         # 7: move to staging workspace
-        gsutil ls "~{staging_gs_bucket}"/data_files/"~{sample}"/reads/
+        #gsutil ls "~{staging_gs_bucket}"/data_files/"~{sample}"/reads/
         gsutil cp ~{outname} "~{staging_gs_bucket}"/data_files/"~{sample}"/reads/"~{sample}".GRCh38.bam
         gsutil cp ~{outname}.bai "~{staging_gs_bucket}"/data_files/"~{sample}"/reads/"~{sample}".GRCh38.bam.bai
         gsutil ls "~{staging_gs_bucket}"/data_files/"~{sample}"/reads/
