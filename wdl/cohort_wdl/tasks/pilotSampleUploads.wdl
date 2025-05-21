@@ -52,9 +52,12 @@ workflow pilotUpload {
     
 
     output {
+        File trackerfileAll = uploadStagingData.trackerfile
         File readcount = indexMergeUpload.readcount
         File trackerfileBAM = indexMergeUpload.trackerfile
-        File trackerfileAll = uploadStagingData.trackerfile
+        File origionalReadsPerChro = indexMergeUpload.origionalReadsPerChr
+        File uploadedReadsPerChro = indexMergeUpload.uploadedReadsPerChr
+        File numReadFileo = indexMergeUpload.numReadFile
 
     }
 }
@@ -200,12 +203,31 @@ task indexMergeUpload {
         samtools view -@ ~{threads} -c ~{outname} >> readcount.txt
 
         echo $(echo ~{tracker_string}) > trackerfile.txt
+
+        # check reads in 
+        samtools view ~{unphasedMappedBAM} | cut -f1 | sort | uniq -c >> ~{sample}.readsInUnphasedBam.chr.txt
+
+        echo "unphased_aln _unphased_read count" > ~{sample}.numReads.txt
+        awk '{sum += $1; count++} END {print sum, count}' ~{sample}.readsInUnphasedBam.chr.txt >> ~{sample}.numReads.txt
+
+        samtools view -@ ~{threads} ~{outname} | cut -f1 | sort | uniq -c > ~{sample}.readsInUploadedBam.chr.txt
+
+        echo "uploaded_aln uploaded_read count" >> ~{sample}.numReads.txt
+        awk '{sum += $1; count++} END {print sum, count}' ~{sample}.readsInUploadedBam.chr.txt >> ~{sample}.numReads.txt
+
+        echo "uploaded_chr_aln_count" >> ~{sample}.numReads.txt
+        samtools view -@ ~{threads} ~{outname} | cut -f3 | sort | uniq -c >> ~{sample}.numReads.txt
+
     >>>
 
     output {
         String trackerString = "~{tracker_string}"
         File readcount = "readcount.txt"
         File trackerfile = "trackerfile.txt"
+        File origionalReadsPerChr = "~{sample}.readsInUnphasedBam.chr.txt"
+        File uploadedReadsPerChr = "~{sample}.readsInUploadedBam.chr.txt"
+        File numReadFile = "~{sample}.numReads.txt"
+
     }
 
     runtime {
