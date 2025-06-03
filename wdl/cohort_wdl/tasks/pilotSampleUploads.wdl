@@ -4,16 +4,16 @@ version 1.0
 
 workflow pilotUpload {
     input {
-        File modkitBEDunphased
-        File modkitBed_1
-        File modkitBed_2
-        File modkitBed_ungrouped
+        #File modkitBEDunphased
+        #File modkitBed_1
+        #File modkitBed_2
+        #File modkitBed_ungrouped
 
-        File snifflesvcf
-        File snifflessnf
-        File hapdiff09
-        File harmonizedVCF
-        File dvGvcf
+        #File snifflesvcf
+        #File snifflessnf
+        #File hapdiff09
+        #File harmonizedVCF
+        #File dvGvcf
 
         File haplotaggedBAM
         File mappedBam
@@ -35,24 +35,24 @@ workflow pilotUpload {
             staging_gs_bucket=staging_gs_bucket
     }
 
-    call uploadStagingData {
-        input:
-            modkitBEDunphased = modkitBEDunphased,
-            modkitBed_1 = modkitBed_1,
-            modkitBed_2 = modkitBed_2,
-            modkitBed_ungrouped = modkitBed_ungrouped,
-            harmonizedVCF = harmonizedVCF, 
-            snifflesvcf = snifflesvcf,
-            snifflessnf = snifflessnf,
-            hapdiff09 = hapdiff09,
-            dvGvcf = dvGvcf,
-            sample=sample,
-            staging_gs_bucket=staging_gs_bucket
-    }
+    #call uploadStagingData {
+    #    input:
+    #        modkitBEDunphased = modkitBEDunphased,
+    #        modkitBed_1 = modkitBed_1,
+    #        modkitBed_2 = modkitBed_2,
+    #        modkitBed_ungrouped = modkitBed_ungrouped,
+    #        harmonizedVCF = harmonizedVCF, 
+    #        snifflesvcf = snifflesvcf,
+    #        snifflessnf = snifflessnf,
+    #        hapdiff09 = hapdiff09,
+    #        dvGvcf = dvGvcf,
+    #        sample=sample,
+    #        staging_gs_bucket=staging_gs_bucket
+    #}
     
 
     output {
-        File trackerfileAll = uploadStagingData.trackerfile
+        #File trackerfileAll = uploadStagingData.trackerfile
         File readcount = indexMergeUpload.readcount
         File trackerfileBAM = indexMergeUpload.trackerfile
         File origionalReadsPerChro = indexMergeUpload.origionalReadsPerChr
