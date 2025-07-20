@@ -18,6 +18,8 @@ workflow cardEndToEndVcfMethyl
         File?       referenceVntrAnnotations
         File?       shastaFasta
         Boolean     shastaInMem = false
+        File?       hapdupFasta1
+        File?       hapdupFasta2
         Array[File] inputMappedBams = []
         Int         nbReadsPerChunk = 0
         String      sampleName = "sample"
@@ -150,7 +152,7 @@ workflow cardEndToEndVcfMethyl
     File dvVCF = select_first([mergeVCFs.vcf, dv_t.dvVcf])
     File dvgVCF = select_first([mergeVCFs.gvcf, dv_t.dvgVcf])
 
-    ##### Haplotag the reads
+    ##### Haplotag the reads  ?
     call dv_margin_t.margin_t{
         input:
             threads = threads,
@@ -166,43 +168,51 @@ workflow cardEndToEndVcfMethyl
     
 
     ##### De novo phased assembly
+    # if hapdup assembly already provided 
+    if(!defined(hapdupFasta1)){
 
-    ## if any fastq reads are suppled as input use those for shasta
-    if(basename(inReadFile, ".bam") == basename(inReadFile)){
-        ## If one fastq is provided as input read/s store as a File 
-        if (length(inputReads) == 1){
-            File readFile = select_first(inputReads)
-        }
-
-        ## or merge multiple unaligned read fastqs into a single File
-        if (length(inputReads) > 1){
-            call minimap_t.mergeFASTQ as mergeInReadsFQs{
-                input:
-                    reads = inputReads,
-                    outname = sampleName,
+        ## if any fastq reads are suppled as input use those for shasta
+        if(basename(inReadFile, ".bam") == basename(inReadFile)){
+            ## If one fastq is provided as input read/s store as a File 
+            if (length(inputReads) == 1){
+                File readFile = select_first(inputReads)
             }
+
+            ## or merge multiple unaligned read fastqs into a single File
+            if (length(inputReads) > 1){
+                call minimap_t.mergeFASTQ as mergeInReadsFQs{
+                    input:
+                        reads = inputReads,
+                        outname = sampleName,
+                }
+            }
+            File singleReadsFastq = select_first([mergeInReadsFQs.fq, readFile])
         }
-        File singleReadsFastq = select_first([mergeInReadsFQs.fq, readFile])
+
+        # if any non-BAM reads are supplied as input use those for shasta
+        File shastaInputReads = select_first([singleReadsFastq, bamFile])
+
+        ## Run assembly
+        call denovo_asm_wf.structuralVariantsDenovoAssembly as asm {
+            input:
+                readsFile = shastaInputReads, 
+                chunkedReadsFiles=select_first([chunkedReads, []]),
+                shastaFasta = shastaFasta,
+                shastaInMem = shastaInMem,
+                threads = threads
+        }
+
     }
 
-    # if any non-BAM reads are supplied as input use those for shasta
-    File shastaInputReads = select_first([singleReadsFastq, bamFile])
-
-    ## Run assembly
-    call denovo_asm_wf.structuralVariantsDenovoAssembly as asm {
-        input:
-            readsFile = shastaInputReads, 
-            chunkedReadsFiles=select_first([chunkedReads, []]),
-            shastaFasta = shastaFasta,
-            shastaInMem = shastaInMem,
-            threads = threads
-    }
+    # Isolate the haplotype resolved assemblies
+    File asmDual1 = select_first([hapdupFasta1, asm.asmDual1])
+    File asmDual2 = select_first([hapdupFasta2, asm.asmDual2])
 
     ##### Assembly-based structural variant calling
     call hapdiff_t.hapdiff_t as hapdiff {
         input:
-            ctgsPat = asm.asmDual1,
-            ctgsMat = asm.asmDual2,
+            ctgsPat = asmDual1,
+            ctgsMat = asmDual2,
             reference = referenceFasta,
             vntrAnnotations = referenceVntrAnnotations,
 			sample = sampleName
@@ -210,8 +220,8 @@ workflow cardEndToEndVcfMethyl
 
     call dipcall_t.dipcall_t as dipcall {
         input:
-            ctgsPat = asm.asmDual1,
-            ctgsMat = asm.asmDual2,
+            ctgsPat = asmDual1,
+            ctgsMat = asmDual2,
             reference = referenceFasta
     }
 
@@ -226,7 +236,7 @@ workflow cardEndToEndVcfMethyl
     }
 
 
-    ##### Reference-based structural variant calling
+    ##### Reference-based structural variant calling; using the harmonized bam
     call sniffles_t.sniffles_t as sniffles {
         input:
             #bamAlignment = margin_t.haplotaggedBam,
@@ -266,16 +276,16 @@ workflow cardEndToEndVcfMethyl
         File smallVariantsgVcf = margin_t.phasedgVcf
         File snifflesVcf = sniffles.snifflesVcf
         File snifflesSnf = sniffles.snifflesSnf
-        File shastaHaploid = asm.shastaHaploid
+        File? shastaHaploid = asm.shastaHaploid
         #File? shastaLog = asm.shastaLog
         #File? shastaGFA = asm.shastaGfa
         #File? shastaHtml = asm.shastaHtml
-        File assemblyHap1 = asm.asmPhased1
-        File assemblyHap2 = asm.asmPhased2
-        File asmHap1PhaseBed = asm.phaseBed1
-        File asmHap2PhaseBed = asm.phaseBed2
-        File assemblyDual1 = asm.asmDual1
-        File assemblyDual2 = asm.asmDual2
+        File? assemblyHap1 = asm.asmPhased1
+        File? assemblyHap2 = asm.asmPhased2
+        File? asmHap1PhaseBed = asm.phaseBed1
+        File? asmHap2PhaseBed = asm.phaseBed2
+        File? assemblyDual1 = asm.asmDual1
+        File? assemblyDual2 = asm.asmDual2
         File structuralVariantsVcf = hapdiff.hapdiffUnphasedVcf
         File alignmentBedHap1 = hapdiff.alignmentBedHap1
         File alignmentBedHap2 = hapdiff.alignmentBedHap2

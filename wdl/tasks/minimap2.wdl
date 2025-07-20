@@ -160,7 +160,8 @@ task indexBAM {
         set -o xtrace
 
         ln -s ~{bam} reads.bam
-        samtools index -@ ~{threads} reads.bam
+        samtools sort reads.bam > reads.sorted.bam
+        samtools index -@ ~{threads} reads.sorted.bam
 
         ## split by chromosome, if any chrs specified
         if [ ~{anyChrs} == true ]
@@ -168,19 +169,20 @@ task indexBAM {
             mkdir bamPerChrs
             while read -r chrn
             do
-                samtools view -@ ~{threads} -h -O BAM reads.bam ${chrn} -o bamPerChrs/~{outname}.${chrn}.bam
+                #samtools fastq -TMm,Ml,MM,ML -@ 6 reads.bam | chopper -t 4 -q 10  | minimap2 -ax map-ont ref.fa - -y --eqx > merged.piped.chopped.bam
+                samtools view -@ ~{threads} -h -O BAM reads.sorted.bam ${chrn} -o bamPerChrs/~{outname}.${chrn}.bam
                 samtools index -@ ~{threads} bamPerChrs/~{outname}.${chrn}.bam
             done < ~{write_lines(chrs)}
         fi
     >>>
     output {
-        File bamIndex = "reads.bam.bai"
+        File bamIndex = "reads.sorted.bam.bai"
         Array[File]? bamPerChrs = glob("bamPerChrs/*.bam")
         Array[File]? bamPerChrsIndex = glob("bamPerChrs/*.bam.bai")
     }
     runtime {
-        preemptible: 2
-        time: 240
+        #preemptible: 2
+        #time: 240
         memory: memGb + " GB"
         cpu: threads
         disks: "local-disk " + diskGb + " SSD"
