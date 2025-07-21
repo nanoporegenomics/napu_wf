@@ -160,8 +160,8 @@ task indexBAM {
         set -o xtrace
 
         ln -s ~{bam} reads.bam
-        samtools sort reads.bam > reads.sorted.bam
-        samtools index -@ ~{threads} reads.sorted.bam
+        samtools sort -@~{threads} reads.bam > ~{outname}.sorted.bam
+        samtools index -@ ~{threads} ~{outname}.sorted.bam
 
         ## split by chromosome, if any chrs specified
         if [ ~{anyChrs} == true ]
@@ -176,7 +176,8 @@ task indexBAM {
         fi
     >>>
     output {
-        File bamIndex = "reads.sorted.bam.bai"
+        File sortedBam = "~{outname}.sorted.bam"
+        File bamIndex = "~{outname}.sorted.bam.bai"
         Array[File]? bamPerChrs = glob("bamPerChrs/*.bam")
         Array[File]? bamPerChrsIndex = glob("bamPerChrs/*.bam.bai")
     }
