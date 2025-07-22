@@ -147,7 +147,7 @@ task indexBAM {
     input {
         File bam
         Array[String] chrs = []
-        Boolean sortInputBAM = False
+        Boolean sortInputBAM = false
         Int threads = 8
         Int diskGb = round(5 * size(bam, 'G')) + 20
         Int memGb = 8
