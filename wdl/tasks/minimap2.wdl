@@ -147,6 +147,7 @@ task indexBAM {
     input {
         File bam
         Array[String] chrs = []
+        Boolean sortInputBAM = False
         Int threads = 8
         Int diskGb = round(5 * size(bam, 'G')) + 20
         Int memGb = 8
@@ -159,9 +160,17 @@ task indexBAM {
         set -u
         set -o xtrace
 
-        ln -s ~{bam} reads.bam
-        samtools sort -@~{threads} reads.bam > ~{outname}.sorted.bam
+        if [ ~{sortInputBAM} == true ]
+        then
+            ln -s ~{bam} reads.bam
+            samtools sort -@~{threads} reads.bam > ~{outname}.sorted.bam
+            
+        else
+            ln -s ~{bam} ~{outname}.sorted.bam
+        fi
+
         samtools index -@ ~{threads} ~{outname}.sorted.bam
+
 
         ## split by chromosome, if any chrs specified
         if [ ~{anyChrs} == true ]
