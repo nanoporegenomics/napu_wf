@@ -167,7 +167,7 @@ task mergeVCFs {
 
   runtime {
     preemptible: 2
-    docker: "quay.io/biocontainers/bcftools@sha256:95c212df20552fc74670d8f16d20099d9e76245eda6a1a6cfff4bd39e57be01b"
+    docker: "biocontainers/bcftools:v1.9-1-deb_cv1@sha256:ab5e68068ff56baf59b79f995b5425edba9f61cc86a5476357db87ec2670899d"
     cpu: 1
     memory: memSizeGb + " GB"
     disks: "local-disk " + diskSizeGb + " SSD"
