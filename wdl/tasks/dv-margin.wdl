@@ -103,7 +103,7 @@ task margin_t {
     ln -s ~{bamAlignmentIndex} reads.bam.bai
     
     mkdir output/
-    margin phase reads.bam ref.fa ~{vcfFile} /opt/margin/params/phase/allParams.haplotag.ont-r104q20.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName}
+    margin phase reads.bam ref.fa ~{vcfFile} /opt/margin/params/phase/allParams.haplotag.ont-r104q20.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName} -M
 
     bgzip output/~{sampleName}.phased.vcf
 
@@ -112,14 +112,14 @@ task margin_t {
 
     bgzip output/~{sampleName}.g.phased.vcf
 
-    samtools index -@ ~{threads} output/~{sampleName}.haplotagged.bam
+    #samtools index -@ ~{threads} output/~{sampleName}.haplotagged.bam
   >>>
 
   output {
       File phasedVcf = "output/~{sampleName}.phased.vcf.gz"
       File phasedgVcf = "output/~{sampleName}.g.phased.vcf.gz"
-      File haplotaggedBam = "output/~{sampleName}.haplotagged.bam"
-      File haplotaggedBamIdx = "output/~{sampleName}.haplotagged.bam.bai"
+      #File haplotaggedBam = "output/~{sampleName}.haplotagged.bam"
+      #File haplotaggedBamIdx = "output/~{sampleName}.haplotagged.bam.bai"
       File? toplog = "top.log"
   }
 
