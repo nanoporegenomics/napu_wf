@@ -40,6 +40,7 @@ workflow runMarginPhase {
 
     output {
         File out_margin_phase_svs = marginPhase.phasedVcf
+        File out_phasedVcfIdx = marginPhase.phasedVcfIdx
         File out_margin_phasedgVcf = marginPhase.phasedgVcf
         File out_margin_phase_bam = marginPhase.haplotaggedBam
         File out_margin_phase_bam_bai = marginPhase.haplotaggedBamIdx
@@ -123,6 +124,7 @@ task marginPhase {
 
         # gzip vcf and index bam
         bgzip output/~{sampleName}_hvcf.phased.vcf
+        tabix output/~{sampleName}_hvcf.phased.vcf.gz
         samtools index -@ ~{threads} output/~{sampleName}_hvcf.haplotagged.bam
 
         # Don't output a bam (-M) for gVCF phasing
@@ -133,6 +135,7 @@ task marginPhase {
     >>>
     output {
         File phasedVcf = "output/~{sampleName}_hvcf.phased.vcf.gz"
+        File phasedVcfIdx = "output/~{sampleName}_hvcf.phased.vcf.gz.tbi"
         File phasedgVcf = "output/~{sampleName}.g.phased.vcf.gz"
         File haplotaggedBam = "output/~{sampleName}_hvcf.haplotagged.bam"
         File haplotaggedBamIdx = "output/~{sampleName}_hvcf.haplotagged.bam.bai"
