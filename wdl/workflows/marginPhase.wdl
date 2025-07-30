@@ -5,6 +5,7 @@ workflow runMarginPhase {
         File smallVariantsFile
         File structuralVariantsFile
         File? harmonizedVariantFile
+        File gvcfFile
         File refFile
         File bamFile
         String sampleName
@@ -28,6 +29,7 @@ workflow runMarginPhase {
     call marginPhase {
         input:
         combinedVcfFile = combinedVariantVCF,
+        gVcfFile = gvcfFile,
         refFile = refFile,
         bamFile = bamFile,
         sampleName = sampleName,
@@ -38,6 +40,7 @@ workflow runMarginPhase {
 
     output {
         File out_margin_phase_svs = marginPhase.phasedVcf
+        File out_margin_phasedgVcf = marginPhase.phasedgVcf
         File out_margin_phase_bam = marginPhase.haplotaggedBam
         File out_margin_phase_bam_bai = marginPhase.haplotaggedBamIdx
     }
@@ -91,6 +94,7 @@ task marginPhase {
         File combinedVcfFile
         File refFile
         File bamFile
+        File gVcfFile
         String sampleName
         String dockerImage
         String marginOtherArgs = ""
@@ -121,9 +125,15 @@ task marginPhase {
         bgzip output/~{sampleName}_hvcf.phased.vcf
         samtools index -@ ~{threads} output/~{sampleName}_hvcf.haplotagged.bam
 
+        # Don't output a bam (-M) for gVCF phasing
+        margin phase output/~{sampleName}_hvcf.haplotagged.bam ~{refFile} ~{gVcfFile} /opt/margin/params/phase/allParams.haplotag.ont-r104q20.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName}.g -M
+
+        bgzip output/~{sampleName}.g.phased.vcf
+
     >>>
     output {
         File phasedVcf = "output/~{sampleName}_hvcf.phased.vcf.gz"
+        File phasedgVcf = "output/~{sampleName}.g.phased.vcf.gz"
         File haplotaggedBam = "output/~{sampleName}_hvcf.haplotagged.bam"
         File haplotaggedBamIdx = "output/~{sampleName}_hvcf.haplotagged.bam.bai"
         File? toplog = "top.log"

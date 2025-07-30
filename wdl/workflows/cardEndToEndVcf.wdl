@@ -153,17 +153,16 @@ workflow cardEndToEndVcfMethyl
     File dvgVCF = select_first([mergeVCFs.gvcf, dv_t.dvgVcf])
 
     ##### Haplotag the reads  ?
-    call dv_margin_t.margin_t{
-        input:
-            threads = threads,
-            reference = referenceFasta,
-            bamAlignment = bamFile,
-            bamAlignmentIndex = bamFileIndex,
-            vcfFile = dvVCF,
-            gvcfFile = dvgVCF,
-            sampleName = sampleName
-    }
-
+    #call dv_margin_t.margin_t{
+    #    input:
+    #        threads = threads,
+    #        reference = referenceFasta,
+    #        bamAlignment = bamFile,
+    #        bamAlignmentIndex = bamFileIndex,
+    #        vcfFile = dvVCF,
+    #        gvcfFile = dvgVCF,
+    #        sampleName = sampleName
+    #}
 
     
 
@@ -228,10 +227,11 @@ workflow cardEndToEndVcfMethyl
     ##### Phase short variants and structural variants
     call margin_phase_wf.runMarginPhase as margin_phase {
         input:
-            smallVariantsFile = margin_t.phasedVcf,
+            smallVariantsFile = dvVCF,
             structuralVariantsFile = hapdiff.hapdiffUnphasedVcf,
+            gvcfFile = dvgVCF,
             refFile = referenceFasta,
-            bamFile = margin_t.haplotaggedBam,
+            bamFile = bamFile, #margin_t.haplotaggedBam,
             sampleName = sampleName
     }
 
@@ -272,8 +272,8 @@ workflow cardEndToEndVcfMethyl
         File harmonizedPhasedBamBai = margin_phase.out_margin_phase_bam_bai
         File harmonizedVcf = margin_phase.out_margin_phase_svs
         #File phasedBam = margin_t.haplotaggedBam
-        File smallVariantsVcf = margin_t.phasedVcf
-        File smallVariantsgVcf = margin_t.phasedgVcf
+        File smallVariantsVcf = dvVCF
+        File smallVariantsgVcf = margin_phase.out_margin_phasedgVcf
         File snifflesVcf = sniffles.snifflesVcf
         File snifflesSnf = sniffles.snifflesSnf
         File? shastaHaploid = asm.shastaHaploid
