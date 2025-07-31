@@ -10,6 +10,7 @@ workflow runMarginPhase {
         File bamFile
         String sampleName
         Int preemptible_count = 2
+        Int threads = 64
         String dockerImage = "mkolmogo/card_harmonize_vcf:0.1"
         File? resourceLogScript
     }
@@ -20,6 +21,8 @@ workflow runMarginPhase {
                 smallVariantsFile = smallVariantsFile,
                 structuralVariantsFile = structuralVariantsFile,
                 sampleName = sampleName,
+                preemptible_count = preemptible_count,
+                threads = threads,
                 dockerImage = dockerImage
         }
     }
@@ -35,6 +38,7 @@ workflow runMarginPhase {
         sampleName = sampleName,
         dockerImage = dockerImage,
         preemptible_count = preemptible_count,
+        threads = threads,
         resourceLogScript = resourceLogScript
     }
 
@@ -53,6 +57,7 @@ task combineVcfs {
         File structuralVariantsFile
         String sampleName
         String dockerImage
+        Int preemptible_count
         Int svLengthCutoff = 25
         Int threads = 32
         Int memSizeGb = 128
@@ -82,7 +87,7 @@ task combineVcfs {
         File outVcf = "~{sampleName}.merged_small_svs.vcf"
     }
     runtime {
-        preemptible: 2
+        preemptible: preemptible_count
         memory: memSizeGb + " GB"
         cpu: threads
         disks: "local-disk " + diskSizeGb + " SSD"
@@ -100,8 +105,8 @@ task marginPhase {
         String dockerImage
         String marginOtherArgs = ""
         Int preemptible_count
-        Int threads = 32
-        Int memSizeGb = 2 * round(size(bamFile, 'G')) + 100
+        Int threads = 64
+        Int memSizeGb = 2 * round(size(bamFile, 'G')) + 200
         Int diskSizeGb = 2 * round(size(bamFile, 'G')) + round(size(refFile, 'G')) + 100
         File? resourceLogScript
     }
