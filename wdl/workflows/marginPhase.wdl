@@ -9,7 +9,7 @@ workflow runMarginPhase {
         File refFile
         File bamFile
         String sampleName
-        Int preemptible_count = 2
+        Int preemptible_count = 0
         Int threads = 64
         String dockerImage = "mkolmogo/card_harmonize_vcf:0.1"
         File? resourceLogScript
