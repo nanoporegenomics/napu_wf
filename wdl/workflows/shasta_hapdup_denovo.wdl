@@ -14,6 +14,7 @@ workflow structuralVariantsDenovoAssembly {
         File? shastaLOG
         File? readAlign
         Boolean shastaInMem = false
+        Boolean qScoreCutoff = false
         String extraShastaArgs = ""
         Array[File] chunkedReadsFiles = []
         Int threads
@@ -28,13 +29,24 @@ workflow structuralVariantsDenovoAssembly {
     Array[File] readArray = [readsFile]
     if(!defined(shastaFasta)){
         if ((basename(readsFile, ".fasta") == basename(readsFile)) && (basename(readsFile, ".fa") == basename(readsFile))){
-            call shasta_t.convertToFasta {
-                input:
-                readfiles=readArray,
-                preemptible=preemptible
+            if(qScoreCutoff){
+                call shasta_t.convertToFastq {
+                    input:
+                    readfiles=readArray,
+                    preemptible=preemptible
+                }
             }
+            
+            if(!qScoreCutoff){
+                call shasta_t.convertToFasta {
+                    input:
+                    readfiles=readArray,
+                    preemptible=preemptible
+                }
+            }
+                
         }
-        File readsFasta = select_first([convertToFasta.fasta, readsFile])
+        File readsFasta = select_first([convertToFasta.fasta, convertToFasta.fasta, readsFile])
         if(shastaInMem){
             call shasta_t.shasta_inmem_t as shasta_t {
                 input:
