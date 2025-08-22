@@ -221,9 +221,9 @@ task convertToFastq {
 
       if [ "${READS: -3}" == "bam" ]
       then
-        #samtools fasta -@ ~{threads} $READS >> ~{outname}.fasta
-        # after converting to fastq and chopping, maybe pipe back? do we still need quality values?
-        samtools fastq -@ ~{threads} $READS | chopper -t ~{threads} -q ~{QscoreMin} | bgzip >> ~{outname}.Q~{QscoreMin}.fastq.gz
+        samtools fasta -@ ~{threads} $READS >> ~{outname}.fasta
+        # Reads are already >Q10, don't filter.
+        # samtools fastq -@ ~{threads} $READS | chopper -t ~{threads} -q ~{QscoreMin} | bgzip >> ~{outname}.Q~{QscoreMin}.fastq.gz
       fi
     done;
   >>>
