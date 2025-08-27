@@ -185,7 +185,7 @@ task indexBAM {
         fi
     >>>
     output {
-        File sortedBam = "~{outname}.sorted.bam"
+        File? sortedBam = "~{outname}.sorted.bam"
         File bamIndex = "~{outname}.sorted.bam.bai"
         Array[File]? bamPerChrs = glob("bamPerChrs/*.bam")
         Array[File]? bamPerChrsIndex = glob("bamPerChrs/*.bam.bai")
