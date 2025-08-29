@@ -45,6 +45,9 @@ workflows:
    -  name: hifiasmWf
       subclass: WDL
       primaryDescriptorPath: /wdl/tasks/hifiasm.wdl
+   -  name: indexaBAM
+      subclass: WDL
+      primaryDescriptorPath: /wdl/cohort_wdl/workflows/indexABAM.wdl 
    -  name: mergeUploadGCP
       subclass: WDL
       primaryDescriptorPath: /wdl/cohort_wdl/tasks/mergeAndUpload.wdl
