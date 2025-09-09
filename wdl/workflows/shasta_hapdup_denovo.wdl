@@ -14,6 +14,7 @@ workflow structuralVariantsDenovoAssembly {
         File? shastaLOG
         File? readAlign
         Boolean shastaInMem = false
+        Boolean qScoreCutoff = false
         String extraShastaArgs = ""
         Array[File] chunkedReadsFiles = []
         Int threads
@@ -28,13 +29,24 @@ workflow structuralVariantsDenovoAssembly {
     Array[File] readArray = [readsFile]
     if(!defined(shastaFasta)){
         if ((basename(readsFile, ".fasta") == basename(readsFile)) && (basename(readsFile, ".fa") == basename(readsFile))){
-            call shasta_t.convertToFasta {
-                input:
-                readfiles=readArray,
-                preemptible=preemptible
+            if(qScoreCutoff){
+                call shasta_t.convertToFastq {
+                    input:
+                    readfiles=readArray,
+                    preemptible=preemptible
+                }
             }
+            
+            if(!qScoreCutoff){
+                call shasta_t.convertToFasta {
+                    input:
+                    readfiles=readArray,
+                    preemptible=preemptible
+                }
+            }
+                
         }
-        File readsFasta = select_first([convertToFasta.fasta, readsFile])
+        File readsFasta = select_first([convertToFasta.fasta, convertToFasta.fasta, readsFile])
         if(shastaInMem){
             call shasta_t.shasta_inmem_t as shasta_t {
                 input:
@@ -53,9 +65,9 @@ workflow structuralVariantsDenovoAssembly {
         }
     }
     File ambFasta = select_first([shasta_t.shastaFasta, shasta_inmem_t.shastaFasta, shastaFasta])
-    File? shastaGfa_t = select_first([shasta_t.shastaGfa, shasta_inmem_t.shastaGfa, shastaGFA])
-    File? shastaLog_t = select_first([shasta_t.shastaLog, shasta_inmem_t.shastaLog, shastaLOG])
-    File? shastaHtml_t = select_first([shasta_t.shastaHtml, shasta_inmem_t.shastaHtml, shastaHTML])
+    #File? shastaGfa_t = select_first([shasta_t.shastaGfa, shasta_inmem_t.shastaGfa, shastaGFA])
+    #File? shastaLog_t = select_first([shasta_t.shastaLog, shasta_inmem_t.shastaLog, shastaLOG])
+    #File? shastaHtml_t = select_first([shasta_t.shastaHtml, shasta_inmem_t.shastaHtml, shastaHTML])
 
     if(!defined(readAlign)){
         ### minimap2 alignment ###
@@ -88,29 +100,31 @@ workflow structuralVariantsDenovoAssembly {
 
 
     }
-	
+    
 
     File bamFile = select_first([minimap2.bam, mergeBAMhapdup.bam, readAlign])
 
-	### hapdup
-	call hapdup_t.hapdup_t as hapdup_t {
-		input:
-			threads=threads,
-			alignedBam=bamFile,
-			contigs=ambFasta,
-			diskSizeGb=hapdupDiskSizeGB
+    ### hapdup
+    call hapdup_t.hapdup_t as hapdup_t {
+        input:
+            threads=threads,
+            alignedBam=bamFile,
+            contigs=ambFasta,
+            diskSizeGb=hapdupDiskSizeGB
     }
 
-	output {
+    output {
         File asmDual1 = hapdup_t.hapdupDual1
         File asmDual2 = hapdup_t.hapdupDual2
         File asmPhased1 = hapdup_t.hapdupPhased1
         File asmPhased2 = hapdup_t.hapdupPhased2
         File phaseBed1 = hapdup_t.hapdupPhaseBed1
         File phaseBed2 = hapdup_t.hapdupPhaseBed2 
-		File shastaHaploid = ambFasta
-        File? shastaGfa = shastaGfa_t
-		File? shastaLog = shastaLog_t
-        File? shastaHtml = shastaHtml_t
-	}
+        File shastaHaploid = ambFasta
+        File readsMappedToAssembly = bamFile
+        File? readsToFasta = readsFasta
+        #File? shastaGfa = shastaGfa_t
+        #File? shastaLog = shastaLog_t
+        #File? shastaHtml = shastaHtml_t
+    }
 }

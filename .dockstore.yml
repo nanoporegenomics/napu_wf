@@ -39,6 +39,28 @@ workflows:
    -  name: bedtoolsMapwf
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/bedtoolsMap.wdl
+<<<<<<< HEAD
    -  name: regionalMethylationwf
       subclass: WDL
       primaryDescriptorPath: /wdl/tasks/regionalMethylation.wdl
+=======
+   -  name: hifiasmWf
+      subclass: WDL
+      primaryDescriptorPath: /wdl/tasks/hifiasm.wdl
+   -  name: indexaBAM
+      subclass: WDL
+      primaryDescriptorPath: /wdl/workflows/indexABAM.wdl 
+   -  name: mergeUploadGCP
+      subclass: WDL
+      primaryDescriptorPath: /wdl/cohort_wdl/tasks/mergeAndUpload.wdl
+   -  name: checkUploadReadCount
+      subclass: WDL
+      primaryDescriptorPath: /wdl/cohort_wdl/tasks/checkUploadReadCount.wdl  
+   -  name: deleteStagingData
+      subclass: WDL
+      primaryDescriptorPath: /wdl/cohort_wdl/tasks/delete_staging_data.wdl     
+   -  name: pilotUpload
+      subclass: WDL
+      primaryDescriptorPath: /wdl/cohort_wdl/tasks/pilotSampleUploads.wdl     
+      
+>>>>>>> R10_gt

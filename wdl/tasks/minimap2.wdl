@@ -147,6 +147,7 @@ task indexBAM {
     input {
         File bam
         Array[String] chrs = []
+        Boolean sortInputBAM = false
         Int threads = 8
         Int diskGb = round(5 * size(bam, 'G')) + 20
         Int memGb = 8
@@ -159,8 +160,17 @@ task indexBAM {
         set -u
         set -o xtrace
 
-        ln -s ~{bam} reads.bam
-        samtools index -@ ~{threads} reads.bam
+        if [ ~{sortInputBAM} == true ]
+        then
+            ln -s ~{bam} reads.bam
+            samtools sort -@~{threads} reads.bam > ~{outname}.sorted.bam
+            
+        else
+            ln -s ~{bam} ~{outname}.sorted.bam
+        fi
+
+        samtools index -@ ~{threads} ~{outname}.sorted.bam
+
 
         ## split by chromosome, if any chrs specified
         if [ ~{anyChrs} == true ]
@@ -168,19 +178,21 @@ task indexBAM {
             mkdir bamPerChrs
             while read -r chrn
             do
-                samtools view -@ ~{threads} -h -O BAM reads.bam ${chrn} -o bamPerChrs/~{outname}.${chrn}.bam
+                #samtools fastq -TMm,Ml,MM,ML -@ 6 reads.bam | chopper -t 4 -q 10  | minimap2 -ax map-ont ref.fa - -y --eqx > merged.piped.chopped.bam
+                samtools view -@ ~{threads} -h -O BAM ~{outname}.sorted.bam ${chrn} -o bamPerChrs/~{outname}.${chrn}.bam
                 samtools index -@ ~{threads} bamPerChrs/~{outname}.${chrn}.bam
             done < ~{write_lines(chrs)}
         fi
     >>>
     output {
-        File bamIndex = "reads.bam.bai"
+        File? sortedBam = "~{outname}.sorted.bam"
+        File bamIndex = "~{outname}.sorted.bam.bai"
         Array[File]? bamPerChrs = glob("bamPerChrs/*.bam")
         Array[File]? bamPerChrsIndex = glob("bamPerChrs/*.bam.bai")
     }
     runtime {
-        preemptible: 2
-        time: 240
+        #preemptible: 2
+        #time: 240
         memory: memGb + " GB"
         cpu: threads
         disks: "local-disk " + diskGb + " SSD"

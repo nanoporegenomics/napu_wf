@@ -6,18 +6,33 @@ workflow shasta {
         Array[File] readFiles = []
         String shastaArgs = ""
         Boolean inMemory = false
+        Boolean qScoreCutoff = false
+        Int preemptible = 2
         Int diskSizeGB = 1024
     }
     
     File readsFile = select_first(readFiles)
 
-    if ((basename(readsFile, ".fasta") == basename(readsFile)) && (basename(readsFile, ".fa") == basename(readsFile))){
-        call convertToFasta {
+    if(qScoreCutoff){
+      # convert to fastq to remove reads below QscoreMin
+      call convertToFastq {
             input:
-            readfiles=readFiles
+            readfiles=readFiles,
+            preemptible=preemptible
         }
     }
-    File readsFasta = select_first([convertToFasta.fasta, readsFile])
+
+    if(!qScoreCutoff){
+      if ((basename(readsFile, ".fasta") == basename(readsFile)) && (basename(readsFile, ".fa") == basename(readsFile))){
+        call convertToFasta {
+            input:
+            readfiles=readFiles,
+            preemptible=preemptible
+        }
+    }
+    }
+    
+    File readsFasta = select_first([convertToFastq.fastq, convertToFasta.fasta, readsFile])
 
     if(inMemory){
         call shasta_inmem_t {
@@ -45,6 +60,7 @@ workflow shasta {
         File fasta = shastaFasta
         File gfa = shastaGfa
         File log = shastaLog
+        File readsToFasta = readsFasta
     }
 }
 
@@ -56,7 +72,7 @@ task shasta_t {
     String shastaConfig = "/opt/shasta_config/Nanopore-R10-Fast-Nov2022.conf"
     Int memSizeGb = 624
     Int diskSizeGb = 1125
-    String dockerImage = "quay.io/jmonlong/card_shasta@sha256:ce218dc133b2534f58f841bccd4b1d1d880c6ad62c1c321dd91bdd8d43e554f1"
+    String dockerImage = "meredith705/shasta@sha256:f0b2350446e5772232bbd027ad3f27414d20fd5b26d4a57ca73281593b1e21a2"
   }
 
   command <<<
@@ -99,6 +115,7 @@ task shasta_t {
   output {
     File shastaFasta = "ShastaRun/Assembly.fasta"
     File shastaGfa = "ShastaRun/Assembly.gfa"
+    File shastaHtml = "ShastaRun/AssemblySummary.html"
     File shastaLog = "shasta.log.tar.gz"
   }
 
@@ -159,18 +176,71 @@ task shasta_inmem_t {
   output {
     File shastaFasta = "ShastaRun/Assembly.fasta"
     File shastaGfa = "ShastaRun/Assembly.gfa"
+    File shastaHtml = "ShastaRun/AssemblySummary.html" 
     File shastaLog = "shasta.log.tar.gz"
   }
 
   #This is optimized for GCP/Terra environemnt to get maximum available RAM. May need to adjust for other cloud environemnts or HPC
   runtime {
-    docker: "quay.io/jmonlong/card_shasta@sha256:ce218dc133b2534f58f841bccd4b1d1d880c6ad62c1c321dd91bdd8d43e554f1"
+    docker: "meredith705/shasta@sha256:f0b2350446e5772232bbd027ad3f27414d20fd5b26d4a57ca73281593b1e21a2"
     cpu: threads
     memory: memSizeGb + " GB"
     disks: "local-disk " + diskSizeGb + " LOCAL"
     cpuPlatform: cpuPlatform
   }
 }
+
+task convertToFastq {
+  input {
+    Array[File] readfiles = []
+    Int QscoreMin = 10
+    Int threads = 10
+    Int memSizeGb = 8
+    Int diskSizeGb = 5 * round(size(readfiles, 'G')) + 50
+    Int preemptible = 2
+  }
+
+  String outname = sub(sub(basename(select_first(readfiles)), ".gz$", ""), ".bam", "")
+  command <<<
+    set -o pipefail
+    set -e
+    set -u
+    set -o xtrace
+
+    for READS in ~{sep=' ' readfiles}
+    do
+      if [ "${READS: -3}" == ".gz" ]
+      then
+        if [ "${READS: -4}" == "q.gz" ]
+        then
+          zcat $READS | awk '{if(NR%4==1) {printf(">%s\n",substr($0,2));} else if(NR%4==2) print;}' >> ~{outname}.fasta
+        else
+          zcat $READS >> ~{outname}.fasta
+        fi
+      fi
+
+      if [ "${READS: -3}" == "bam" ]
+      then
+        samtools fasta -@ ~{threads} $READS >> ~{outname}.fasta
+        # Reads are already >Q10, don't filter.
+        # samtools fastq -@ ~{threads} $READS | chopper -t ~{threads} -q ~{QscoreMin} | bgzip >> ~{outname}.Q~{QscoreMin}.fastq.gz
+      fi
+    done;
+  >>>
+
+  output {
+    File fastq = "~{outname}.Q~{QscoreMin}.fastq.gz"
+  }
+
+  runtime {
+      docker: "meredith705/shasta@sha256:f0b2350446e5772232bbd027ad3f27414d20fd5b26d4a57ca73281593b1e21a2"
+      preemptible: preemptible
+      cpu: threads
+      memory: memSizeGb + " GB"
+      disks: "local-disk " + diskSizeGb + " SSD"
+  }
+}
+
 
 task convertToFasta {
   input {
@@ -212,7 +282,7 @@ task convertToFasta {
   }
 
   runtime {
-      docker: "quay.io/jmonlong/card_shasta@sha256:ce218dc133b2534f58f841bccd4b1d1d880c6ad62c1c321dd91bdd8d43e554f1"
+      docker: "meredith705/shasta@sha256:f0b2350446e5772232bbd027ad3f27414d20fd5b26d4a57ca73281593b1e21a2"
       preemptible: preemptible
       cpu: threads
       memory: memSizeGb + " GB"
