@@ -18,7 +18,7 @@ workflow runMarginPhase {
     if(!defined(harmonizedVariantFile)){
         call combineVcfs {
             input:
-                smallVariantsFile = smallVariantsFile,
+                smallVariantsFile = gvcfFile,
                 structuralVariantsFile = structuralVariantsFile,
                 sampleName = sampleName,
                 preemptible_count = preemptible_count,
@@ -46,8 +46,8 @@ workflow runMarginPhase {
         File out_margin_phase_svs = marginPhase.phasedVcf
         File out_phasedVcfIdx = marginPhase.phasedVcfIdx
         File out_phasedVCFPhaseSetBED = marginPhase.phasedVCFPhaseSetBED
-        File out_margin_phasedgVcf = marginPhase.phasedgVcf
-        File out_margin_phasedgVCFPhaseSetBED = marginPhase.phasedgVCFPhaseSetBED
+        #File out_margin_phasedgVcf = marginPhase.phasedgVcf
+        #File out_margin_phasedgVCFPhaseSetBED = marginPhase.phasedgVCFPhaseSetBED
         File out_margin_phase_bam = marginPhase.haplotaggedBam
         File out_margin_phase_bam_bai = marginPhase.haplotaggedBamIdx
     }
@@ -135,17 +135,17 @@ task marginPhase {
         samtools index -@ ~{threads} output/~{sampleName}_hvcf.haplotagged.bam
 
         # Don't output a bam (-M) for gVCF phasing
-        margin phase output/~{sampleName}_hvcf.haplotagged.bam ~{refFile} ~{gVcfFile} /opt/margin/params/phase/allParams.haplotag.ont-r104q20.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName}.g -M
+        #margin phase output/~{sampleName}_hvcf.haplotagged.bam ~{refFile} ~{gVcfFile} /opt/margin/params/phase/allParams.haplotag.ont-r104q20.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName}.g -M
 
-        bgzip output/~{sampleName}.g.phased.vcf
+        #bgzip output/~{sampleName}.g.phased.vcf
 
     >>>
     output {
         File phasedVcf = "output/~{sampleName}_hvcf.phased.vcf.gz"
         File phasedVcfIdx = "output/~{sampleName}_hvcf.phased.vcf.gz.tbi"
         File phasedVCFPhaseSetBED = "output/~{sampleName}_hvcf.phaseset.bed"
-        File phasedgVcf = "output/~{sampleName}.g.phased.vcf.gz"
-        File phasedgVCFPhaseSetBED = "output/~{sampleName}.g.phaseset.bed"
+        #File phasedgVcf = "output/~{sampleName}.g.phased.vcf.gz"
+        #File phasedgVCFPhaseSetBED = "output/~{sampleName}.g.phaseset.bed"
         File haplotaggedBam = "output/~{sampleName}_hvcf.haplotagged.bam"
         File haplotaggedBamIdx = "output/~{sampleName}_hvcf.haplotagged.bam.bai"
         File? toplog = "top.log"

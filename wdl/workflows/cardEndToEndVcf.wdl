@@ -273,10 +273,7 @@ workflow cardEndToEndVcfMethyl
         File harmonizedVcf = margin_phase.out_margin_phase_svs
         File harmonizedVcfIdx = margin_phase.out_phasedVcfIdx
         File harmonizedVcfPhaseset = margin_phase.out_phasedVCFPhaseSetBED
-        #File phasedBam = margin_t.haplotaggedBam
         File smallVariantsVcf = dvVCF
-        File smallVariantsgVcf = margin_phase.out_margin_phasedgVcf
-        File smallVariantsgVcfPhaseset = margin_phase.out_margin_phasedgVCFPhaseSetBED
         File snifflesVcf = sniffles.snifflesVcf
         File snifflesSnf = sniffles.snifflesSnf
         File? shastaHaploid = asm.shastaHaploid
