@@ -39,11 +39,9 @@ workflows:
    -  name: bedtoolsMapwf
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/bedtoolsMap.wdl
-<<<<<<< HEAD
    -  name: regionalMethylationwf
       subclass: WDL
       primaryDescriptorPath: /wdl/tasks/regionalMethylation.wdl
-=======
    -  name: hifiasmWf
       subclass: WDL
       primaryDescriptorPath: /wdl/tasks/hifiasm.wdl
@@ -62,5 +60,4 @@ workflows:
    -  name: pilotUpload
       subclass: WDL
       primaryDescriptorPath: /wdl/cohort_wdl/tasks/pilotSampleUploads.wdl     
-      
->>>>>>> R10_gt
+
