@@ -29,6 +29,13 @@ RUN wget https://github.com/samtools/samtools/releases/download/1.9/samtools-1.9
     make && \
     ln -s /opt/samtools/samtools-1.9/samtools /usr/local/bin/samtools
 
+# get bedtools
+WORKDIR /opt/bedtools
+RUN wget https://github.com/arq5x/bedtools2/releases/download/v2.31.0/bedtools.static && \
+    mv bedtools.static.binary bedtools
+    chmod a+x bedtools 
+    ln -s /opt/bedtools/bedtools /usr/local/bin/bedtools
+
 # get marginPolish
 WORKDIR /opt
 RUN git clone https://github.com/UCSC-nanopore-cgl/margin.git && \
@@ -77,6 +84,9 @@ RUN wget https://github.com/samtools/bcftools/releases/download/${bcftoolsVer}/b
 
 WORKDIR /opt
 COPY ./vcf_filter_size.py /opt/vcf_filter_size.py
+COPY ./filter_high_depth_variants.py /opt/filter_high_depth_variants.py
+COPY ./filter_vcf.sh /opt/filter_vcf.sh
+
 
 RUN apt-get update && apt-get install --no-install-recommends -y tabix
 WORKDIR /data

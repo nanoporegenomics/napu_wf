@@ -2,10 +2,10 @@ version 1.0
 
 workflow runMarginPhase {
     input {
-        File smallVariantsFile
+        File smallVariantsgVCFFile
         File structuralVariantsFile
         File? harmonizedVariantFile
-        File gvcfFile
+        #File gvcfFile
         File refFile
         File bamFile
         String sampleName
@@ -18,7 +18,7 @@ workflow runMarginPhase {
     if(!defined(harmonizedVariantFile)){
         call combineVcfs {
             input:
-                smallVariantsFile = gvcfFile,
+                smallVariantsFile = smallVariantsgVCFFile,
                 structuralVariantsFile = structuralVariantsFile,
                 sampleName = sampleName,
                 preemptible_count = preemptible_count,
@@ -32,7 +32,6 @@ workflow runMarginPhase {
     call marginPhase {
         input:
         combinedVcfFile = combinedVariantVCF,
-        gVcfFile = gvcfFile,
         refFile = refFile,
         bamFile = bamFile,
         sampleName = sampleName,
@@ -83,10 +82,14 @@ task combineVcfs {
         zcat -f ~{smallVariantsFile} | python3 /opt/vcf_filter_size.py less ~{svLengthCutoff} | bcftools reheader -s samplename.txt | bgzip > $SMALL_FILTERED
         tabix -p vcf $SMALL_FILTERED
 
-        bcftools concat -a $SMALL_FILTERED $SV_FILTERED -o ~{sampleName}.merged_small_svs.vcf
+        bcftools concat -a $SMALL_FILTERED $SV_FILTERED -Oz -o ~{sampleName}.merged_small_svs.vcf.gz
+        tabix -p vcf $SMALL_FILTERED ~{sampleName}.merged_small_svs.vcf.gz
+
+
     >>>
     output {
-        File outVcf = "~{sampleName}.merged_small_svs.vcf"
+        File outVcf = "~{sampleName}.merged_small_svs.vcf.gz"
+        File outVcfIdx = "~{sampleName}.merged_small_svs.vcf.gz.tbi"
     }
     runtime {
         preemptible: preemptible_count
@@ -102,10 +105,12 @@ task marginPhase {
         File combinedVcfFile
         File refFile
         File bamFile
-        File gVcfFile
         String sampleName
         String dockerImage
         String marginOtherArgs = ""
+        Int filter_window_size = 100000
+        Int filter_min_cluster_size = 10
+        Int filter_threshold_SD = 3
         Int preemptible_count
         Int threads = 64
         Int memSizeGb = 2 * round(size(bamFile, 'G')) + 200
@@ -123,29 +128,28 @@ task marginPhase {
         then
             bash ~{resourceLogScript} 20 top.log &
         fi
+
+        #filter the VCF by depth or do this in combinVcf task?
+        ./opt/filter_vcf.sh ~{combinedVcfFile} ~{sampleName} ~{filter_window_size} ~{filter_min_cluster_size} ~{filter_threshold_SD}
+        # Make name of the filterd VCF
+        filtVcf="${sampleName}.merged_small_svs.${filter_threshold_SD}_sd_depthFilt.vcf.gz"
         
         samtools index -@ ~{threads} ~{bamFile}
         samtools faidx ~{refFile}
         mkdir output/
-        margin phase ~{bamFile} ~{refFile} ~{combinedVcfFile} /opt/margin/params/phase/allParams.phase_vcf.ont.sv.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName}_hvcf 
+        margin phase ~{bamFile} ~{refFile} $filtVcf /opt/margin/params/phase/allParams.phase_vcf.ont.sv.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName}_hvcf 
 
         # gzip vcf and index bam
         bgzip output/~{sampleName}_hvcf.phased.vcf
         tabix output/~{sampleName}_hvcf.phased.vcf.gz
         samtools index -@ ~{threads} output/~{sampleName}_hvcf.haplotagged.bam
 
-        # Don't output a bam (-M) for gVCF phasing
-        #margin phase output/~{sampleName}_hvcf.haplotagged.bam ~{refFile} ~{gVcfFile} /opt/margin/params/phase/allParams.haplotag.ont-r104q20.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName}.g -M
-
-        #bgzip output/~{sampleName}.g.phased.vcf
 
     >>>
     output {
         File phasedVcf = "output/~{sampleName}_hvcf.phased.vcf.gz"
         File phasedVcfIdx = "output/~{sampleName}_hvcf.phased.vcf.gz.tbi"
         File phasedVCFPhaseSetBED = "output/~{sampleName}_hvcf.phaseset.bed"
-        #File phasedgVcf = "output/~{sampleName}.g.phased.vcf.gz"
-        #File phasedgVCFPhaseSetBED = "output/~{sampleName}.g.phaseset.bed"
         File haplotaggedBam = "output/~{sampleName}_hvcf.haplotagged.bam"
         File haplotaggedBamIdx = "output/~{sampleName}_hvcf.haplotagged.bam.bai"
         File? toplog = "top.log"
