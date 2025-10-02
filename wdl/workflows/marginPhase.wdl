@@ -61,8 +61,8 @@ task combineVcfs {
         Int preemptible_count
         Int svLengthCutoff = 25
         Int threads = 32
-        Int memSizeGb = 128
-        Int diskSizeGb = 256
+        Int memSizeGb = 2 * round(size(smallVariantsFile, 'G')) + round(size(structuralVariantsFile, 'G'))
+        Int diskSizeGb = 2 * round(size(smallVariantsFile, 'G')) + 2 * round(size(structuralVariantsFile, 'G'))
     }
     command <<<
         set -o pipefail
@@ -129,9 +129,9 @@ task marginPhase {
             bash ~{resourceLogScript} 20 top.log &
         fi
 
-        #filter the VCF by depth or do this in combinVcf task?
+        #filter the VCF by depth or do this in combineVcf task?
         ./opt/filter_vcf.sh ~{combinedVcfFile} ~{sampleName} ~{filter_window_size} ~{filter_min_cluster_size} ~{filter_threshold_SD}
-        # Make name of the filterd VCF
+        # Make the name of the filterd VCF
         filtVcf="${sampleName}.merged_small_svs.${filter_threshold_SD}_sd_depthFilt.vcf.gz"
         
         samtools index -@ ~{threads} ~{bamFile}
