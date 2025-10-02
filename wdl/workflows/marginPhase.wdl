@@ -61,8 +61,8 @@ task combineVcfs {
         Int preemptible_count
         Int svLengthCutoff = 25
         Int threads = 32
-        Int memSizeGb = 2 * round(size(smallVariantsFile, 'G')) + round(size(structuralVariantsFile, 'G'))
-        Int diskSizeGb = 2 * round(size(smallVariantsFile, 'G')) + 2 * round(size(structuralVariantsFile, 'G'))
+        Int memSizeGb = 2 * round(size(smallVariantsFile, 'G')) + round(size(structuralVariantsFile, 'G')) + 200
+        Int diskSizeGb = 2 * round(size(smallVariantsFile, 'G')) + 2 * round(size(structuralVariantsFile, 'G')) + 500
     }
     command <<<
         set -o pipefail
@@ -71,8 +71,8 @@ task combineVcfs {
         set -o xtrace
 
         # check if input is bgzipped or not
-        SV_FILTERED=~{structuralVariantsFile}_size_filtered.vcf
-        SMALL_FILTERED=~{smallVariantsFile}_size_filtered.vcf
+        SV_FILTERED=~{structuralVariantsFile}_size_filtered.vcf.gz
+        SMALL_FILTERED=~{smallVariantsFile}_size_filtered.vcf.gz
 
         echo ~{sampleName} > samplename.txt
         
