@@ -11,7 +11,7 @@ workflow runMarginPhase {
         String sampleName
         Int preemptible_count = 0
         Int threads = 64
-        String dockerImage = "mkolmogo/card_harmonize_vcf:0.1"
+        String dockerImage = "meredith705/card_harmonize_vcf@sha256:5a0ef5a7a4b58a502b9ac2510eac16ef02db9aae8aabc850d12e183c317729f4"
         File? resourceLogScript
     }
 
