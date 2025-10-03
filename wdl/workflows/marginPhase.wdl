@@ -83,7 +83,7 @@ task combineVcfs {
         tabix -p vcf $SMALL_FILTERED
 
         bcftools concat -a $SMALL_FILTERED $SV_FILTERED -Oz -o ~{sampleName}.merged_small_svs.vcf.gz
-        tabix -p vcf $SMALL_FILTERED ~{sampleName}.merged_small_svs.vcf.gz
+        tabix -p vcf ~{sampleName}.merged_small_svs.vcf.gz
 
 
     >>>
