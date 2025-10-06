@@ -5,7 +5,7 @@ ARG git_commit
 
 # update and install dependencies
 RUN apt-get update && \
-    apt-get -y install time git make wget autoconf gcc g++ zlib1g-dev libcurl4-openssl-dev libbz2-dev libhdf5-dev liblzma-dev python3 && \
+    apt-get -y install time git make wget autoconf gcc g++ zlib1g-dev libcurl4-openssl-dev libbz2-dev libhdf5-dev liblzma-dev python3 python3-pip && \
     apt-get clean && \
     apt-get purge && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -70,8 +70,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
  libcurl4-gnutls-dev \
  libssl-dev \
  libperl-dev \
- libgsl0-dev \
- python3-pip \&& \
+ libgsl0-dev && \
  rm -rf /var/lib/apt/lists/* && apt-get autoclean
 
 # get bcftools and make /data
