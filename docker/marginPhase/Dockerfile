@@ -70,7 +70,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
  libcurl4-gnutls-dev \
  libssl-dev \
  libperl-dev \
- libgsl0-dev && \
+ libgsl0-dev \
+ python3-pip \&& \
  rm -rf /var/lib/apt/lists/* && apt-get autoclean
 
 # get bcftools and make /data
