@@ -130,7 +130,7 @@ task marginPhase {
         fi
 
         #filter the VCF by depth or do this in combineVcf task?
-        ./opt/filter_vcf.sh ~{combinedVcfFile} ~{sampleName} ~{filter_window_size} ~{filter_min_cluster_size} ~{filter_threshold_SD}
+        bash /opt/filter_vcf.sh ~{combinedVcfFile} ~{sampleName} ~{filter_window_size} ~{filter_min_cluster_size} ~{filter_threshold_SD}
         # Make the name of the filterd VCF
         filtVcf="${sampleName}.merged_small_svs.${filter_threshold_SD}_sd_depthFilt.vcf.gz"
         

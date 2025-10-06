@@ -82,6 +82,10 @@ RUN wget https://github.com/samtools/bcftools/releases/download/${bcftoolsVer}/b
  make install && \
  mkdir /data
 
+# install pysam etc
+RUN pip3 install --upgrade pip && \
+    pip3 install --upgrade pysam==0.19.1
+
 WORKDIR /opt
 COPY ./vcf_filter_size.py /opt/vcf_filter_size.py
 COPY ./filter_high_depth_variants.py /opt/filter_high_depth_variants.py
