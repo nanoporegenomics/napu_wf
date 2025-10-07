@@ -5,6 +5,7 @@ workflow runMarginPhase {
         File smallVariantsgVCFFile
         File structuralVariantsFile
         File? harmonizedVariantFile
+        File? harmonizedVariantFileIdx
         #File gvcfFile
         File refFile
         File bamFile
@@ -28,10 +29,12 @@ workflow runMarginPhase {
     }
 
     File combinedVariantVCF = select_first([harmonizedVariantFile, combineVcfs.outVcf])
+    File combinedVariantVCFIdx = select_first([harmonizedVariantFileIdx, combineVcfs.outVcfIdx])
 
     call marginPhase {
         input:
         combinedVcfFile = combinedVariantVCF,
+        combinedVcfFileIdx = combinedVariantVCFIdx,
         refFile = refFile,
         bamFile = bamFile,
         sampleName = sampleName,
@@ -103,6 +106,7 @@ task combineVcfs {
 task marginPhase {
     input {
         File combinedVcfFile
+        File combinedVcfFileIdx
         File refFile
         File bamFile
         String sampleName
