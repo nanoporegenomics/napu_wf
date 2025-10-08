@@ -133,10 +133,15 @@ task marginPhase {
             bash ~{resourceLogScript} 20 top.log &
         fi
 
+        ln -s ~{combinedVcfFile} combinedVcfFile.vcf
+        ln -s ~{combinedVcfFileIdx} combinedVcfFile.vcf.idx
+
         #filter the VCF by depth or do this in combineVcf task?
-        bash /opt/filter_vcf.sh ~{combinedVcfFile} ~{sampleName} ~{filter_window_size} ~{filter_min_cluster_size} ~{filter_threshold_SD}
+        bash /opt/filter_vcf.sh combinedVcfFile.vcf ~{sampleName} ~{filter_window_size} ~{filter_min_cluster_size} ~{filter_threshold_SD}
         # Make the name of the filterd VCF
         filtVcf="${sampleName}.merged_small_svs.${filter_threshold_SD}_sd_depthFilt.vcf.gz"
+        mergedFilteredBed="${sample_id}.merged_small_svs.filt${window}bp_${threshold_SD}_sds.100kbmerged.bed"
+
         
         samtools index -@ ~{threads} ~{bamFile}
         samtools faidx ~{refFile}
@@ -156,6 +161,7 @@ task marginPhase {
         File phasedVCFPhaseSetBED = "output/~{sampleName}_hvcf.phaseset.bed"
         File haplotaggedBam = "output/~{sampleName}_hvcf.haplotagged.bam"
         File haplotaggedBamIdx = "output/~{sampleName}_hvcf.haplotagged.bam.bai"
+        File exclusionBed = "~{sampleName}.merged_small_svs.filt~{filter_window_size}bp_~{filter_threshold_SD}_sds.100kbmerged.bed"
         File? toplog = "top.log"
     }
 
