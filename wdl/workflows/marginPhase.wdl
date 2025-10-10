@@ -52,6 +52,7 @@ workflow runMarginPhase {
         #File out_margin_phasedgVCFPhaseSetBED = marginPhase.phasedgVCFPhaseSetBED
         File out_margin_phase_bam = marginPhase.haplotaggedBam
         File out_margin_phase_bam_bai = marginPhase.haplotaggedBamIdx
+        File out_exclusionBed = marginPhase.exclusionBed
     }
 }
 
