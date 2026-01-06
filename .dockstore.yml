@@ -12,6 +12,9 @@ workflows:
    -  name: dvMargin
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/dvMargin.wdl
+   -  name: deepVariant
+      subclass: WDL
+      primaryDescriptorPath: /wdl/workflows/deepVariant.wdl
    -  name: snifflesWorkflow
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/sniffles.wdl

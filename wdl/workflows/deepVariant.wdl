@@ -34,7 +34,5 @@ workflow deepVariant {
 
 	output {
 		File dvVcf = dv_t.dvVcf
-		File haplotaggedBam = margin_t.haplotaggedBam
-		File haplotaggedBamBai = margin_t.haplotaggedBamIdx
 	}
 }
