@@ -62,7 +62,7 @@ task dv_t {
 
   runtime {
     preemptible: preemptible
-    docker: "google/deepvariant:cl508467184"
+    docker: "google/deepvariant:1.9.0"
     cpu: threads
     memory: memSizeGb + " GB"
     disks: "local-disk " + diskSizeGb + " SSD"
@@ -73,7 +73,6 @@ task margin_t {
   input {
     File reference
     File vcfFile
-    File gvcfFile
     File bamAlignment
     File bamAlignmentIndex
     String sampleName
@@ -102,22 +101,19 @@ task margin_t {
     ln -s ~{bamAlignment} reads.bam
     ln -s ~{bamAlignmentIndex} reads.bam.bai
     
+    # Don't output a bam (-M)
     mkdir output/
     margin phase reads.bam ref.fa ~{vcfFile} /opt/margin/params/phase/allParams.haplotag.ont-r104q20.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName} -M
 
     bgzip output/~{sampleName}.phased.vcf
 
-    # Don't output a bam (-M) for gVCF phasing
-    margin phase reads.bam ref.fa ~{gvcfFile} /opt/margin/params/phase/allParams.haplotag.ont-r104q20.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName}.g -M
-
-    bgzip output/~{sampleName}.g.phased.vcf
 
     #samtools index -@ ~{threads} output/~{sampleName}.haplotagged.bam
   >>>
 
   output {
       File phasedVcf = "output/~{sampleName}.phased.vcf.gz"
-      File phasedgVcf = "output/~{sampleName}.g.phased.vcf.gz"
+      #File phasedgVcf = "output/~{sampleName}.g.phased.vcf.gz"
       #File haplotaggedBam = "output/~{sampleName}.haplotagged.bam"
       #File haplotaggedBamIdx = "output/~{sampleName}.haplotagged.bam.bai"
       File? toplog = "top.log"
