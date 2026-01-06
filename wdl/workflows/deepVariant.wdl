@@ -29,6 +29,7 @@ workflow deepVariant {
 		threads = threads,
 		reference = referenceFile,
 		bamAlignment = bamFile,
+		sampleName = sampleName
 	}
 
 
