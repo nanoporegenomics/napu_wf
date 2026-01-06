@@ -34,5 +34,6 @@ workflow deepVariant {
 
 	output {
 		File dvVcf = dv_t.dvVcf
+		File dvgVcf = dv_t.dvgVcf
 	}
 }
