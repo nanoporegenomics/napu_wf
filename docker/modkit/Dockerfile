@@ -48,7 +48,7 @@ RUN git clone --recursive https://github.com/meredith705/methyl_read_grouping.gi
 ENV PATH="/home/apps/samtools-1.15.1:${PATH}"
 ENV PATH="/home/apps/minimap2-$MINIMAP_VER:/opt/minimap2/minimap2-$MINIMAP_VER/misc:$PATH"
 ENV PATH="/home/apps/k8-0.2.5:$PATH"
-ENV PATH="/home/apps/dist:${PATH}"
+ENV PATH="/home/apps/dist_modkit_v0.6.0_68b540b:$PATH"
 ENV PATH="/home/apps/methyl_read_grouping/methlotype/:$PATH"
 ENV PATH="/home/apps/methyl_read_grouping/methlotype/regionalMethylation.py:$PATH"
 
