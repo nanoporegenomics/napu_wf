@@ -39,8 +39,8 @@ RUN wget https://github.com/attractivechaos/k8/releases/download/0.2.5/k8-0.2.5.
 
 WORKDIR /home/apps
 ARG MODKIT_VER=0.6.0
-RUN wget https://github.com/nanoporetech/modkit/releases/download/v$MODKIT_VER/modkit_v$MODKIT_VER_u16_x86_64.tar.gz && \
-    tar -xvzf modkit_v$MODKIT_VER_u16_x86_64.tar.gz
+RUN wget https://github.com/nanoporetech/modkit/releases/download/v0.6.0/modkit_v0.6.0_u16_x86_64.tar.gz && \
+    tar -xvzf modkit_v0.6.0_u16_x86_64.tar.gz
 
 WORKDIR /home/apps
 RUN git clone --recursive https://github.com/meredith705/methyl_read_grouping.git
