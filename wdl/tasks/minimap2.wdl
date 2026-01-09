@@ -43,7 +43,7 @@ task minimap2_t {
   }
 
   runtime {
-    docker: "mkolmogo/card_minimap2:2.23"
+    docker: "meredith705/card_minimap2:2.30"
     cpu: threads
 	memory: memSizeGb + " GB"
 	disks: "local-disk " + diskSizeGb + " SSD"
