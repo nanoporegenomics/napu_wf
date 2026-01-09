@@ -6,7 +6,6 @@ workflow runMarginPhase {
         File structuralVariantsFile
         File? harmonizedVariantFile
         File? harmonizedVariantFileIdx
-        #File gvcfFile
         File refFile
         File bamFile
         String sampleName
@@ -138,7 +137,7 @@ task marginPhase {
         #ln -s ~{combinedVcfFile} combinedVcfFile.vcf.gz
         #ln -s ~{combinedVcfFileIdx} combinedVcfFile.vcf.gz.idx
 
-        #filter the VCF by depth or do this in combineVcf task?
+        #filter the VCF by depth 
         bash /opt/filter_vcf.sh ~{combinedVcfFile} ~{sampleName} ~{filter_window_size} ~{filter_min_cluster_size} ~{filter_threshold_SD}
         # Make the name of the filterd VCF
         filtVcf="~{sampleName}.merged_small_svs.~{filter_threshold_SD}_sd_depthFilt.vcf.gz"
@@ -148,21 +147,21 @@ task marginPhase {
         samtools index -@ ~{threads} ~{bamFile}
         samtools faidx ~{refFile}
         mkdir output/
-        margin phase ~{bamFile} ~{refFile} $filtVcf /opt/margin/params/phase/allParams.phase_vcf.ont.sv.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName}_hvcf 
+        margin phase ~{bamFile} ~{refFile} $filtVcf /opt/margin/params/phase/allParams.phase_vcf.ont.sv.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName}_harm_gvcf 
 
         # gzip vcf and index bam
-        bgzip output/~{sampleName}_hvcf.phased.vcf
-        tabix output/~{sampleName}_hvcf.phased.vcf.gz
-        samtools index -@ ~{threads} output/~{sampleName}_hvcf.haplotagged.bam
+        bgzip -@ ~{threads} output/~{sampleName}_harm_gvcf.phased.vcf
+        tabix output/~{sampleName}_harm_gvcf.phased.vcf.gz
+        samtools index -@ ~{threads} output/~{sampleName}_harm_gvcf.haplotagged.bam
 
 
     >>>
     output {
-        File phasedVcf = "output/~{sampleName}_hvcf.phased.vcf.gz"
-        File phasedVcfIdx = "output/~{sampleName}_hvcf.phased.vcf.gz.tbi"
-        File phasedVCFPhaseSetBED = "output/~{sampleName}_hvcf.phaseset.bed"
-        File haplotaggedBam = "output/~{sampleName}_hvcf.haplotagged.bam"
-        File haplotaggedBamIdx = "output/~{sampleName}_hvcf.haplotagged.bam.bai"
+        File phasedVcf = "output/~{sampleName}_harm_gvcf.phased.vcf.gz"
+        File phasedVcfIdx = "output/~{sampleName}_harm_gvcf.phased.vcf.gz.tbi"
+        File phasedVCFPhaseSetBED = "output/~{sampleName}_harm_gvcf.phaseset.bed"
+        File haplotaggedBam = "output/~{sampleName}_harm_gvcf.haplotagged.bam"
+        File haplotaggedBamIdx = "output/~{sampleName}_harm_gvcf.haplotagged.bam.bai"
         File exclusionBed = "~{sampleName}.merged_small_svs.filt~{filter_window_size}bp_~{filter_threshold_SD}_sds.100kbmerged.bed"
         File? toplog = "top.log"
     }
