@@ -10,17 +10,16 @@ RUN cd /home/apps && \
     tabix python3.8 python3.8-dev python3-pip \
     protobuf-compiler pkg-config libprotobuf-dev libjansson-dev libhts-dev libncurses-dev \
     libbz2-dev liblzma-dev zlib1g-dev autoconf libcurl4-openssl-dev curl libomp-dev libssl-dev python3-tk && \
-    apt-get install -y samtools && \
     pip3 install pysam matplotlib numpy pandas seaborn scikit-learn scipy scikit-network IPython
 
 
-#WORKDIR /home/apps
-#RUN wget https://github.com/samtools/samtools/releases/download/1.15.1/samtools-1.15.1.tar.bz2 && \
-#    tar xvf samtools-1.15.1.tar.bz2 && \
-#    rm samtools-1.15.1.tar.bz2 && \
-#    cd samtools-1.15.1 && \
-#    ./configure && \
-#    make 
+WORKDIR /home/apps
+RUN wget https://github.com/samtools/samtools/releases/download/1.15.1/samtools-1.15.1.tar.bz2 && \
+    tar xvf samtools-1.15.1.tar.bz2 && \
+    rm samtools-1.15.1.tar.bz2 && \
+    cd samtools-1.15.1 && \
+    ./configure && \
+    make 
 
 WORKDIR /home/apps
 ARG MINIMAP_VER=2.30
@@ -46,7 +45,7 @@ RUN wget https://github.com/nanoporetech/modkit/releases/download/v$MODKIT_VER/m
 WORKDIR /home/apps
 RUN git clone --recursive https://github.com/meredith705/methyl_read_grouping.git
 
-#ENV PATH="/home/apps/samtools-1.15.1:${PATH}"
+ENV PATH="/home/apps/samtools-1.15.1:${PATH}"
 ENV PATH="/home/apps/minimap2-$MINIMAP_VER:/opt/minimap2/minimap2-$MINIMAP_VER/misc:$PATH"
 ENV PATH="/home/apps/k8-0.2.5:$PATH"
 ENV PATH="/home/apps/dist:${PATH}"
