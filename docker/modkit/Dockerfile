@@ -38,9 +38,9 @@ RUN wget https://github.com/attractivechaos/k8/releases/download/0.2.5/k8-0.2.5.
 
 
 WORKDIR /home/apps
-ARG MODKIT_VER=0.6.0
-RUN wget https://github.com/nanoporetech/modkit/releases/download/v0.6.0/modkit_v0.6.0_u16_x86_64.tar.gz && \
-    tar -xvzf modkit_v0.6.0_u16_x86_64.tar.gz
+# update to v0.5.0
+RUN wget https://github.com/nanoporetech/modkit/releases/download/v0.5.0/modkit_v0.5.0_u16_x86_64.tar.gz && \
+    tar -xvzf modkit_v0.5.0_u16_x86_64.tar.gz
 
 WORKDIR /home/apps
 RUN git clone --recursive https://github.com/meredith705/methyl_read_grouping.git
@@ -48,7 +48,7 @@ RUN git clone --recursive https://github.com/meredith705/methyl_read_grouping.gi
 ENV PATH="/home/apps/samtools-1.15.1:${PATH}"
 ENV PATH="/home/apps/minimap2-$MINIMAP_VER:/opt/minimap2/minimap2-$MINIMAP_VER/misc:$PATH"
 ENV PATH="/home/apps/k8-0.2.5:$PATH"
-ENV PATH="/home/apps/dist_modkit_v0.6.0_68b540b:$PATH"
+ENV PATH="/home/apps/dist_modkit_v0.5.0_5120ef7:$PATH"
 ENV PATH="/home/apps/methyl_read_grouping/methlotype/:$PATH"
 ENV PATH="/home/apps/methyl_read_grouping/methlotype/regionalMethylation.py:$PATH"
 
