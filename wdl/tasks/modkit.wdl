@@ -15,7 +15,7 @@ task modkit {
         Int memSizeGB = 64
         Int threadCount = 64
         Int diskSizeGB = 4 * round(size(haplotaggedBam, 'G')) + round(size(ref, 'G')) + 100
-        String dockerImage = "meredith705/modkit:latest"
+        String dockerImage = "meredith705/card_modkit:0.5.0"
         File? resourceLogScript
     }
 
@@ -55,14 +55,14 @@ task modkit {
         if [ ~{partitionTag} == true ]
         then
             modkit pileup ~{out_type_filter} --partition-tag HP --prefix ~{sample_name_ref} --ref ~{ref} \
-                   --threads ~{threadCount} --only-tabs ~{extraArgs} reads.bam modkit_out
+                   --threads ~{threadCount} --combine-strands ~{extraArgs} reads.bam modkit_out
         fi
 
         if [ ~{partitionTag} == false ]
         then
             # modkit command with reference on input reads
             modkit pileup ~{out_type_filter} --prefix ~{sample_name_ref} --ref ~{ref} \
-                    --threads ~{threadCount} --only-tabs ~{extraArgs} reads.bam ~{unphased_outFile}
+                    --threads ~{threadCount} --combine-strands ~{extraArgs} reads.bam ~{unphased_outFile}
         fi
 
         if [ ~{partitionTag} == true ]
@@ -148,7 +148,7 @@ task regionalMethylation {
 
       runtime {
         preemptible: 2
-        docker: "meredith705/modkit:latest"
+        docker: "meredith705/card_modkit:0.6.0"
         cpu: threadCount
         memory: memSizeGB + " GB"
         disks: "local-disk " + diskSizeGB + " SSD"
@@ -196,7 +196,7 @@ task plot_ML_hist {
         memory: memSizeGB + " GB"
         cpu: threadCount
         disks: "local-disk " + diskSizeGB + " SSD"
-        docker: "meredith705/modkit:latest"
+        docker: "meredith705/card_modkit:0.6.0"
         preemptible: 1
     }
 }
