@@ -65,14 +65,17 @@ task hifiasm_t {
         awk '/^S/{print ">"$2;print $3}' hifiasm.ont.bp.hap1.p_ctg.gfa > hifiasm.ont.bp.hap1.p_ctg.fa
         awk '/^S/{print ">"$2;print $3}' hifiasm.ont.bp.hap2.p_ctg.gfa > hifiasm.ont.bp.hap2.p_ctg.fa
 
+        bgzip -@ ~{threads} hifiasm.ont.bp.hap1.p_ctg.fa
+        bgzip -@ ~{threads} hifiasm.ont.bp.hap2.p_ctg.fa
+
     
 
     >>>
 
     output {
         File asm_gfa = "hifiasm.ont.bp.p_ctg.noseq.gfa"
-        File asm_hap1_fa = "hifiasm.ont.bp.hap1.p_ctg.fa"
-        File asm_hap2_fa = "hifiasm.ont.bp.hap2.p_ctg.fa"
+        File asm_hap1_fa = "hifiasm.ont.bp.hap1.p_ctg.fa.gz"
+        File asm_hap2_fa = "hifiasm.ont.bp.hap2.p_ctg.fa.gz"
         File asm_hap1_gfa = "hifiasm.ont.bp.hap1.p_ctg.noseq.gfa"
         File asm_hap2_gfa = "hifiasm.ont.bp.hap2.p_ctg.noseq.gfa"
         File hifiasm_log = "hifiasm.ont.log"
