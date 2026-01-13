@@ -40,7 +40,7 @@ workflow hifiasm {
         File hap1_noseq_gfa = hifiasm_t.asm_hap1_gfa
         File hap2_noseq_gfa = hifiasm_t.asm_hap2_gfa
         File gfa = hifiasm_t.asm_gfa
-        File hifiasm_log = hifiasm_t.hifiasm_log
+        #File hifiasm_log = hifiasm_t.hifiasm_log
     }
 }
 
@@ -63,7 +63,7 @@ task hifiasm_t {
         set -u
         set -o xtrace
 
-        hifiasm -t~{threads} ~{hifiasmONToption} ~{hifiasmArgs} -o ~{sample_name}.hifiasm.ont ~{reads} 2> hifiasm.ont.log
+        hifiasm -t~{threads} ~{hifiasmONToption} ~{hifiasmArgs} -o ~{sample_name}.hifiasm.ont ~{reads} #2> hifiasm.ont.log
 
         awk '/^S/{print ">"$2;print $3}' hifiasm.ont.bp.hap1.p_ctg.gfa > ~{sample_name}.hifiasm.ont.bp.hap1.p_ctg.fa
         awk '/^S/{print ">"$2;print $3}' hifiasm.ont.bp.hap2.p_ctg.gfa > ~{sample_name}.hifiasm.ont.bp.hap2.p_ctg.fa
@@ -81,7 +81,7 @@ task hifiasm_t {
         File asm_hap2_fa = "~{sample_name}.hifiasm.ont.bp.hap2.p_ctg.fa.gz"
         File asm_hap1_gfa = "~{sample_name}.hifiasm.ont.bp.hap1.p_ctg.noseq.gfa"
         File asm_hap2_gfa = "~{sample_name}.hifiasm.ont.bp.hap2.p_ctg.noseq.gfa"
-        File hifiasm_log = "~{sample_name}.hifiasm.ont.log"
+        #File hifiasm_log = "~{sample_name}.hifiasm.ont.log"
 
     }
 
