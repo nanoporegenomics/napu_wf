@@ -39,7 +39,6 @@ workflow hifiasm {
         File hap2_noseq_gfa = hifiasm_t.asm_hap2_gfa
         File gfa = hifiasm_t.asm_gfa
         File hifiasm_log = hifiasm_t.hifiasm_log
-        File? readsToFastq = readsFastq
     }
 }
 
