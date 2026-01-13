@@ -4,6 +4,7 @@ workflow hifiasm {
 
     input {
         Array[File] readFiles = []
+        String sample_name
         Boolean convert2fastq = false
         String hifiasmArgs = ""
         Int diskSizeGB = 1024
@@ -27,6 +28,7 @@ workflow hifiasm {
     call hifiasm_t {
         input:
         reads=readsFastq,
+        sample_name=sample_name,
         hifiasmArgs=hifiasmArgs,
         diskSizeGb=diskSizeGB
     }
@@ -47,6 +49,7 @@ workflow hifiasm {
 task hifiasm_t {
     input {
         File reads
+        String sample_name
         String hifiasmArgs = ""
         Int threads = 96
         String hifiasmONToption = "--ont"
@@ -60,25 +63,25 @@ task hifiasm_t {
         set -u
         set -o xtrace
 
-        hifiasm -t~{threads} ~{hifiasmONToption} ~{hifiasmArgs} -o hifiasm.ont ~{reads} 2> hifiasm.ont.log
+        hifiasm -t~{threads} ~{hifiasmONToption} ~{hifiasmArgs} -o ~{sample_name}.hifiasm.ont ~{reads} 2> hifiasm.ont.log
 
-        awk '/^S/{print ">"$2;print $3}' hifiasm.ont.bp.hap1.p_ctg.gfa > hifiasm.ont.bp.hap1.p_ctg.fa
-        awk '/^S/{print ">"$2;print $3}' hifiasm.ont.bp.hap2.p_ctg.gfa > hifiasm.ont.bp.hap2.p_ctg.fa
+        awk '/^S/{print ">"$2;print $3}' hifiasm.ont.bp.hap1.p_ctg.gfa > ~{sample_name}.hifiasm.ont.bp.hap1.p_ctg.fa
+        awk '/^S/{print ">"$2;print $3}' hifiasm.ont.bp.hap2.p_ctg.gfa > ~{sample_name}.hifiasm.ont.bp.hap2.p_ctg.fa
 
-        bgzip -@ ~{threads} hifiasm.ont.bp.hap1.p_ctg.fa
-        bgzip -@ ~{threads} hifiasm.ont.bp.hap2.p_ctg.fa
+        bgzip -@ ~{threads} ~{sample_name}.hifiasm.ont.bp.hap1.p_ctg.fa
+        bgzip -@ ~{threads} ~{sample_name}.hifiasm.ont.bp.hap2.p_ctg.fa
 
     
 
     >>>
 
     output {
-        File asm_gfa = "hifiasm.ont.bp.p_ctg.noseq.gfa"
-        File asm_hap1_fa = "hifiasm.ont.bp.hap1.p_ctg.fa.gz"
-        File asm_hap2_fa = "hifiasm.ont.bp.hap2.p_ctg.fa.gz"
-        File asm_hap1_gfa = "hifiasm.ont.bp.hap1.p_ctg.noseq.gfa"
-        File asm_hap2_gfa = "hifiasm.ont.bp.hap2.p_ctg.noseq.gfa"
-        File hifiasm_log = "hifiasm.ont.log"
+        File asm_gfa = "~{sample_name}.hifiasm.ont.bp.p_ctg.noseq.gfa"
+        File asm_hap1_fa = "~{sample_name}.hifiasm.ont.bp.hap1.p_ctg.fa.gz"
+        File asm_hap2_fa = "~{sample_name}.hifiasm.ont.bp.hap2.p_ctg.fa.gz"
+        File asm_hap1_gfa = "~{sample_name}.hifiasm.ont.bp.hap1.p_ctg.noseq.gfa"
+        File asm_hap2_gfa = "~{sample_name}.hifiasm.ont.bp.hap2.p_ctg.noseq.gfa"
+        File hifiasm_log = "~{sample_name}.hifiasm.ont.log"
 
     }
 
