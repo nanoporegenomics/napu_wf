@@ -18,7 +18,7 @@ task sniffles_t {
 
   String trfString = if defined(vntrAnnotations) then "--tandem-repeats " else ""
   String phaseArg = if phaseVariants then "--phase " else ""
-  String mosaicArg = if mosaicVariants then "--phase " else ""
+  String mosaicArg = if mosaicVariants then "--mosaic-include-germline " else ""
 
   command <<<
     set -o pipefail
