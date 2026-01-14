@@ -8,6 +8,7 @@ task sniffles_t {
     File? vntrAnnotations
     String sample = "sniffles"
     Boolean phaseVariants = true
+    Boolean mosaicVariants = true
     String extraArgs = ""
     Int minSvLen = 25
     Int memSizeGb = 32
@@ -17,6 +18,7 @@ task sniffles_t {
 
   String trfString = if defined(vntrAnnotations) then "--tandem-repeats " else ""
   String phaseArg = if phaseVariants then "--phase " else ""
+  String mosaicArg = if mosaicVariants then "--phase " else ""
 
   command <<<
     set -o pipefail
@@ -34,7 +36,7 @@ task sniffles_t {
     ln -s ~{bamAlignmentIndex} reads.bam.bai
     
     sniffles -i reads.bam -v ~{sample}.sniffles.vcf --snf ~{sample}.snf -t ~{threads} ~{trfString}~{vntrAnnotations} \
-      ~{phaseArg} --minsvlen ~{minSvLen} ~{extraArgs} 2>&1 | tee ~{sample}_sniffles.log
+      ~{phaseArg} --minsvlen ~{minSvLen} ~{mosaicArg} ~{extraArgs} 2>&1 | tee ~{sample}_sniffles.log
 
   >>>
 
