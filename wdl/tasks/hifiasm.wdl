@@ -7,7 +7,6 @@ workflow hifiasm {
         String sample_name
         Boolean convert2fastq = false
         String hifiasmArgs = ""
-        Int diskSizeGB = 1024
         Int preemptible = 2
     }
     
@@ -81,6 +80,8 @@ task hifiasm_t {
         File asm_hap2_fa = "~{sample_name}.hifiasm.ont.bp.hap2.p_ctg.fa.gz"
         File asm_hap1_gfa = "~{sample_name}.hifiasm.ont.bp.hap1.p_ctg.noseq.gfa"
         File asm_hap2_gfa = "~{sample_name}.hifiasm.ont.bp.hap2.p_ctg.noseq.gfa"
+        File asm_hap1_lowQ_bed = "~{sample_name}.hifiasm.ont.bp.hap1.p_ctg.lowQ.bed"
+        File asm_hap2_lowQ_bed = "~{sample_name}.hifiasm.ont.bp.hap2.p_ctg.lowQ.bed"
         File hifiasm_log = "~{sample_name}.hifiasm.ont.log"
 
     }
