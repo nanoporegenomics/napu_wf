@@ -63,7 +63,7 @@ task hifiasm_t {
         set -u
         set -o xtrace
 
-        hifiasm -t~{threads} ~{hifiasmONToption} ~{hifiasmArgs} -o ~{sample_name}.hifiasm.ont ~{reads} #2> hifiasm.ont.log
+        hifiasm -t~{threads} ~{hifiasmONToption} ~{hifiasmArgs} -o ~{sample_name}.hifiasm.ont ~{reads} #2> ~{sample_name}.hifiasm.ont.log
 
         awk '/^S/{print ">"$2;print $3}' ~{sample_name}.hifiasm.ont.bp.hap1.p_ctg.gfa > ~{sample_name}.hifiasm.ont.bp.hap1.p_ctg.fa
         awk '/^S/{print ">"$2;print $3}' ~{sample_name}.hifiasm.ont.bp.hap2.p_ctg.gfa > ~{sample_name}.hifiasm.ont.bp.hap2.p_ctg.fa
