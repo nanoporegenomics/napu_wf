@@ -65,8 +65,8 @@ task hifiasm_t {
 
         hifiasm -t~{threads} ~{hifiasmONToption} ~{hifiasmArgs} -o ~{sample_name}.hifiasm.ont ~{reads} #2> hifiasm.ont.log
 
-        awk '/^S/{print ">"$2;print $3}' hifiasm.ont.bp.hap1.p_ctg.gfa > ~{sample_name}.hifiasm.ont.bp.hap1.p_ctg.fa
-        awk '/^S/{print ">"$2;print $3}' hifiasm.ont.bp.hap2.p_ctg.gfa > ~{sample_name}.hifiasm.ont.bp.hap2.p_ctg.fa
+        awk '/^S/{print ">"$2;print $3}' ~{sample_name}.hifiasm.ont.bp.hap1.p_ctg.gfa > ~{sample_name}.hifiasm.ont.bp.hap1.p_ctg.fa
+        awk '/^S/{print ">"$2;print $3}' ~{sample_name}.hifiasm.ont.bp.hap2.p_ctg.gfa > ~{sample_name}.hifiasm.ont.bp.hap2.p_ctg.fa
 
         bgzip -@ ~{threads} ~{sample_name}.hifiasm.ont.bp.hap1.p_ctg.fa
         bgzip -@ ~{threads} ~{sample_name}.hifiasm.ont.bp.hap2.p_ctg.fa
