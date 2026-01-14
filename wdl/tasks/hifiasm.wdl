@@ -28,8 +28,7 @@ workflow hifiasm {
         input:
         reads=readsFastq,
         sample_name=sample_name,
-        hifiasmArgs=hifiasmArgs,
-        diskSizeGb=diskSizeGB
+        hifiasmArgs=hifiasmArgs
     }
 
 
@@ -38,6 +37,8 @@ workflow hifiasm {
         File hap2_fa = hifiasm_t.asm_hap2_fa
         File hap1_noseq_gfa = hifiasm_t.asm_hap1_gfa
         File hap2_noseq_gfa = hifiasm_t.asm_hap2_gfa
+        File hap1_lowq_bed = hifiasm_t.asm_hap1_lowQ_bed
+        File hap2_lowq_bed = hifiasm_t.asm_hap2_lowQ_bed
         File gfa = hifiasm_t.asm_gfa
         File hifiasm_log = hifiasm_t.hifiasm_log
     }
