@@ -40,7 +40,7 @@ workflow hifiasm {
         File hap1_noseq_gfa = hifiasm_t.asm_hap1_gfa
         File hap2_noseq_gfa = hifiasm_t.asm_hap2_gfa
         File gfa = hifiasm_t.asm_gfa
-        #File hifiasm_log = hifiasm_t.hifiasm_log
+        File hifiasm_log = hifiasm_t.hifiasm_log
     }
 }
 
