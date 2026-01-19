@@ -95,4 +95,5 @@ if __name__ == "__main__":
     print(f"Using cutoff: DP > {cutoff:.2f} ({threshold} SDs above mean)")
     print(f"Found {len(clusters)} dense clusters (written to {bed_file})")
 
-    write_bed(clusters, bed_file)
+    if len(clusters) > 0:
+        write_bed(clusters, bed_file)
