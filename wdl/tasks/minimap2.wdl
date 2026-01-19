@@ -178,7 +178,6 @@ task indexBAM {
             mkdir bamPerChrs
             while read -r chrn
             do
-                #samtools fastq -TMm,Ml,MM,ML -@ 6 reads.bam | chopper -t 4 -q 10  | minimap2 -ax map-ont ref.fa - -y --eqx > merged.piped.chopped.bam
                 samtools view -@ ~{threads} -h -O BAM ~{outname}.sorted.bam ${chrn} -o bamPerChrs/~{outname}.${chrn}.bam
                 samtools index -@ ~{threads} bamPerChrs/~{outname}.${chrn}.bam
             done < ~{write_lines(chrs)}
