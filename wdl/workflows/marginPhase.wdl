@@ -11,7 +11,7 @@ workflow runMarginPhase {
         String sampleName
         Int preemptible_count = 0
         Int threads = 64
-        String dockerImage = "meredith705/card_harmonize_vcf@sha256:8c2a9ab10dca94093907042d6bf3126b8753823a8d7175474605cc232ab5eb9b"
+        String dockerImage = "meredith705/card_harmonize_vcf:0.2"
         File? resourceLogScript
     }
 
@@ -51,7 +51,7 @@ workflow runMarginPhase {
         #File out_margin_phasedgVCFPhaseSetBED = marginPhase.phasedgVCFPhaseSetBED
         File out_margin_phase_bam = marginPhase.haplotaggedBam
         File out_margin_phase_bam_bai = marginPhase.haplotaggedBamIdx
-        File out_exclusionBed = marginPhase.exclusionBed
+        File? out_exclusionBed = marginPhase.exclusionBed
     }
 }
 
@@ -139,15 +139,22 @@ task marginPhase {
 
         #filter the VCF by depth 
         bash /opt/filter_vcf.sh ~{combinedVcfFile} ~{sampleName} ~{filter_window_size} ~{filter_min_cluster_size} ~{filter_threshold_SD}
+
+
         # Make the name of the filterd VCF
         filtVcf="~{sampleName}.merged_small_svs.~{filter_threshold_SD}_sd_depthFilt.vcf.gz"
         mergedFilteredBed="~{sampleName}.merged_small_svs.filt~{filter_window_size}bp_~{filter_threshold_SD}_sds.100kbmerged.bed"
-
         
         samtools index -@ ~{threads} ~{bamFile}
         samtools faidx ~{refFile}
         mkdir output/
-        margin phase ~{bamFile} ~{refFile} $filtVcf /opt/margin/params/phase/allParams.phase_vcf.ont.sv.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName}_harm_gvcf 
+
+        # if any dense clusters are filtered out use the filtered vcf
+        if [ -f "$mergedFilteredBed"] && [ -f "$filtVcf"]; then
+            margin phase ~{bamFile} ~{refFile} $filtVcf /opt/margin/params/phase/allParams.phase_vcf.ont.sv.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName}_harm_gvcf 
+        else
+            margin phase ~{bamFile} ~{refFile} ~{combinedVcfFile} /opt/margin/params/phase/allParams.phase_vcf.ont.sv.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName}_harm_gvcf
+        fi
 
         # gzip vcf and index bam
         bgzip -@ ~{threads} output/~{sampleName}_harm_gvcf.phased.vcf
@@ -162,7 +169,7 @@ task marginPhase {
         File phasedVCFPhaseSetBED = "output/~{sampleName}_harm_gvcf.phaseset.bed"
         File haplotaggedBam = "output/~{sampleName}_harm_gvcf.haplotagged.bam"
         File haplotaggedBamIdx = "output/~{sampleName}_harm_gvcf.haplotagged.bam.bai"
-        File exclusionBed = "~{sampleName}.merged_small_svs.filt~{filter_window_size}bp_~{filter_threshold_SD}_sds.100kbmerged.bed"
+        File? exclusionBed = "~{sampleName}.merged_small_svs.filt~{filter_window_size}bp_~{filter_threshold_SD}_sds.100kbmerged.bed"
         File? toplog = "top.log"
     }
 
