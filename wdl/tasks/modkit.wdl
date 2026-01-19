@@ -20,8 +20,8 @@ task modkit {
     }
 
     parameter_meta {
-        haplotaggedBam: "Guppy with Remora reads aligned to assembly. in BAM format."
-        ref: "Assembly (reference) to that reads are aligned to."
+        haplotaggedBam: "Guppy with Remora reads aligned to reference. in BAM format."
+        ref: "Assembly (reference) that reads are aligned to."
         sample_name: "Sample name. Will be used in output bed file."
         ref_name: "Reference name. Will be used in output bed file."
         #modType: "Modified base of interest, one of: 5mC (default), 5hmC, 5fC, 5caC, 5hmU, 5fU, 5caU, 6mA, 5oxoG, Xao."
@@ -46,6 +46,8 @@ task modkit {
 
         ln -s ~{haplotaggedBam} reads.bam
         ln -s ~{haplotaggedBamBai} reads.bam.bai
+
+        samtools faidx ~{ref}
 
 
         mkdir modkit_out
