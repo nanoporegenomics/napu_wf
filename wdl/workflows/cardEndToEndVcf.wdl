@@ -227,9 +227,8 @@ workflow cardEndToEndVcfMethyl
     ##### Phase short variants and structural variants
     call margin_phase_wf.runMarginPhase as margin_phase {
         input:
-            smallVariantsFile = dvVCF,
+            smallVariantsgVCFFile = dvVCF,
             structuralVariantsFile = hapdiff.hapdiffUnphasedVcf,
-            gvcfFile = dvgVCF,
             refFile = referenceFasta,
             bamFile = bamFile, #margin_t.haplotaggedBam,
             sampleName = sampleName
