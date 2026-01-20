@@ -242,6 +242,7 @@ workflow cardEndToEndVcfMethyl
             #bamAlignmentIndex = margin_t.haplotaggedBamIdx,
             bamAlignment = margin_phase.out_margin_phase_bam,
             bamAlignmentIndex = margin_phase.out_margin_phase_bam_bai,
+            reference = referenceFasta,
             vntrAnnotations = referenceVntrAnnotations,
             sample = sampleName
     }

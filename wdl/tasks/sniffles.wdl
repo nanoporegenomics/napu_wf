@@ -5,6 +5,7 @@ task sniffles_t {
     Int threads = 22
     File bamAlignment
     File bamAlignmentIndex
+    File reference
     File? vntrAnnotations
     String sample = "sniffles"
     Boolean phaseVariants = true
@@ -36,7 +37,7 @@ task sniffles_t {
     ln -s ~{bamAlignmentIndex} reads.bam.bai
     
     sniffles -i reads.bam -v ~{sample}.sniffles.vcf --snf ~{sample}.snf -t ~{threads} ~{trfString}~{vntrAnnotations} \
-      ~{phaseArg} --minsvlen ~{minSvLen} ~{mosaicArg} ~{extraArgs} 2>&1 | tee ~{sample}_sniffles.log
+      ~{phaseArg} --reference ~{reference} --minsvlen ~{minSvLen} ~{mosaicArg} ~{extraArgs} 2>&1 | tee ~{sample}_sniffles.log
 
   >>>
 
