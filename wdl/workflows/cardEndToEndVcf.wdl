@@ -167,7 +167,7 @@ workflow cardEndToEndVcfMethyl
     
 
     ##### De novo phased assembly
-    # if hapdup assembly already provided 
+    # if hapdup assembly already provided skip assembly
     if(!defined(hapdupFasta1)){
 
         ## if any fastq reads are suppled as input use those for shasta
@@ -227,7 +227,7 @@ workflow cardEndToEndVcfMethyl
     ##### Phase short variants and structural variants
     call margin_phase_wf.runMarginPhase as margin_phase {
         input:
-            smallVariantsgVCFFile = dvVCF,
+            smallVariantsgVCFFile = dvgVCF,
             structuralVariantsFile = hapdiff.hapdiffUnphasedVcf,
             refFile = referenceFasta,
             bamFile = bamFile, #margin_t.haplotaggedBam,
@@ -272,6 +272,7 @@ workflow cardEndToEndVcfMethyl
         File harmonizedVcf = margin_phase.out_margin_phase_svs
         File harmonizedVcfIdx = margin_phase.out_phasedVcfIdx
         File harmonizedVcfPhaseset = margin_phase.out_phasedVCFPhaseSetBED
+        File? harmonizedVcfDenseFilterBed = margin_phase.out_exclusionBed
         File smallVariantsVcf = dvVCF
         File snifflesVcf = sniffles.snifflesVcf
         File snifflesSnf = sniffles.snifflesSnf
