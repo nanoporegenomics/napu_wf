@@ -117,7 +117,7 @@ task marginPhase {
         Int filter_threshold_SD = 3
         Int preemptible_count
         Int threads = 64
-        Int memSizeGb = 2 * round(size(bamFile, 'G')) + 200
+        Int memSizeGb = 4 * round(size(bamFile, 'G')) + 200
         Int diskSizeGb = 2 * round(size(bamFile, 'G')) + round(size(refFile, 'G')) + 100
         File? resourceLogScript
     }
@@ -132,10 +132,6 @@ task marginPhase {
         then
             bash ~{resourceLogScript} 20 top.log &
         fi
-
-        # if prism job works, delete this
-        #ln -s ~{combinedVcfFile} combinedVcfFile.vcf.gz
-        #ln -s ~{combinedVcfFileIdx} combinedVcfFile.vcf.gz.idx
 
         #filter the VCF by depth 
         bash /opt/filter_vcf.sh ~{combinedVcfFile} ~{sampleName} ~{filter_window_size} ~{filter_min_cluster_size} ~{filter_threshold_SD}
@@ -160,6 +156,8 @@ task marginPhase {
         bgzip -@ ~{threads} output/~{sampleName}_harm_gvcf.phased.vcf
         tabix output/~{sampleName}_harm_gvcf.phased.vcf.gz
         samtools index -@ ~{threads} output/~{sampleName}_harm_gvcf.haplotagged.bam
+
+        # consider separating gVCF and SV vcf here
 
 
     >>>
