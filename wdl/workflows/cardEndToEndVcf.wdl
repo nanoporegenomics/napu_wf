@@ -274,6 +274,7 @@ workflow cardEndToEndVcfMethyl
         File harmonizedVcfPhaseset = margin_phase.out_phasedVCFPhaseSetBED
         File? harmonizedVcfDenseFilterBed = margin_phase.out_exclusionBed
         File smallVariantsVcf = dvVCF
+        File smallVariantsgVcf = dvgVCF
         File snifflesVcf = sniffles.snifflesVcf
         File snifflesSnf = sniffles.snifflesSnf
         File? shastaHaploid = asm.shastaHaploid
