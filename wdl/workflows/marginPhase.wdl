@@ -117,7 +117,8 @@ task marginPhase {
         Int filter_threshold_SD = 3
         Int preemptible_count
         Int threads = 64
-        Int memSizeGb = 4 * round(size(bamFile, 'G')) 
+        # reducing 4 * to 3 * temp for large samples
+        Int memSizeGb = 3 * round(size(bamFile, 'G')) 
         Int diskSizeGb = 2 * round(size(bamFile, 'G')) + round(size(refFile, 'G')) + 100
         File? resourceLogScript
     }
