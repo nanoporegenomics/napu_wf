@@ -19,6 +19,7 @@ workflow runSeverus {
 	
 	output {
 		File severus_tar = severus.severus_tar
+		File severus_somatic_vcf = severus.severus_somatic_vcf
 		}
 	}
 
