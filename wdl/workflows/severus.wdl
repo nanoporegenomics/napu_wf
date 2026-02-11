@@ -39,7 +39,7 @@ task severus {
 		String extraArgs = ""
 		Int preemptible_count
 		Int memSizeGb = 2 * round(size(bam, 'G'))
-		Int disksizeGb = 2 * round(size(bam, 'G'))
+		Int diskSizeGb = 2 * round(size(bam, 'G'))
 	}
 
 	String vntrsArg = if includeVNTRS then "--vntr-bed /opt/Severus/vntrs/human_GRCh38_no_alt_analysis_set.trf.bed" else ""
