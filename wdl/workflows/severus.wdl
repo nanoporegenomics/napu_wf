@@ -6,12 +6,14 @@ workflow runSeverus {
 		File haplotaggedBAM 
 		File? phasedVCF
 		Int threads = 16
+		Int preemptible_count = 0
 		String dockerImage = "meredith705/severus:1.6"
 	}
 
 	call severus {
 		input:
 			bam = haplotaggedBAM, 
+			sample = sample,
 			vcf = phasedVCF, 
 			threads = threads,
 			dockerImage = dockerImage
@@ -35,6 +37,7 @@ task severus {
 		Boolean includeVNTRS = true
 		Boolean includePON = true
 		String extraArgs = ""
+		Int preemptible_count
 		Int memSizeGb = 2 * round(size(bam, 'G'))
 		Int disksizeGb = 2 * round(size(bam, 'G'))
 	}
@@ -62,5 +65,13 @@ task severus {
 		File severus_tar = "{sample}_severus.tar.gz"
 		File severus_somatic_vcf = "{sample}_severus/somatic_SVs/{sample}_somatic.vcf"
 	}
+
+	runtime {
+        preemptible: preemptible_count
+        memory: memSizeGb + " GB"
+        cpu: threads
+        disks: "local-disk " + diskSizeGb + " SSD"
+        docker: dockerImage
+    }
 
 }
