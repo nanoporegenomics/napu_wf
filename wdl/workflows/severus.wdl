@@ -49,12 +49,13 @@ task severus {
 	command <<<
 		set -eux -o pipefail
 
+
 		# source the conda install
 		source /opt/conda/etc/profile.d/conda.sh
 		# activate the severus environment
 		conda activate severus_env
 
-		./opt/Severus/severus.py --target-bam {bam} --out-dir {sample}_severus -t {threads} \
+		conda run -n severus_env python /opt/Severus/severus.py --target-bam {bam} --out-dir {sample}_severus -t {threads} \
 		{vntrsArg} {ponArg} {phasedVcf}{vcf} {extraArgs}
 
 		tar -czf {sample}_severus.tar.gz {sample}_severus
