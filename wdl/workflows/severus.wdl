@@ -3,7 +3,8 @@ version 1.0
 workflow runSeverus {
 	input {
 		String sample
-		File haplotaggedBAM 
+		File haplotaggedBAM
+		File haplotaggedBAMbai 
 		File? phasedVCF
 		Int threads = 16
 		Int preemptible_count = 0
@@ -13,6 +14,7 @@ workflow runSeverus {
 	call severus {
 		input:
 			bam = haplotaggedBAM, 
+			bamIdx = haplotaggedBAMbai,
 			sample = sample,
 			vcf = phasedVCF, 
 			threads = threads,
@@ -31,6 +33,7 @@ task severus {
 	input {
 		String sample
 		File bam
+		File bamIdx
 		File? vcf
 		Int threads
 		String dockerImage
