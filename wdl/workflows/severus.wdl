@@ -55,16 +55,16 @@ task severus {
 		# activate the severus environment
 		conda activate severus_env
 
-		conda run -n severus_env python /opt/Severus/severus.py --target-bam {bam} --out-dir {sample}_severus -t {threads} \
-		{vntrsArg} {ponArg} {phasedVcf}{vcf} {extraArgs}
+		conda run -n severus_env python /opt/Severus/severus.py --target-bam ~{bam} --out-dir ~{sample}_severus -t ~{threads} \
+		~{vntrsArg} ~{ponArg} ~{phasedVcf}~{vcf} ~{extraArgs}
 
-		tar -czf {sample}_severus.tar.gz {sample}_severus
+		tar -czf ~{sample}_severus.tar.gz ~{sample}_severus
 
 	>>>
 
 	output {
-		File severus_tar = "{sample}_severus.tar.gz"
-		File severus_somatic_vcf = "{sample}_severus/somatic_SVs/{sample}_somatic.vcf"
+		File severus_tar = "~{sample}_severus.tar.gz"
+		File severus_somatic_vcf = "~{sample}_severus/somatic_SVs/~{sample}_somatic.vcf"
 	}
 
 	runtime {
