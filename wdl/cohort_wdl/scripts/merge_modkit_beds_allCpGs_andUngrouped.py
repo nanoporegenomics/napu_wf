@@ -89,23 +89,23 @@ def merge_beds(gslinks, outputdir, haplotype):
 
         try:
             # open GCS file and read using gzip 
-            with fs.open(file, 'rb') as f:
-                with gzip.open(f, 'rt') as gz_file:
-                    df = pl.read_csv(
-                        gz_file,
-                        separator="\t",
-                        has_header=False,
-                        columns=[0, 1, 2, 3, 9, 10, 11],
-                        new_columns=[
-                            "#chrom",
-                            "start",
-                            "end",
-                            "modtype",
-                            f"{sample_name}_validCov",
-                            f"{sample_name}_modFraction",
-                            f"{sample_name}_modReads",
-                        ],
-                    )
+            # with fs.open(file, 'rb') as f:
+                # with gzip.open(f, 'rt') as gz_file:
+            df = pl.read_csv(
+                file,
+                separator="\t",
+                has_header=False,
+                columns=[0, 1, 2, 3, 9, 10, 11],
+                new_columns=[
+                    "#chrom",
+                    "start",
+                    "end",
+                    "modtype",
+                    f"{sample_name}_validCov",
+                    f"{sample_name}_modFraction",
+                    f"{sample_name}_modReads",
+                ],
+            )
 
         except Exception as e:
             log_time(f"Error reading {sample_name}: {e}")
