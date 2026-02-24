@@ -120,7 +120,7 @@ task marginPhase {
         Int memSizeGb = 3 * round(size(bamFile, 'G')) 
         Int diskSizeGb = 2 * round(size(bamFile, 'G')) + round(size(refFile, 'G')) + 100
         # ensure the ram/cpu ratio stays below the 6.5Gb ram/ cpu threshold
-        Int threads = ceil(memSizeGb / 6.4)
+        Int threads = round(ceil(memSizeGb / 6.4))
         # also ensure its a common number of threads
         #Int threadsRounded = 4 * ceil(threads / 4)
         File? resourceLogScript
