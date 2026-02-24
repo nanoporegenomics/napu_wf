@@ -22,7 +22,7 @@ workflow runMarginPhase {
                 structuralVariantsFile = structuralVariantsFile,
                 sampleName = sampleName,
                 preemptible_count = preemptible_count,
-                threads = threads,
+                #threads = threads,
                 dockerImage = dockerImage
         }
     }
@@ -116,10 +116,13 @@ task marginPhase {
         Int filter_min_cluster_size = 10
         Int filter_threshold_SD = 3
         Int preemptible_count
-        Int threads = 64
         # reducing 4 * to 3 * temp for large samples
         Int memSizeGb = 3 * round(size(bamFile, 'G')) 
         Int diskSizeGb = 2 * round(size(bamFile, 'G')) + round(size(refFile, 'G')) + 100
+        # ensure the ram/cpu ratio stays below the 6.5Gb ram/ cpu threshold
+        Int threads = ceil(memSizeGb / 6.4)
+        # also ensure its a common number of threads
+        Int threadsRounded = 4 * ceil(threads / 4)
         File? resourceLogScript
     }
     command <<<
@@ -175,7 +178,7 @@ task marginPhase {
     runtime {
         preemptible: preemptible_count
         memory: memSizeGb + " GB"
-        cpu: threads
+        cpu: threadsRounded
         disks: "local-disk " + diskSizeGb + " SSD"
         docker: dockerImage
     }
