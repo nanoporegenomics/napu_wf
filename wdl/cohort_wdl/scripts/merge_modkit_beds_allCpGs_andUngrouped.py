@@ -95,11 +95,12 @@ def merge_beds(gslinks, outputdir, haplotype):
                         gz_file,
                         separator="\t",
                         has_header=False,
-                        columns=[0, 1, 2, 9, 10, 11],
+                        columns=[0, 1, 2, 3, 9, 10, 11],
                         new_columns=[
                             "#chrom",
                             "start",
                             "end",
+                            "modtype",
                             f"{sample_name}_validCov",
                             f"{sample_name}_modFraction",
                             f"{sample_name}_modReads",
@@ -118,7 +119,7 @@ def merge_beds(gslinks, outputdir, haplotype):
         else:
             combined_df = combined_df.join(
                 df,
-                on=["#chrom", "start", "end"],
+                on=["#chrom", "start", "end", "modtype"],
                 how="outer",
                 coalesce=True,
             )
