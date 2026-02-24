@@ -10,7 +10,7 @@ workflow runMarginPhase {
         File bamFile
         String sampleName
         Int preemptible_count = 0
-        Int threads 
+        Int threads = 96
         String dockerImage = "meredith705/card_harmonize_vcf:0.2"
         File? resourceLogScript
     }
@@ -22,7 +22,7 @@ workflow runMarginPhase {
                 structuralVariantsFile = structuralVariantsFile,
                 sampleName = sampleName,
                 preemptible_count = preemptible_count,
-                threads = threads,
+                #threads = threads,
                 dockerImage = dockerImage
         }
     }
@@ -39,7 +39,7 @@ workflow runMarginPhase {
         sampleName = sampleName,
         dockerImage = dockerImage,
         preemptible_count = preemptible_count,
-        #threads = threads,
+        threads = threads,
         resourceLogScript = resourceLogScript
     }
 
@@ -116,13 +116,10 @@ task marginPhase {
         Int filter_min_cluster_size = 10
         Int filter_threshold_SD = 3
         Int preemptible_count
+        Int threads = 96
         # reducing 4 * to 3 * temp for large samples
         Int memSizeGb = 3 * round(size(bamFile, 'G')) 
         Int diskSizeGb = 2 * round(size(bamFile, 'G')) + round(size(refFile, 'G')) + 100
-        # ensure the ram/cpu ratio stays below the 6.5Gb ram/ cpu threshold
-        Int threads = round(ceil(memSizeGb / 6.4))
-        # also ensure its a common number of threads
-        #Int threadsRounded = 4 * ceil(threads / 4)
         File? resourceLogScript
     }
     command <<<
