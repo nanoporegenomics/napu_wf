@@ -11,10 +11,17 @@ workflow run_glnexus{
 
     }
 
+    # Scatter the filterVCF task over the input VCF files to remove SV lines
+    scatter (input_vcf in vcfFiles) {
+        call filterVCF as filter_vcf {
+            input:
+                input_vcf = input_vcf
+        }
+    }
 
     call glnexus as glnexux_merge{
         input:
-					vcfFiles = vcfFiles,
+					vcfFiles = filter_vcf.filtered_gvcf,
 					out_name = out_name,
 					regional_bed = regional_bed,
                     dockerImage = dockerImage
@@ -22,6 +29,8 @@ workflow run_glnexus{
 
     output{
         File? merged_gvcf = glnexux_merge.merged_gvcf
+        Array[File] gvcfFiles = filter_vcf.filtered_gvcf
+        Array[File] svVcfFiles = filter_vcf.filtered_sv_vcf
     }
 }
 
@@ -83,7 +92,7 @@ task filterVCF {
         File input_vcf
         Int memSizeGB = 128
         Int threadCount = 4
-        Int diskSizeGB = 2 * round(size(input_vcf, 'G')) + 30
+        Int diskSizeGB = 3 * round(size(input_vcf, 'G')) + 30
         String dockerImage = "quay.io/mlin/glnexus:v1.2.7"
     }
     
@@ -92,18 +101,19 @@ task filterVCF {
         # exit when a command fails, fail with unset variables, print commands before execution
         set -eux -o pipefail
         set -o xtrace
-        # Define a temp file for filtering
-        #tmp_file=basename(~{input_vcf}).filt.vcf.gz
+
         
-        # Remove 'NoCall' lines and write to the temporary file
-        bgzip -dc ~{input_vcf} | grep -v NoCall | bgzip > ~{filtFile}.filt.vcf.gz
+        # Remove 'filt_gvcf' lines and write to the gvcf file
+        bgzip -dc ~{input_vcf} | grep -v svim_asm | bgzip > ~{filtFile}.filt_gvcf.vcf.gz
         
-        # Rename the temporary file to the input VCF name to save space
-        #mv $tmp_file ~{input_vcf}
+
+        # select sv lines 
+        bgzip -dc ~{input_vcf} | grep svim_asm | bgzip > ~{filtFile}.svim_asm.vcf.gz
     >>>
 
     output {
-        File filtered_vcf = "~{filtFile}.filt.vcf.gz"
+        File filtered_gvcf = "~{filtFile}.filt_gvcf.vcf.gz"
+        File filtered_sv_vcf = "~{filtFile}.svim_asm.vcf.gz"
     }
     runtime {
         memory: memSizeGB + " GB"
