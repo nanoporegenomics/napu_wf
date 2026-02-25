@@ -159,6 +159,13 @@ if __name__ == "__main__":
         help="name of output directory."
     )
 
+    parser.add_argument(
+        '--merge_groups',
+        nargs='*',        # '+' = one or more, '*' = zero or more
+        type=str,
+        help='A space-separated list of groups to merge: hap1, hap2, ungrouped. if none are provided all three will be merged.'
+    )
+
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
         sys.exit(1)
@@ -174,11 +181,22 @@ if __name__ == "__main__":
     os.makedirs(output_dir, exist_ok=True)
     log_time(f"Output directory ensured at: {output_dir}")
 
+    print(args.merge_groups)
     # Merge the data within each haplotype
     # methylation matches Variant genoytpes - not methylation status 
-    merge_beds(hap1_gs, output_dir, 'hap1')
-    merge_beds(hap2_gs, output_dir, 'hap2')
-    merge_beds(ungrouped_gs, output_dir, 'ungrouped')
+
+    # if a particular merge is input only run that
+    if len(args.merge_groups) > 0:
+        if 'hap1' in args.merge_groups:
+            merge_beds(hap1_gs, output_dir, 'hap1')
+        if 'hap2' in args.merge_groups:
+            merge_beds(hap2_gs, output_dir, 'hap2')
+        if 'ungrouped' in args.merge_groups:
+            merge_beds(ungrouped_gs, output_dir, 'ungrouped')
+    else:
+        merge_beds(hap1_gs, output_dir, 'hap1')
+        merge_beds(hap2_gs, output_dir, 'hap2')
+        merge_beds(ungrouped_gs, output_dir, 'ungrouped')
 
 
 
