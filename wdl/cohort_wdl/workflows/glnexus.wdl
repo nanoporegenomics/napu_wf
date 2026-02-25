@@ -7,17 +7,10 @@ workflow run_glnexus{
         String out_name
         String configuration = "DeepVariantWGS"
         String? extraArgs = ""
-        String dockerImage = "quay.io/mlin/glnexus:v1.2.7"
+        String dockerImage = "ghcr.io/dnanexus-rnd/glnexus:v1.4.1"
 
     }
 
-    # Scatter the filterVCF task over the input VCF files to remove NoCall lines
-    scatter (input_vcf in vcfFiles) {
-        call filterVCF as filter_vcf {
-            input:
-                input_vcf = input_vcf
-        }
-    }
 
     call glnexus as glnexux_merge{
         input:
@@ -85,38 +78,3 @@ task glnexus {
     }
 }
 
-task filterVCF {
-    input {
-        File input_vcf
-        Int memSizeGB = 128
-        Int threadCount = 4
-        Int diskSizeGB = 2 * round(size(input_vcf, 'G')) + 30
-        String dockerImage = "quay.io/mlin/glnexus:v1.2.7"
-    }
-    
-    String filtFile = basename(input_vcf)
-    command <<<
-        # exit when a command fails, fail with unset variables, print commands before execution
-        set -eux -o pipefail
-        set -o xtrace
-        # Define a temp file for filtering
-        #tmp_file=basename(~{input_vcf}).filt.vcf.gz
-        
-        # Remove 'NoCall' lines and write to the temporary file
-        bgzip -dc ~{input_vcf} | grep -v NoCall | bgzip > ~{filtFile}.filt.vcf.gz
-        
-        # Rename the temporary file to the input VCF name to save space
-        #mv $tmp_file ~{input_vcf}
-    >>>
-
-    output {
-        File filtered_vcf = "~{filtFile}.filt.vcf.gz"
-    }
-    runtime {
-        memory: memSizeGB + " GB"
-        cpu: threadCount
-        disks: "local-disk " + diskSizeGB + " SSD"
-        docker: dockerImage
-        preemptible: 1
-    }
-}
