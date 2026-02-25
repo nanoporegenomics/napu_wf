@@ -91,6 +91,7 @@ def merge_beds(gslinks, outputdir, haplotype):
             # open GCS file and read using gzip 
             # with fs.open(file, 'rb') as f:
                 # with gzip.open(f, 'rt') as gz_file:
+            # polars can just read the gs link
             df = pl.read_csv(
                 file,
                 separator="\t",
@@ -126,10 +127,10 @@ def merge_beds(gslinks, outputdir, haplotype):
 
         log_time(f'Completed {sample_name}')
 
-        # # write out the merged df every 10 samples to prevent loosing all merged data
-        # if i%10==0:
-        #     log_time(f'writing out combined file with {i} samples')
-        #     combined_df.to_csv(f'{outputdir}/combined_methylation_{haplotype}.tsv', sep="\t", index=False)
+        # # write out the merged df every 100 samples to prevent loosing all merged data
+        if i%100==0:
+            log_time(f'writing out combined file with {i} samples')
+            combined_df.to_csv(f'{outputdir}/combined_methylation_{haplotype}.tsv', sep="\t", index=False)
 
     log_time('Filling in zeros')
     # fill missing values with a 0 for zero coverage/measurements of that position
