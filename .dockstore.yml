@@ -3,6 +3,9 @@ workflows:
    -  name: cardEndToEndVcfMethyl
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/cardEndToEndVcf.wdl
+   -  name: cardEndToEndVcfMethyl_noSnf
+      subclass: WDL
+      primaryDescriptorPath: /wdl/workflows/cardEndToEndVcf_noSniffles.wdl
    -  name: pepperMarginDvWorkflow
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/pepper_margin_deepvariant.wdl
