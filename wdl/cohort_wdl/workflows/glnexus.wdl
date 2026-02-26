@@ -3,6 +3,7 @@ version 1.0
 workflow run_glnexus{
     input {
         Array[File] vcfFiles = []
+        File reference
         File? regional_bed
         String out_name
         String configuration = "DeepVariantWGS"
@@ -15,7 +16,8 @@ workflow run_glnexus{
     scatter (input_vcf in vcfFiles) {
         call filterVCF as filter_vcf {
             input:
-                input_vcf = input_vcf
+                input_vcf = input_vcf,
+                reference = reference
         }
     }
 
@@ -90,8 +92,9 @@ task glnexus {
 task filterVCF {
     input {
         File input_vcf
+        File reference
         Int memSizeGB = 128
-        Int threadCount = 4
+        Int threadCount = 8
         Int diskSizeGB = 3 * round(size(input_vcf, 'G')) + 30
         String dockerImage = "quay.io/mlin/glnexus:v1.2.7"
     }
@@ -103,16 +106,17 @@ task filterVCF {
         set -o xtrace
 
         
-        # Remove 'filt_gvcf' lines and write to the gvcf file
-        bgzip -dc ~{input_vcf} | grep -v svim_asm | bgzip > ~{filtFile}.filt_gvcf.vcf.gz
+        # Remove sv lines and write to the gvcf file
+        bcftools view -e 'ID~"svim_asm"' --threads 8 ~{input_vcf} | \
+            bcftools norm -f ~{reference} -m -any --threads 8 -Oz ~{filtFile}.filt_gvcf.norm.vcf.gz
         
 
         # select sv lines 
-        bgzip -dc ~{input_vcf} | grep svim_asm | bgzip > ~{filtFile}.svim_asm.vcf.gz
+        bcftools view -i 'ID~"svim_asm"' --threads 8 -Oz -o ~{filtFile}.svim_asm.vcf.gz ~{input_vcf}
     >>>
 
     output {
-        File filtered_gvcf = "~{filtFile}.filt_gvcf.vcf.gz"
+        File filtered_gvcf = "~{filtFile}.filt_gvcf.norm.vcf.gz"
         File filtered_sv_vcf = "~{filtFile}.svim_asm.vcf.gz"
     }
     runtime {
