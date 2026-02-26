@@ -46,7 +46,7 @@ task glnexus {
         Int memSizeGB = 128
         Int threadCount = 64
         Int diskSizeGB = 5 * round(size(vcfFiles, 'G')) + 300
-        String dockerImage = "quay.io/mlin/glnexus:v1.2.7"
+        String dockerImage = "ghcr.io/dnanexus-rnd/glnexus:v1.4.1"
 
     }
 
