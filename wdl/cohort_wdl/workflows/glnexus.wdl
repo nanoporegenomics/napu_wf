@@ -107,8 +107,7 @@ task filterVCF {
 
         
         # Remove sv lines and write to the gvcf file
-        bgzip -dc ~{input_vcf} | awk -F "\t" '(/^#/ || $3 !~ /svim_asm/)' \
-            bcftools norm -f ~{reference} -m -any --threads 8 -Oz ~{filtFile}.filt_gvcf.norm.vcf.gz
+        bgzip -dc ~{input_vcf} | awk -F "\t" '(/^#/ || $3 !~ /svim_asm/)' | bcftools norm -f ~{reference} -m -any --threads 8 -Oz ~{filtFile}.filt_gvcf.norm.vcf.gz
         tabix ~{filtFile}.filt_gvcf.norm.vcf.gz
         
 
