@@ -94,7 +94,7 @@ task filterVCF {
         File input_vcf
         File reference
         Int memSizeGB = 128
-        Int threadCount = 8
+        Int threadCount = 4
         Int diskSizeGB = 3 * round(size(input_vcf, 'G')) + 30
         String dockerImage = "quay.io/mlin/glnexus:v1.2.7"
     }
@@ -107,17 +107,22 @@ task filterVCF {
 
         
         # Remove sv lines and write to the gvcf file
-        bcftools view -e 'ID~"svim_asm"' --threads 8 ~{input_vcf} | \
+        bgzip -dc ~{input_vcf} | awk -F "\t" '(/^#/ || $3 !~ /svim_asm/)' \
             bcftools norm -f ~{reference} -m -any --threads 8 -Oz ~{filtFile}.filt_gvcf.norm.vcf.gz
+        tabix ~{filtFile}.filt_gvcf.norm.vcf.gz
         
 
         # select sv lines 
-        bcftools view -i 'ID~"svim_asm"' --threads 8 -Oz -o ~{filtFile}.svim_asm.vcf.gz ~{input_vcf}
+        bgzip -dc ~{input_vcf} | awk -F "\t" '(/^#/ || $3 ~ /svim_asm/)' | bgzip > ~{filtFile}.svim_asm.vcf.gz
+        tabix ~{filtFile}.svim_asm.vcf.gz
+
     >>>
 
     output {
         File filtered_gvcf = "~{filtFile}.filt_gvcf.norm.vcf.gz"
+        File filtered_gvcf_idx = "~{filtFile}.filt_gvcf.norm.vcf.gz.tbi"
         File filtered_sv_vcf = "~{filtFile}.svim_asm.vcf.gz"
+        File filtered_sv_vcf_idx = "~{filtFile}.svim_asm.vcf.gz.tbi"
     }
     runtime {
         memory: memSizeGB + " GB"
