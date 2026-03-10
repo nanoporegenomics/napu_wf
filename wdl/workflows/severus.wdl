@@ -67,7 +67,7 @@ task severus {
 
 	output {
 		File severus_tar = "~{sample}_severus.tar.gz"
-		File severus_somatic_vcf = "~{sample}_severus/somatic_SVs/~{sample}_somatic.vcf"
+		File severus_somatic_vcf = "~{sample}_severus/somatic_SVs/severus_somatic.vcf"
 	}
 
 	runtime {
