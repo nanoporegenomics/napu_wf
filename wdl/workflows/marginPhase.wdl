@@ -118,7 +118,7 @@ task marginPhase {
         Int preemptible_count
         Int threads = 64
         # reducing 4 * to 3 * temp for large samples
-        Int memSizeGb = 4 * round(size(bamFile, 'G')) 
+        Int memSizeGb = 4 * round(size(bamFile, 'G')) + 200
         Int diskSizeGb = 2 * round(size(bamFile, 'G')) + round(size(refFile, 'G')) + 100
         File? resourceLogScript
     }
