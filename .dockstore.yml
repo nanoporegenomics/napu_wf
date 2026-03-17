@@ -42,6 +42,9 @@ workflows:
    -  name: glnexus
       subclass: WDL
       primaryDescriptorPath: /wdl/cohort_wdl/workflows/glnexus.wdl
+   -  name: truvariCollapse
+      subclass: WDL
+      primaryDescriptorPath: /wdl/cohort_wdl/workflows/truvari.wdl
    -  name: bcftools
       subclass: WDL
       primaryDescriptorPath: /wdl/cohort_wdl/tasks/bcftools.wdl
