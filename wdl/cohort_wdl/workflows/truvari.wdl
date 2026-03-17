@@ -2,7 +2,7 @@ version 1.0
 
 workflow run_truvari_collapse{
     input {
-        Array[File] vcfFiles = []
+        Array[File] vcfFiles 
         File reference
         File reference_index
         File? regional_bed
@@ -118,11 +118,16 @@ task truvari {
         bgzip ~{out_name}.truvari_merged.cohort.vcf
         bgzip ~{out_name}.truvari_collapsed.vcf
 
+        tabix ~{out_name}.truvari_merged.cohort.vcf.gz
+        tabix ~{out_name}.truvari_collapsed.vcf.gz
+
     >>>
 
         output {
             File? merged_vcf = "~{out_name}.truvari_merged.cohort.vcf.gz"
+            File? merged_vcf_idx = "~{out_name}.truvari_merged.cohort.vcf.gz.tbi"
             File? collapsed_vcf = "~{out_name}.truvari_collapsed.vcf.gz"
+            File? collapsed_vcf_idx = "~{out_name}.truvari_collapsed.vcf.gz.tbi"
     }
 
     runtime {
