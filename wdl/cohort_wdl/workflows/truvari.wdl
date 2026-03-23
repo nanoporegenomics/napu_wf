@@ -44,9 +44,9 @@ workflow run_truvari_collapse{
 
     call truvari as truvari_merge{
         input:
-					vcfFile = combined_sv_vcf,
-                    vcfFileIdxs = combined_sv_vcf_idx,
-					out_name = out_name,
+                    vcfFile = mergeVCFs.combined_sv_vcf,
+                    vcfFileIdxs = mergeVCFs.combined_sv_vcf_idx,
+                    out_name = out_name,
                     refdist = refdist, 
                     pctsize = pctsize, 
                     pctseq = pctseq,
@@ -64,7 +64,7 @@ workflow run_truvari_collapse{
         File? merged_truvari_vcf = truvari_merge.merged_vcf
         File? collapsed_vcf = truvari_merge.collapsed_vcf
         File combined_sv_vcf = mergeVCFs.combined_sv_vcf
-        File combined_sv_vcf_idx = mergeVCFs.combined_sv_vcf_idx
+        #File combined_sv_vcf_idx = mergeVCFs.combined_sv_vcf_idx
         Array[File] vcf50Files = filter_vcf.fiftybp_sv_vcf
         Array[File] vcf50FilesIdxs = filter_vcf.ffiftybp_sv_vcf_idx
     }
@@ -109,7 +109,7 @@ task truvari {
             --pctsize ~{pctsize} \
             --pctseq ~{pctseq} \
             ~{passonly} \
-            --keep ~{keep}
+            --keep ~{keep} \
             -i ~{vcfFile} \
             -o ~{out_name}.truvari_merged.cohort.vcf \
             -c ~{out_name}.truvari_collapsed.vcf \
@@ -119,7 +119,7 @@ task truvari {
         bgzip ~{out_name}.truvari_collapsed.vcf
 
         tabix ~{out_name}.truvari_merged.cohort.vcf.gz
-        tabix ~{out_name}.truvari_collapsed.vcf.gz
+        #tabix ~{out_name}.truvari_collapsed.vcf.gz
 
     >>>
 
@@ -127,7 +127,7 @@ task truvari {
             File? merged_vcf = "~{out_name}.truvari_merged.cohort.vcf.gz"
             File? merged_vcf_idx = "~{out_name}.truvari_merged.cohort.vcf.gz.tbi"
             File? collapsed_vcf = "~{out_name}.truvari_collapsed.vcf.gz"
-            File? collapsed_vcf_idx = "~{out_name}.truvari_collapsed.vcf.gz.tbi"
+            #File? collapsed_vcf_idx = "~{out_name}.truvari_collapsed.vcf.gz.tbi"
     }
 
     runtime {
