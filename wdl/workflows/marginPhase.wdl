@@ -11,6 +11,7 @@ workflow runMarginPhase {
         String sampleName
         Int preemptible_count = 0
         Int threads = 96
+        String? machineType
         String dockerImage = "meredith705/card_harmonize_vcf:0.2"
         File? resourceLogScript
     }
@@ -40,6 +41,7 @@ workflow runMarginPhase {
         dockerImage = dockerImage,
         preemptible_count = preemptible_count,
         threads = threads,
+        machineType = machineType,
         resourceLogScript = resourceLogScript
     }
 
@@ -117,9 +119,11 @@ task marginPhase {
         Int filter_threshold_SD = 3
         Int preemptible_count
         Int threads = 64
+        String? machineType
         # reducing 4 * to 3 * temp for large samples
-        Int memSizeGb = 4 * round(size(bamFile, 'G')) + 200
+        Int memSizeGb = 3 * round(size(bamFile, 'G')) + 200
         Int diskSizeGb = 2 * round(size(bamFile, 'G')) + round(size(refFile, 'G')) + 100
+        Int mem_mb = memSizeGb + 1024
         File? resourceLogScript
     }
     command <<<
@@ -177,6 +181,7 @@ task marginPhase {
         memory: memSizeGb + " GB"
         cpu: threads
         disks: "local-disk " + diskSizeGb + " SSD"
+        machineType : select_first([machineType, "custom-" + threads + "-" + mem_mb]) 
         docker: dockerImage
     }
 }
