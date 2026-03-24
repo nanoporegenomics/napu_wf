@@ -181,7 +181,7 @@ task marginPhase {
         memory: memSizeGb + " GB"
         cpu: threads
         disks: "local-disk " + diskSizeGb + " SSD"
-        machineType : select_first([machineType, "custom-" + threads + "-" + mem_mb]) 
+        machineType : select_first([machineType, "custom-${threads}-${mem_mb}"]) 
         docker: dockerImage
     }
 }
