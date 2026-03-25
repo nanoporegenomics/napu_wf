@@ -123,7 +123,7 @@ task marginPhase {
         # reducing 4 * to 3 * temp for large samples
         Int memSizeGb = 3 * round(size(bamFile, 'G')) + 200
         Int diskSizeGb = 2 * round(size(bamFile, 'G')) + round(size(refFile, 'G')) + 100
-        Int mem_mb = memSizeGb + 1024
+        Int mem_mb = memSizeGb * 1024
         File? resourceLogScript
     }
     command <<<
@@ -181,7 +181,7 @@ task marginPhase {
         memory: memSizeGb + " GB"
         cpu: threads
         disks: "local-disk " + diskSizeGb + " SSD"
-        machineType : select_first([machineType, "custom-${threads}-${mem_mb}"]) 
+        machineType : machineType 
         docker: dockerImage
     }
 }
