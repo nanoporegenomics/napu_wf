@@ -180,7 +180,6 @@ task marginPhase {
         memory: memSizeGb + " GB"
         cpu: threads
         disks: "local-disk " + diskSizeGb + " SSD"
-        machineType : machineType 
         docker: dockerImage
     }
 }
