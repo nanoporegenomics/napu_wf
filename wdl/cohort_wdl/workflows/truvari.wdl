@@ -195,17 +195,18 @@ task filterVCF {
         set -o xtrace
 
         # select for >=50 bp SVs
-        bcftools view -i 'INFO/SVLEN >= 50 | INFO/SVLEN <= -50' ~{input_vcf}| bgzip  > ~{input_vcf}.50bps.vcf.gz
+        bcftools view -i 'INFO/SVLEN >= 50 | INFO/SVLEN <= -50' ~{input_vcf}| bgzip  > ~{filtFile}.50bps.vcf.gz
 
         # index
-        tabix ~{input_vcf}.50bps.vcf.gz
+        tabix ~{filtFile}.50bps.vcf.gz
 
     >>>
 
     output {
-        File fiftybp_sv_vcf = "~{input_vcf}.50bps.vcf.gz"
-        File ffiftybp_sv_vcf_idx = "~{input_vcf}.50bps.vcf.gz.tbi"
+        File fiftybp_sv_vcf = "~{filtFile}.50bps.vcf.gz"
+        File ffiftybp_sv_vcf_idx = "~{filtFile}.50bps.vcf.gz.tbi"
     }
+    
     runtime {
         memory: memSizeGB + " GB"
         cpu: threadCount
