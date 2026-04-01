@@ -129,6 +129,7 @@ task marginPhase {
         set -u
         set -o xtrace
 
+        # create this empty log file to be present in the output even wdl fails
         touch monitoring.log
         if [ -s ~{monitoring_script} ]; then
             bash ~{monitoring_script} > monitoring.log &
@@ -157,8 +158,6 @@ task marginPhase {
         bgzip -@ ~{threads} output/~{sampleName}_harm_gvcf.phased.vcf
         tabix output/~{sampleName}_harm_gvcf.phased.vcf.gz
         samtools index -@ ~{threads} output/~{sampleName}_harm_gvcf.haplotagged.bam
-
-        # consider separating gVCF and SV vcf here
 
 
     >>>
