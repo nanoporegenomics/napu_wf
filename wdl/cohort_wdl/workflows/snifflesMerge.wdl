@@ -53,11 +53,7 @@ task snifflesMerge_t {
     set -o xtrace
     
     # work on this command:
-    sniffles ~{phaseArg} ~{maxInMemArg} --input snf_files_cohort.tsv --vcf ~{cohort}_multisample.vcf.gz --reference ~{referenceFa}
-
-    # use: --combine-max-inmemory-result
-
-    # or  use --no-sort
+    sniffles ~{phaseArg} ~{maxInMemArg} --input ~{snf_tsv} --vcf ~{cohort}_multisample.vcf.gz --reference ~{referenceFa}
 
     tabix ~{cohort}_multisample.vcf.gz
 
