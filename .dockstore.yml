@@ -45,6 +45,9 @@ workflows:
    -  name: truvariCollapse
       subclass: WDL
       primaryDescriptorPath: /wdl/cohort_wdl/workflows/truvari.wdl
+   -  name: snifflesMerge
+      subclass: WDL
+      primaryDescriptorPath: /wdl/cohort_wdl/workflows/snifflesMerge.wdl
    -  name: bcftools
       subclass: WDL
       primaryDescriptorPath: /wdl/cohort_wdl/tasks/bcftools.wdl
