@@ -12,7 +12,7 @@ workflow runMarginPhase {
         Int preemptible_count = 0
         Int threads = 96
         String dockerImage = "meredith705/card_harmonize_vcf:0.2"
-        File? resourceLogScript
+        File? monitoring_script
     }
 
     if(!defined(harmonizedVariantFile)){
@@ -40,7 +40,7 @@ workflow runMarginPhase {
         dockerImage = dockerImage,
         preemptible_count = preemptible_count,
         threads = threads,
-        resourceLogScript = resourceLogScript
+        monitoring_script = monitoring_script
     }
 
     output {
@@ -52,6 +52,7 @@ workflow runMarginPhase {
         File out_margin_phase_bam = marginPhase.haplotaggedBam
         File out_margin_phase_bam_bai = marginPhase.haplotaggedBamIdx
         File? out_exclusionBed = marginPhase.exclusionBed
+        File margin_out_monitor = marginPhase.monitoring_log
     }
 }
 
@@ -116,11 +117,11 @@ task marginPhase {
         Int filter_min_cluster_size = 10
         Int filter_threshold_SD = 3
         Int preemptible_count
-        Int threads = 64
+        Int threads = 96
         # reducing 4 * to 3 * temp for large samples
-        Int memSizeGb = 3 * round(size(bamFile, 'G')) + 200
+        Int memSizeGb = 2 * round(size(bamFile, 'G')) + 200
         Int diskSizeGb = 2 * round(size(bamFile, 'G')) + round(size(refFile, 'G')) + 100
-        File? resourceLogScript
+        File? monitoring_script
     }
     command <<<
         set -o pipefail
@@ -128,10 +129,10 @@ task marginPhase {
         set -u
         set -o xtrace
 
-        ## run a recurrent "top" in the background to monitor resource usage
-        if [ ~{resourceLogScript} != "" ]
-        then
-            bash ~{resourceLogScript} 20 top.log &
+        # create this empty log file to be present in the output even wdl fails
+        touch monitoring.log
+        if [ -s ~{monitoring_script} ]; then
+            bash ~{monitoring_script} > monitoring.log &
         fi
 
         #filter the VCF by depth 
@@ -158,8 +159,6 @@ task marginPhase {
         tabix output/~{sampleName}_harm_gvcf.phased.vcf.gz
         samtools index -@ ~{threads} output/~{sampleName}_harm_gvcf.haplotagged.bam
 
-        # consider separating gVCF and SV vcf here
-
 
     >>>
     output {
@@ -169,7 +168,7 @@ task marginPhase {
         File haplotaggedBam = "output/~{sampleName}_harm_gvcf.haplotagged.bam"
         File haplotaggedBamIdx = "output/~{sampleName}_harm_gvcf.haplotagged.bam.bai"
         File? exclusionBed = "~{sampleName}.merged_small_svs.filt~{filter_window_size}bp_~{filter_threshold_SD}_sds.100kbmerged.bed"
-        File? toplog = "top.log"
+        File monitoring_log = "monitoring.log"
     }
 
     runtime {

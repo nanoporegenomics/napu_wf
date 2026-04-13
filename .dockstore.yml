@@ -27,6 +27,9 @@ workflows:
    -  name: marginPhase
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/marginPhase.wdl
+   -  name: marginPhaseHifi
+      subclass: WDL
+      primaryDescriptorPath: /wdl/workflows/marginPhase_hifi.wdl
    -  name: shasta
       subclass: WDL
       primaryDescriptorPath: /wdl/tasks/shasta.wdl
@@ -45,6 +48,9 @@ workflows:
    -  name: truvariCollapse
       subclass: WDL
       primaryDescriptorPath: /wdl/cohort_wdl/workflows/truvari.wdl
+   -  name: snifflesMerge
+      subclass: WDL
+      primaryDescriptorPath: /wdl/cohort_wdl/workflows/snifflesMerge.wdl
    -  name: bcftools
       subclass: WDL
       primaryDescriptorPath: /wdl/cohort_wdl/tasks/bcftools.wdl
