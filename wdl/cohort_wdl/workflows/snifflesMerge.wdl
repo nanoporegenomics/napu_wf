@@ -4,7 +4,7 @@ version 1.0
 
 workflow run_sniffles_merge{
   input {
-    File snf_tsv
+    Array[File] snfFiles
     File reference
     String cohort 
     Int numSamples
@@ -15,7 +15,7 @@ workflow run_sniffles_merge{
 
   call snifflesMerge_t as snifflesMerge{
     input:
-        snf_tsv = snf_tsv,
+        snfFiles  = snfFiles,
         referenceFa = reference,
         cohort = cohort,
         numSamples = numSamples,
@@ -31,8 +31,8 @@ workflow run_sniffles_merge{
 
 task snifflesMerge_t {
   input {
+    Array[File] snfFiles
     Int threads = 64
-    File snf_tsv 
     File referenceFa
     String cohort 
     Int numSamples 
@@ -52,8 +52,8 @@ task snifflesMerge_t {
     set -u
     set -o xtrace
     
-    # work on this command:
-    sniffles ~{phaseArg} ~{maxInMemArg} --input ~{snf_tsv} --vcf ~{cohort}_multisample.vcf.gz --reference ~{referenceFa}
+    # Multi-Sample SV Calling command:
+    sniffles ~{phaseArg} ~{maxInMemArg} --input ~{sep=" " snfFiles} --vcf ~{cohort}_multisample.vcf.gz --reference ~{referenceFa}
 
     tabix ~{cohort}_multisample.vcf.gz
 
