@@ -55,7 +55,6 @@ task snifflesMerge_t {
     # Multi-Sample SV Calling command:
     sniffles ~{phaseArg} ~{maxInMemArg} --input ~{sep=" " snfFiles} --vcf ~{cohort}_multisample.vcf.gz --reference ~{referenceFa}
 
-    tabix ~{cohort}_multisample.vcf.gz
 
   >>>
 
