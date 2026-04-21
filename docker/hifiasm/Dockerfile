@@ -20,11 +20,16 @@ RUN wget https://github.com/mbhall88/rasusa/releases/download/3.0.0/rasusa-$RASU
 	tar -xzvf rasusa-$RASUSA_VER-x86_64-unknown-linux-gnu.tar.gz && \
 	rm rasusa-$RASUSA_VER-x86_64-unknown-linux-gnu.tar.gz
 
+ARG RASUSA_VER=3.0.0
+RUN wget https://github.com/mbhall88/rasusa/releases/download/$RASUSA_VER/rasusa-$RASUSA_VER-x86_64-unknown-linux-gnu.tar.gz && \
+    tar -xzvf rasusa-$RASUSA_VER-x86_64-unknown-linux-gnu.tar.gz && \
+    mv rasusa-$RASUSA_VER-x86_64-unknown-linux-gnu/rasusa /usr/local/bin/rasusa && \
+    chmod +x /usr/local/bin/rasusa && \
+    rm -rf rasusa-$RASUSA_VER-x86_64-unknown-linux-gnu*
 
 
 
 ENV PATH="/opt/hifiasm-$HIFIASM_VER:$PATH"
-ENV PATH="/opt/rasusa-$RASUSA_VER-x86_64-unknown-linux-gnu/rasusa:$PATH"
 
-WORKDIR /opt
+WORKDIR /data
 
