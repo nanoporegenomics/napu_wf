@@ -60,6 +60,9 @@ workflows:
    -  name: hifiasmWf
       subclass: WDL
       primaryDescriptorPath: /wdl/tasks/hifiasm.wdl
+   -  name: hifiasmDownsample
+      subclass: WDL
+      primaryDescriptorPath: /wdl/workflows/hifiasmDownsample.wdl
    -  name: indexaBAM
       subclass: WDL
       primaryDescriptorPath: /wdl/workflows/indexABAM.wdl 
