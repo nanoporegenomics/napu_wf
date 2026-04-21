@@ -1,6 +1,6 @@
 version 1.0
 
-workflow hifiasm_longitudinal {
+workflow hifiasm_downsampled {
 
     input {
         Array[File] readFiles = []
