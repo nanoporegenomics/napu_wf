@@ -31,5 +31,7 @@ RUN wget https://github.com/mbhall88/rasusa/releases/download/$RASUSA_VER/rasusa
 
 ENV PATH="/opt/hifiasm-$HIFIASM_VER:$PATH"
 
+COPY ./addCounterToFastqReadNames.sh /usr/local/bin/addCounterToFastqReadNames.sh
+
 WORKDIR /data
 
