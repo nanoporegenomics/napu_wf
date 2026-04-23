@@ -48,7 +48,7 @@ workflows:
    -  name: truvariCollapse
       subclass: WDL
       primaryDescriptorPath: /wdl/cohort_wdl/workflows/truvari.wdl
-      -  name: truvariCollapse
+   -  name: truvari_merge_hapdiffAndSniffles
       subclass: WDL
       primaryDescriptorPath: /wdl/cohort_wdl/workflows/truvari_merge_hapdiffAndSniffles.wdl
    -  name: snifflesMerge
