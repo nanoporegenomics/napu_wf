@@ -273,6 +273,7 @@ workflow cardEndToEndVcfMethyl
         File harmonizedVcf = margin_phase.out_margin_phase_svs
         File harmonizedVcfIdx = margin_phase.out_phasedVcfIdx
         File harmonizedVcfPhaseset = margin_phase.out_phasedVCFPhaseSetBED
+        File margin_out_monitor = margin_phase.margin_out_monitor
         File? harmonizedVcfDenseFilterBed = margin_phase.out_exclusionBed
         File smallVariantsVcf = dvVCF
         File smallVariantsgVcf = dvgVCF
