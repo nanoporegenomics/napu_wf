@@ -132,7 +132,7 @@ task convertToFastq {
   >>>
 
   output {
-    File fastq = "~{outname}.uniqName.50x_rasusa_downsampled.fastq.gz"
+    File fastq = "~{outname}.uniqName.~{coverage}x_rasusa_downsampled.fastq.gz"
   }
 
   runtime {
