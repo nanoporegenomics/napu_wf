@@ -126,7 +126,7 @@ task convertToFastq {
     bash addCounterToFastqReadNames.sh ~{outname}.fastq | bgzip > ~{outname}.uniqName.fastq.gz
 
     # use rsusa to downsample to 150 Gbases, by using 50x coverage in 3.1gig refsize
-    rasusa reads --genome-size ~{genomeSize}g -c ~{coverage} ~{outname}.uniqName.fastq.gz | bgzip > ~{outname}.uniqName.50x_rasusa_downsampled.fastq.gz
+    rasusa reads --genome-size ~{genomeSize}g -c ~{coverage} ~{outname}.uniqName.fastq.gz | bgzip > ~{outname}.uniqName.~{coverage}x_rasusa_downsampled.fastq.gz
 
 
   >>>
