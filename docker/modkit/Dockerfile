@@ -10,7 +10,7 @@ RUN cd /home/apps && \
     tabix python3 python3-pip \
     protobuf-compiler pkg-config libprotobuf-dev libjansson-dev libncurses-dev \
     libbz2-dev liblzma-dev zlib1g-dev autoconf libcurl4-openssl-dev curl libomp-dev libssl-dev python3-tk && \
-    pip3 install pysam matplotlib numpy pandas seaborn scikit-learn scipy scikit-network IPython
+    pip3 install pysam matplotlib numpy pandas seaborn scikit-learn scipy scikit-network gcsfs IPython
 
 
 WORKDIR /home/apps
