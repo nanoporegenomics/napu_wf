@@ -34,6 +34,9 @@ RUN wget https://github.com/samtools/bcftools/releases/download/${bcftoolsVer}/b
    make && \
    make install
 
+WORKDIR /opt
+COPY ./genotype_truvari.py /opt/genotype_truvari.py
+
 ENV PATH="/opt/sniffles/Sniffles/src:${PATH}"
 ENV PATH="/opt/bcftools/bcftools2:${PATH}"
 
