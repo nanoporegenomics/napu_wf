@@ -49,13 +49,16 @@ task fillInGenotypes {
         # decompress the vcf for use in the genotype script
         bgzip -dc ~{inVcfFile} > ~{inVcfBasename}
 
+        # expand WDL array in to bash array
+        file_paths=(~{sep=" " bedFiles})
+
         # store variables
         IN_VCF=~{inVcfBasename}
         OUT_VCF=~{outVcfFilename}
         IT=0
 
         # loop through each bed file and fill in genotypes based on coverage
-        for b in ~{sep=" " bedFiles}
+        for b in "${file_paths[@]}"
             do
             echo $b
             python3 /opt/genotype_truvari.py $b $IN_VCF $OUT_VCF
