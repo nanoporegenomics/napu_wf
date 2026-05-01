@@ -61,7 +61,6 @@ task fillInGenotypes {
             echo $b
             python3 /opt/genotype_truvari.py $b $IN_VCF $OUT_VCF
             IN_VCF=$OUT_VCF
-            OUT_VCF=$IN_VCF
             echo 
             echo "Iteration: $IT | IN: $IN_VCF | OUT: $OUT_VCF"
 
