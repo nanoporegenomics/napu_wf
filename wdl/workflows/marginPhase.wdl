@@ -120,7 +120,7 @@ task marginPhase {
         Int threads = 96
         # reducing 4 * to 2 * temp for large samples and removing the + 200 G
         # Int memSizeGb = 2 * round(size(bamFile, 'G')) 
-        Int memSizeGb
+        Int memSizeGb = 600
         Int diskSizeGb = 2 * round(size(bamFile, 'G')) + round(size(refFile, 'G')) + 100
         File? monitoring_script
     }
