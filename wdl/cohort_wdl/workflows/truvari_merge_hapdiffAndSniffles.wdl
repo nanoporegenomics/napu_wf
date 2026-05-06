@@ -2,11 +2,12 @@ version 1.0
 
 workflow run_truvari_collapse{
     input {
-        Array[File] vcfFiles 
+        File snifflesSvVcf
+        File assemblySvVcf 
         File reference
         File reference_index
         File? regional_bed
-        String out_name
+        String out_name_truvari
         String out_prefix
 
         # Matching parameters
@@ -24,19 +25,10 @@ workflow run_truvari_collapse{
 
     }
 
-    # Scatter the filterVCF task over the input VCF files to select SVs >=50 bps
-    scatter (input_vcf in vcfFiles) {
-        call filterVCF as filter_vcf {
-            input:
-                input_vcf = input_vcf,
-                reference = reference
-        }
-    }
-
-    call mergeVCFs {
+    call concatVCFs {
         input:
-            vcfFiles = filter_vcf.fiftybp_sv_vcf,
-            vcfFilesIdxs = filter_vcf.ffiftybp_sv_vcf_idx,
+            snifflesSvVcf = snifflesSvVcf,
+            assemblySvVcf = assemblySvVcf,
             out_prefix = out_prefix,
             dockerImage = dockerImage
 
@@ -44,9 +36,9 @@ workflow run_truvari_collapse{
 
     call truvari as truvari_merge{
         input:
-                    vcfFile = mergeVCFs.combined_sv_vcf,
-                    vcfFileIdxs = mergeVCFs.combined_sv_vcf_idx,
-                    out_name = out_name,
+                    vcfFile = concatVCFs.combined_sv_vcf,
+                    vcfFileIdxs = concatVCFs.combined_sv_vcf_idx,
+                    out_name = out_name_truvari,
                     refdist = refdist, 
                     pctsize = pctsize, 
                     pctseq = pctseq,
@@ -63,10 +55,7 @@ workflow run_truvari_collapse{
     output{
         File? merged_truvari_vcf = truvari_merge.merged_vcf
         File? collapsed_vcf = truvari_merge.collapsed_vcf
-        File combined_sv_vcf = mergeVCFs.combined_sv_vcf
-        #File combined_sv_vcf_idx = mergeVCFs.combined_sv_vcf_idx
-        Array[File] vcf50Files = filter_vcf.fiftybp_sv_vcf
-        Array[File] vcf50FilesIdxs = filter_vcf.ffiftybp_sv_vcf_idx
+        File combined_sv_vcf = concatVCFs.combined_sv_vcf
     }
 }
 
@@ -138,14 +127,14 @@ task truvari {
     }
 }
 
-task mergeVCFs {
+task concatVCFs {
     input {
-        Array[File] vcfFiles = []
-        Array[File] vcfFilesIdxs = []
+        File snifflesSvVcf
+        File assemblySvVcf
         String out_prefix
         Int memSizeGB = 128
         Int threadCount = 64
-        Int diskSizeGB = 2 * round(size(vcfFiles, 'G')) + 50
+        Int diskSizeGB = 150
         String dockerImage 
 
     }
@@ -155,19 +144,15 @@ task mergeVCFs {
         set -eux -o pipefail
         set -o xtrace
 
-        # make a space separated list of file names for bcftools merge
-        bcftools merge \
-            --force-samples \
-            --threads ~{threadCount} \
-            -m none \
-            ~{sep=" " vcfFiles} | bgzip -@ ~{threadCount} > ~{out_prefix}_harmonized_merge.vcf.gz
+        # concat bcftools merge
+        bcftools concat --allow-overlaps -o ~{out_prefix}_snf_hapdiff_concat.vcf.gz ~{assemblySvVcf} ~{snifflesSvVcf}
 
-        bcftools index --tbi ~{out_prefix}_harmonized_merge.vcf.gz
+        bcftools index --tbi ~{out_prefix}_snf_hapdiff_concat.vcf.gz
 
     >>>
     output {
-        File combined_sv_vcf = "~{out_prefix}_harmonized_merge.vcf.gz"
-        File combined_sv_vcf_idx = "~{out_prefix}_harmonized_merge.vcf.gz.tbi"
+        File combined_sv_vcf = "~{out_prefix}_snf_hapdiff_concat.vcf.gz"
+        File combined_sv_vcf_idx = "~{out_prefix}_snf_hapdiff_concat.vcf.gz.tbi"
     }
     runtime {
         memory: memSizeGB + " GB"
@@ -178,40 +163,3 @@ task mergeVCFs {
 
 }
 
-task filterVCF {
-    input {
-        File input_vcf
-        File reference
-        Int memSizeGB = 128
-        Int threadCount = 4
-        Int diskSizeGB = 3 * round(size(input_vcf, 'G')) + 30
-        String dockerImage = "meredith705/truvari"
-    }
-    
-    String filtFile = basename(input_vcf)
-    command <<<
-        # exit when a command fails, fail with unset variables, print commands before execution
-        set -eux -o pipefail
-        set -o xtrace
-
-        # select for >=50 bp SVs
-        bcftools view -i 'INFO/SVLEN >= 50 | INFO/SVLEN <= -50' ~{input_vcf}| bgzip  > ~{filtFile}.50bps.vcf.gz
-
-        # index
-        tabix ~{filtFile}.50bps.vcf.gz
-
-    >>>
-
-    output {
-        File fiftybp_sv_vcf = "~{filtFile}.50bps.vcf.gz"
-        File ffiftybp_sv_vcf_idx = "~{filtFile}.50bps.vcf.gz.tbi"
-    }
-    
-    runtime {
-        memory: memSizeGB + " GB"
-        cpu: threadCount
-        disks: "local-disk " + diskSizeGB + " SSD"
-        docker: dockerImage
-        preemptible: 1
-    }
-}
