@@ -3,7 +3,9 @@ version 1.0
 workflow run_truvari_collapse{
     input {
         File snifflesSvVcf
-        File assemblySvVcf 
+        File snifflesSvVcfidx
+        File assemblySvVcf
+        File assemblySvVcfidx 
         File reference
         File reference_index
         File? regional_bed
@@ -28,7 +30,9 @@ workflow run_truvari_collapse{
     call concatVCFs {
         input:
             snifflesSvVcf = snifflesSvVcf,
+            snifflesSvVcfidx = snifflesSvVcfidx,
             assemblySvVcf = assemblySvVcf,
+            assemblySvVcfidx = assemblySvVcfidx,
             out_prefix = out_prefix,
             dockerImage = dockerImage
 
@@ -130,7 +134,9 @@ task truvari {
 task concatVCFs {
     input {
         File snifflesSvVcf
+        File snifflesSvVcfidx
         File assemblySvVcf
+        File assemblySvVcfidx
         String out_prefix
         Int memSizeGB = 128
         Int threadCount = 64
