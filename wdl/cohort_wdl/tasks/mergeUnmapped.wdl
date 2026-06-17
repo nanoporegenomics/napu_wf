@@ -40,7 +40,7 @@ task combine_unmapped {
         File phasedBAM
         File phasedBAI
         String sample
-        Int memSizeGB = 80
+        Int memSizeGB = 2 * round(size(unphasedMappedBAM, "GB"))
         Int threads = 16
         Int diskSizeGB = 2 * round(size(unphasedMappedBAM, "GB")) + 40
     }
