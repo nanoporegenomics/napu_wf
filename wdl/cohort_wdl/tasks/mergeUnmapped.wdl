@@ -69,7 +69,7 @@ task combine_unmapped {
         # 4: merge unmapped and haplotagged bams and sort
         # samtools merge -@ ~{threads} -o ~{outname} ~{phasedBAM} tmp.extracted_reads.bam
         samtools merge -@ ~{threads} -u - ~{phasedBAM} tmp.extracted_reads.bam | \
-          samtools sort -@ ~{threads} - > ~{outname}
+          samtools sort -@ ~{threads} -T ~{outname}.tmp -o ~{outname} - 
 
         # 5: index the merged BAM
         samtools index -@ ~{threads} ~{outname}
