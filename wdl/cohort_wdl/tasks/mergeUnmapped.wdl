@@ -45,7 +45,7 @@ task combine_unmapped {
         Int diskSizeGB = 2 * round(size(unphasedMappedBAM, "GB")) + 40
     }
 
-    String outname = "~{sample}"+".GRCh38.bam"
+    String outname = "~{sample}"+".haplotagged.GRCh38.bam"
 
     command <<<
 
@@ -66,8 +66,10 @@ task combine_unmapped {
         # 3: convert the tmp.sam to a bam
         samtools view -b -@ ~{threads} tmp.extracted_reads.sam | samtools sort -@ ~{threads} - > tmp.extracted_reads.bam
 
-        # 4: merge unmapped and haplotagged bams
-        samtools merge -@ ~{threads} -o ~{outname} ~{phasedBAM} tmp.extracted_reads.bam
+        # 4: merge unmapped and haplotagged bams and sort
+        # samtools merge -@ ~{threads} -o ~{outname} ~{phasedBAM} tmp.extracted_reads.bam
+        samtools merge -@ ~{threads} -u - ~{phasedBAM} tmp.extracted_reads.bam | \
+          samtools sort -@ ~{threads} -o ~{outname} -
 
         # 5: index the merged BAM
         samtools index -@ ~{threads} ~{outname}
