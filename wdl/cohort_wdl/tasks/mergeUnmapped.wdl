@@ -40,9 +40,9 @@ task combine_unmapped {
         File phasedBAM
         File phasedBAI
         String sample
-        Int memSizeGB = 2 * round(size(unphasedMappedBAM, "GB"))
-        Int threads = 16
-        Int diskSizeGB = 2 * round(size(unphasedMappedBAM, "GB")) + 40
+        Int memSizeGB = 2 * round(size(unphasedMappedBAM, "GB")) + 40
+        Int threads = 26
+        Int diskSizeGB = 3 * round(size(unphasedMappedBAM, "GB")) + 40
     }
 
     String outname = "~{sample}"+".haplotagged.GRCh38.bam"
