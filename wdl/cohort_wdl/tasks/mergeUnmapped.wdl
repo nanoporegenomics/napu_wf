@@ -51,7 +51,7 @@ task combine_unmapped {
 
         set -eux -o pipefail
 
-        #1 : get the header from the first unphased bam into a tmp.sam to append all the reads to
+        #1 : get the header from the first unphased bam into a tmp.sam to append all the reads to it
         samtools view -H ~{unphasedMappedBAM} > tmp.extracted_reads.sam
 
         # 2: get unmapped reads from bam
@@ -67,9 +67,9 @@ task combine_unmapped {
         samtools view -b -@ ~{threads} tmp.extracted_reads.sam | samtools sort -@ ~{threads} - > tmp.extracted_reads.bam
 
         # 4: merge unmapped and haplotagged bams and sort
-        # samtools merge -@ ~{threads} -o ~{outname} ~{phasedBAM} tmp.extracted_reads.bam
-        samtools merge -@ ~{threads} -u - ~{phasedBAM} tmp.extracted_reads.bam | \
-          samtools sort -@ ~{threads} -T ~{outname}.tmp -o ~{outname} - 
+        samtools merge -@ ~{threads} -o ~{outname} ~{phasedBAM} tmp.extracted_reads.bam
+        #samtools merge -@ ~{threads} -u - ~{phasedBAM} tmp.extracted_reads.bam | \
+        #  samtools sort -@ ~{threads} -T ~{outname}.tmp -o ~{outname} - 
 
         # 5: index the merged BAM
         samtools index -@ ~{threads} ~{outname}
