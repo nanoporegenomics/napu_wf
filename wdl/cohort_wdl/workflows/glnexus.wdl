@@ -41,8 +41,8 @@ workflow run_glnexus{
 
     output{
         File? merged_gvcf = glnexux_merge.merged_gvcf
-        Array[File] gvcfFiles = filter_vcf.filtered_gvcf
-        Array[File] svVcfFiles = filter_vcf.filtered_sv_vcf
+        Array[File]? gvcfFiles = filter_vcf.filtered_gvcf
+        Array[File]? svVcfFiles = filter_vcf.filtered_sv_vcf
     }
 }
 
@@ -67,8 +67,7 @@ task glnexus {
         set -eux -o pipefail
         set -o xtrace
 
-        # note output format: https://nanoporetech.github.io/modkit/intro_bedmethyl.html
-        # filtering threshold default 10-th percentile of calls https://github.com/nanoporetech/modkit/blob/master/filtering.md
+        # if there is a region input bed then only merge variants in that region.
         if [ ~{regionaly} == true ]
         then
           glnexus_cli \
