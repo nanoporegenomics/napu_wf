@@ -6,6 +6,7 @@ workflow run_glnexus{
         Array[File]? input_gvcfs 
         File reference
         File? regional_bed
+        File? config_yml
         String out_name
         String configuration = "DeepVariantWGS"
         String? extraArgs = ""
@@ -50,8 +51,10 @@ task glnexus {
     input {
         Array[File] vcfFiles = []
         File? regional_bed
+        File? config_yml
         String out_name
-        String configuration = "DeepVariantWGS"
+        #String configuration = "DeepVariantWGS"
+        String configuration = if defined(config_yml) then basename(select_first([config_yml])) else "DeepVariantWGS"
         String? extraArgs = ""
         Int memSizeGB = 540
         Int threadCount = 96
@@ -66,6 +69,8 @@ task glnexus {
         # exit when a command fails, fail with unset variables, print commands before execution
         set -eux -o pipefail
         set -o xtrace
+
+        echo "configuration: ~{configuration}" 
 
         # if there is a region input bed then only merge variants in that region.
         if [ ~{regionaly} == true ]
@@ -108,7 +113,9 @@ task filterVCF {
         String dockerImage = "quay.io/mlin/glnexus:v1.2.7"
     }
     
+    # remove file ending also here
     String filtFile = basename(input_vcf)
+
     command <<<
         # exit when a command fails, fail with unset variables, print commands before execution
         set -eux -o pipefail
