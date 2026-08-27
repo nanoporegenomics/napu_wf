@@ -30,10 +30,10 @@ workflow dvMargin {
 
     # if the chr arr is provided, split the bams prior to running DV
     # adding this for running DV/chrom outside of the end2end pipeline
-    if(length(chrs) > 0 {
+    if (length(chrs) > 0) {
         call minimap_t.indexBAM as indexSingleInputBam{
             input: 
-                bam = inputBam,
+                bam = bamFile,
                 chrs = chrs
         }
 
@@ -46,7 +46,7 @@ workflow dvMargin {
             call dv_margin_t.dv_t as chr_dv_t {
                 input:
                     threads = threads,
-                    reference = referenceFasta,
+                    reference = referenceFile,
                     bamAlignment = bamChr.left,
                     bamAlignmentIndex = bamChr.right,
                     sampleName = sampleName,
@@ -64,7 +64,7 @@ workflow dvMargin {
     }
     
     # otherwise run dv whole genome
-    if(length(chrs) == 0{
+    if (length(chrs) == 0) {
         call dv_margin_t.dv_t{
         input:
             threads = threads,
@@ -74,24 +74,28 @@ workflow dvMargin {
             sampleName = sampleName
         }
     }
+
+    File vcfDV = select_first([dv_t.dvVcf, mergeVCFs.vcf])
+    File gvcfDV = select_first([dv_t.dvgVcf, mergeVCFs.gvcf])
     
     # phase the variants.
     if (phaseVariants){
+        
         call dv_margin_t.margin_t{
             input:
                 threads = threads,
                 reference = referenceFile,
                 bamAlignment = bamFile,
                 bamAlignmentIndex = bamIdxFile,
-                vcfFile = dv_t.dvVcf,
+                vcfFile = vcfDV,
                 sampleName = sampleName
         }
     }
 
     output {
         File? phasedVcf = margin_t.phasedVcf
-        File  dvUnphasedVcf  = dv_t.dvVcf
-        File  dvUnphasedgVcf = dv_t.dvVcf
+        File  dvUnphasedVcf  = vcfDV
+        File  dvUnphasedgVcf = gvcfDV
         #File phasedgVcf = margin_t.phasedgVcf
         #File haplotaggedBam = margin_t.haplotaggedBam
         #File haplotaggedBamBai = margin_t.haplotaggedBamIdx
