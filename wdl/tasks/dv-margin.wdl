@@ -49,14 +49,14 @@ task dv_t {
         --ref ref.fa \
         --reads reads.bam \
         --sample_name ~{sampleName} \
-        --output_vcf dv.vcf.gz $REGION_ARG \
-        --output_gvcf dv.g.vcf.gz \
+        --output_vcf ~{sampleName}.dv.vcf.gz $REGION_ARG \
+        --output_gvcf ~{sampleName}.dv.g.vcf.gz \
         --num_shards ~{threads} ~{extraArguments}
   >>>
 
   output {
-    File dvVcf = "dv.vcf.gz"
-    File dvgVcf = "dv.g.vcf.gz"
+    File dvVcf = "~{sampleName}.dv.vcf.gz"
+    File dvgVcf = "~{sampleName}.dv.g.vcf.gz"
     File? toplog = "top.log"
   }
 
@@ -101,7 +101,7 @@ task margin_t {
     ln -s ~{bamAlignment} reads.bam
     ln -s ~{bamAlignmentIndex} reads.bam.bai
     
-    # Don't output a bam (-M)
+    # Don't output a bam (-M); now I think we do want to output a bam.
     mkdir output/
     margin phase reads.bam ref.fa ~{vcfFile} /opt/margin/params/phase/allParams.haplotag.ont-r104q20.json -t ~{threads} ~{marginOtherArgs} -o output/~{sampleName} -M
 
@@ -120,7 +120,7 @@ task margin_t {
   }
 
   runtime {
-    preemptible: 2
+    preemptible: 0
     docker: "mkolmogo/card_harmonize_vcf:0.1"
     cpu: threads
     memory: memSizeGb + " GB"

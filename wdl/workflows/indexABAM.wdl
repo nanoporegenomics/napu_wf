@@ -14,6 +14,7 @@ workflow indexTheBAM
 	call minimap_t.indexBAM as indexBAM_t {
 		input: 
                 bam = inputMappedBam,
+                sortInputBAM = sortingInputBAM,
                 chrs = chrs
 	}
 
