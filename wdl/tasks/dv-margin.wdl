@@ -51,12 +51,16 @@ task dv_t {
         --sample_name ~{sampleName} \
         --output_vcf ~{sampleName}.dv.vcf.gz $REGION_ARG \
         --output_gvcf ~{sampleName}.dv.g.vcf.gz \
+        --logging_dir=logs \
         --num_shards ~{threads} ~{extraArguments}
+
+    tar -czf ~{sampleName}.dv_logs.tar.gz logs
   >>>
 
   output {
     File dvVcf = "~{sampleName}.dv.vcf.gz"
     File dvgVcf = "~{sampleName}.dv.g.vcf.gz"
+    File dv_logs   = "~{sampleName}.dv_logs.tar.gz"
     File? toplog = "top.log"
   }
 
