@@ -4,11 +4,13 @@ workflow compressionWDL
 {
 	input {
 		File inputFile
+		String sample_name
 	}
 
 	call compressAFile {
 		input: 
                 inputFile = inputFile,
+                sample_name = sample_name
 	}
 
 	output {
@@ -23,6 +25,7 @@ task compressAFile {
 
     input {
         File inputFile
+        String sample_name
         Int memSizeGB = 40
         Int threads = 12
         Int diskSizeGB = round(size(inputFile, "GB")) + 40
@@ -34,12 +37,12 @@ task compressAFile {
 
         set -eux -o pipefail
 
-        bgzip -@ ~{threads} ~{inputFile}
+        bgzip -@ ~{threads} -o ~{sample_name}.~{inputFile}.gz ~{inputFile}
 
   >>>
 
   output {
-    File outputFile = "~{inputFile}.gz"
+    File outputFile = "~{sample_name}.~{inputFile}.gz"
 
   }
 
