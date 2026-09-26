@@ -89,5 +89,8 @@ workflows:
       primaryDescriptorPath: /wdl/cohort_wdl/tasks/pilotSampleUploads.wdl    
    -  name: severusSomatic
       subclass: WDL
-      primaryDescriptorPath: /wdl/workflows/severus.wdl     
+      primaryDescriptorPath: /wdl/workflows/severus.wdl 
+   -  name: compressAFile
+      subclass: WDL
+      primaryDescriptorPath: /wdl/tasks/compressAFile.wdl     
       
