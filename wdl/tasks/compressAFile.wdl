@@ -19,7 +19,6 @@ workflow compressionWDL
 	}
 }
 
-
 task compressAFile {
 
 
@@ -32,17 +31,18 @@ task compressAFile {
         Int preemptible = 1
     }
 
+    String input_basename = basename(inputFile)
 
     command <<<
 
         set -eux -o pipefail
 
-        bgzip -@ ~{threads} ~{inputFile} > ~{sample_name}.~{inputFile}.gz
+        bgzip -@ ~{threads} ~{inputFile} > ~{sample_name}.~{input_basename}.gz
 
   >>>
 
   output {
-    File outputFile = "~{sample_name}.~{inputFile}.gz"
+    File outputFile = "~{sample_name}.~{input_basename}.gz"
 
   }
 
