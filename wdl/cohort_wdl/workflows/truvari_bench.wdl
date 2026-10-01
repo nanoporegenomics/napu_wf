@@ -1,6 +1,6 @@
 version 1.0
 
-workflow run_truvari_collapse{
+workflow run_truvari_bench{
     input {
         File base_vcf
         File base_vcfIdxs 
