@@ -37,7 +37,7 @@ task compressAFile {
 
         set -eux -o pipefail
 
-        bgzip -@ ~{threads} ~{inputFile} > ~{sample_name}.~{input_basename}.gz
+        bgzip -@ ~{threads} -c ~{inputFile} > ~{sample_name}.~{input_basename}.gz
 
   >>>
 
