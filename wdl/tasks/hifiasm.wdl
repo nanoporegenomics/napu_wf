@@ -41,6 +41,8 @@ workflow hifiasm {
         File hap2_lowq_bed = hifiasm_t.asm_hap2_lowQ_bed
         File gfa = hifiasm_t.asm_gfa
         File hifiasm_log = hifiasm_t.hifiasm_log
+        File ecreads = hifiasm_t.ecreads
+        
     }
 }
 
@@ -84,6 +86,7 @@ task hifiasm_t {
         File asm_hap1_lowQ_bed = "~{sample_name}.hifiasm.ont.bp.hap1.p_ctg.lowQ.bed"
         File asm_hap2_lowQ_bed = "~{sample_name}.hifiasm.ont.bp.hap2.p_ctg.lowQ.bed"
         File hifiasm_log = "~{sample_name}.hifiasm.ont.log"
+        File ec_reads = glob("~{sample_name}*.ec.*")[0]
 
     }
 
