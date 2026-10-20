@@ -41,7 +41,7 @@ workflow hifiasm {
         File hap2_lowq_bed = hifiasm_t.asm_hap2_lowQ_bed
         File gfa = hifiasm_t.asm_gfa
         File hifiasm_log = hifiasm_t.hifiasm_log
-        File ecreads = hifiasm_t.ecreads
+        File ecreads = hifiasm_t.ec_reads
         
     }
 }
