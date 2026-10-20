@@ -11,6 +11,7 @@ workflow snifflesWf {
         File? vntrAnnotations
         Boolean phaseVariants
         Int threads
+        Int diskSizeGb
     }
 
 	### Sniffles
@@ -21,7 +22,8 @@ workflow snifflesWf {
             bamAlignmentIndex=bamAlignmentIndex,
             sample=sample,
 			vntrAnnotations=vntrAnnotations,
-            phaseVariants=phaseVariants
+            phaseVariants=phaseVariants, 
+            diskSizeGb=diskSizeGb
     }
 
 	output {

@@ -3,8 +3,10 @@ version 1.0
 workflow run_glnexus{
     input {
         Array[File] vcfFiles = []
+        Array[File]? input_gvcfs 
         File reference
         File? regional_bed
+        File? config_yml
         String out_name
         String configuration = "DeepVariantWGS"
         String? extraArgs = ""
@@ -12,18 +14,27 @@ workflow run_glnexus{
 
     }
 
-    # Scatter the filterVCF task over the input VCF files to remove SV lines
-    scatter (input_vcf in vcfFiles) {
-        call filterVCF as filter_vcf {
-            input:
-                input_vcf = input_vcf,
-                reference = reference
+    # if there are no filtered_gvcf files input from a previous run then filter the 
+    # SV and SNV merged phased VCF
+
+    # if there are any gvcf files in the input filtered_gvcf file array: 
+    if (!defined(input_gvcfs)){
+        # Run Scatter the filterVCF task over the input VCF files to remove SV lines
+        scatter (input_vcf in vcfFiles) {
+            call filterVCF as filter_vcf {
+                input:
+                    input_vcf = input_vcf,
+                    reference = reference
+            }
         }
     }
 
+    Array[File] gvcfs = select_first([filter_vcf.filtered_gvcf, input_gvcfs])
+    
+
     call glnexus as glnexux_merge{
         input:
-					vcfFiles = filter_vcf.filtered_gvcf,
+					vcfFiles = gvcfs,
 					out_name = out_name,
 					regional_bed = regional_bed,
                     dockerImage = dockerImage
@@ -31,8 +42,8 @@ workflow run_glnexus{
 
     output{
         File? merged_gvcf = glnexux_merge.merged_gvcf
-        Array[File] gvcfFiles = filter_vcf.filtered_gvcf
-        Array[File] svVcfFiles = filter_vcf.filtered_sv_vcf
+        Array[File]? gvcfFiles = filter_vcf.filtered_gvcf
+        Array[File]? svVcfFiles = filter_vcf.filtered_sv_vcf
     }
 }
 
@@ -40,12 +51,14 @@ task glnexus {
     input {
         Array[File] vcfFiles = []
         File? regional_bed
+        File? config_yml
         String out_name
-        String configuration = "DeepVariantWGS"
+        #String configuration = "DeepVariantWGS"
+        String configuration = if defined(config_yml) then basename(select_first([config_yml])) else "DeepVariantWGS"
         String? extraArgs = ""
-        Int memSizeGB = 128
-        Int threadCount = 64
-        Int diskSizeGB = 5 * round(size(vcfFiles, 'G')) + 300
+        Int memSizeGB = 540
+        Int threadCount = 96
+        Int diskSizeGB = 5 * round(size(vcfFiles, 'G')) + 1000  
         String dockerImage = "ghcr.io/dnanexus-rnd/glnexus:v1.4.1"
 
     }
@@ -57,8 +70,9 @@ task glnexus {
         set -eux -o pipefail
         set -o xtrace
 
-        # note output format: https://nanoporetech.github.io/modkit/intro_bedmethyl.html
-        # filtering threshold default 10-th percentile of calls https://github.com/nanoporetech/modkit/blob/master/filtering.md
+        echo "configuration: ~{configuration}" 
+
+        # if there is a region input bed then only merge variants in that region.
         if [ ~{regionaly} == true ]
         then
           glnexus_cli \
@@ -99,7 +113,9 @@ task filterVCF {
         String dockerImage = "quay.io/mlin/glnexus:v1.2.7"
     }
     
+    # remove file ending also here
     String filtFile = basename(input_vcf)
+
     command <<<
         # exit when a command fails, fail with unset variables, print commands before execution
         set -eux -o pipefail

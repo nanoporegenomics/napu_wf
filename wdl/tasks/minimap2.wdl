@@ -149,7 +149,7 @@ task indexBAM {
         Array[String] chrs = []
         Boolean sortInputBAM = false
         Int threads = 8
-        Int diskGb = round(5 * size(bam, 'G')) + 20
+        Int diskGb = round(4 * size(bam, 'G')) + 20
         Int memGb = 8
     }
     Boolean anyChrs = length(chrs) > 0

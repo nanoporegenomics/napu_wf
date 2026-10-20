@@ -45,6 +45,9 @@ workflows:
    -  name: glnexus
       subclass: WDL
       primaryDescriptorPath: /wdl/cohort_wdl/workflows/glnexus.wdl
+   -  name: truvariBench
+      subclass: WDL
+      primaryDescriptorPath: /wdl/cohort_wdl/workflows/truvari_bench.wdl
    -  name: truvariCollapse
       subclass: WDL
       primaryDescriptorPath: /wdl/cohort_wdl/workflows/truvari.wdl
@@ -89,5 +92,8 @@ workflows:
       primaryDescriptorPath: /wdl/cohort_wdl/tasks/pilotSampleUploads.wdl    
    -  name: severusSomatic
       subclass: WDL
-      primaryDescriptorPath: /wdl/workflows/severus.wdl     
+      primaryDescriptorPath: /wdl/workflows/severus.wdl 
+   -  name: compressAFile
+      subclass: WDL
+      primaryDescriptorPath: /wdl/tasks/compressAFile.wdl     
       
