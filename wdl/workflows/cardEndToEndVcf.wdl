@@ -17,6 +17,7 @@ workflow cardEndToEndVcfMethyl
         Int         threads
         File?       referenceVntrAnnotations
         File?       shastaFasta
+        File?       dvGvcf
         Boolean     shastaInMem = false
         File?       hapdupFasta1
         File?       hapdupFasta2
@@ -35,6 +36,7 @@ workflow cardEndToEndVcfMethyl
         inputMappedBams: "Array of input sorted BAMs aligned to the reference"
         sampleName: "Name of Sample"
         nbReadsPerChunk: "Number of reads to put into a chunk for using preemptible instances"
+        dvGvcf: "input gVCF"
     }
 
     ### Either align input, merge multiple mapped input, or reorganize single input
@@ -114,43 +116,47 @@ workflow cardEndToEndVcfMethyl
     
 
     ##### Reference-based variant calling with DeepVariant
-    ## if the reads/BAMs were chunked by chromosomes, use directly those chunks
-    if(length(chrs) > 0 && nbReadsPerChunk > 0){
-        Array[File] bamChrs = select_first([mergeScatteredBAMs.bamPerChrs, mergeAlignedBAMs.bamPerChrs, indexSingleInputBam.bamPerChrs, mergeInputBams.bamPerChrs, mergeScatteredBAMs.bamPerChrs])
-        Array[File] bamChrsIndex = select_first([mergeScatteredBAMs.bamPerChrsIndex, mergeAlignedBAMs.bamPerChrsIndex, indexSingleInputBam.bamPerChrsIndex, mergeInputBams.bamPerChrsIndex, mergeScatteredBAMs.bamPerChrsIndex])
-        scatter (bamChr in zip(bamChrs, bamChrsIndex)){
-            call dv_margin_t.dv_t as chr_dv_t {
+    if(!defined(dvGvcf)){
+
+        ## if the reads/BAMs were chunked by chromosomes, use directly those chunks
+        if(length(chrs) > 0 && nbReadsPerChunk > 0){
+            Array[File] bamChrs = select_first([mergeScatteredBAMs.bamPerChrs, mergeAlignedBAMs.bamPerChrs, indexSingleInputBam.bamPerChrs, mergeInputBams.bamPerChrs, mergeScatteredBAMs.bamPerChrs])
+            Array[File] bamChrsIndex = select_first([mergeScatteredBAMs.bamPerChrsIndex, mergeAlignedBAMs.bamPerChrsIndex, indexSingleInputBam.bamPerChrsIndex, mergeInputBams.bamPerChrsIndex, mergeScatteredBAMs.bamPerChrsIndex])
+            scatter (bamChr in zip(bamChrs, bamChrsIndex)){
+                call dv_margin_t.dv_t as chr_dv_t {
+                    input:
+                        threads = threads,
+                        reference = referenceFasta,
+                        bamAlignment = bamChr.left,
+                        bamAlignmentIndex = bamChr.right,
+                        sampleName = sampleName,
+                        oneChr = true,
+                        preemptible = 2
+                }
+            }
+            call dv_margin_t.mergeVCFs {
+                input:
+                    vcfFiles = chr_dv_t.dvVcf,
+                    gvcfFiles = chr_dv_t.dvgVcf,
+                    outname = sampleName
+            }
+        }
+        ## otherwise, one job for the whole-genome on the entire BAM
+        if(length(chrs) == 0 || nbReadsPerChunk == 0){
+            call dv_margin_t.dv_t{
                 input:
                     threads = threads,
                     reference = referenceFasta,
-                    bamAlignment = bamChr.left,
-                    bamAlignmentIndex = bamChr.right,
-                    sampleName = sampleName,
-                    oneChr = true,
-                    preemptible = 2
+                    bamAlignment = bamFile,
+                    bamAlignmentIndex = bamFileIndex,
+                    sampleName = sampleName
             }
         }
-        call dv_margin_t.mergeVCFs {
-            input:
-                vcfFiles = chr_dv_t.dvVcf,
-                gvcfFiles = chr_dv_t.dvgVcf,
-                outname = sampleName
-        }
     }
-    ## otherwise, one job for the whole-genome on the entire BAM
-    if(length(chrs) == 0 || nbReadsPerChunk == 0){
-        call dv_margin_t.dv_t{
-            input:
-                threads = threads,
-                reference = referenceFasta,
-                bamAlignment = bamFile,
-                bamAlignmentIndex = bamFileIndex,
-                sampleName = sampleName
-        }
-    }
+    
     ## Variant calls from DeepVariant
-    File dvVCF = select_first([mergeVCFs.vcf, dv_t.dvVcf])
-    File dvgVCF = select_first([mergeVCFs.gvcf, dv_t.dvgVcf])
+    File dvVCF = select_first([dvGvcf, mergeVCFs.vcf, dv_t.dvVcf])
+    File dvgVCF = select_first([dvGvcf, mergeVCFs.gvcf, dv_t.dvgVcf])
 
     ##### Haplotag the reads  ?
     #call dv_margin_t.margin_t{
