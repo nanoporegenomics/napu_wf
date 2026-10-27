@@ -6,8 +6,6 @@ workflow phaseblocks {
     input {
         File phasedVCF 
         String sample 
-        #Int diskSizeGB = 2 * round(size(phasedVCF, "G")) 
-        #Int memSizeGb = 128
 
     }
 
@@ -28,9 +26,9 @@ task phaseblocks_t {
     input {
         File phasedVCF
         String sample
-        Int memSizeGB = 20
-        Int threads = 26
-        Int diskSizeGB = 2 * round(size(phasedVCF, "GB")) 
+        Int memSizeGB = 5
+        Int threads = 1
+        Int diskSizeGB = 12 
     }
 
     command <<<
