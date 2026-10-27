@@ -36,7 +36,7 @@ task phaseblocks_t {
         set -eux -o pipefail
 
         # run the phase block calculator
-        python3 /opt/vcf_phaseBlock_calculator.py {phasedVCF} --sample {sample}
+        python3 /opt/vcf_phaseBlock_calculator.py ~{phasedVCF} --sample ~{sample}
 
     >>>
 
