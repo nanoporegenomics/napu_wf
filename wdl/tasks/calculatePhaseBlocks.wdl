@@ -48,7 +48,7 @@ task phaseblocks_t {
         memory: memSizeGB + " GB"
         cpu: threads
         disks: "local-disk " + diskSizeGB + " SSD"
-        docker: "meredith705/card_harmonize_vcf:0.3"
+        docker: "meredith705/card_harmonize_vcf:0.4"
     }
 
 }
