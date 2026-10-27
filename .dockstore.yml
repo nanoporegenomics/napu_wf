@@ -49,7 +49,7 @@ workflows:
       subclass: WDL
       primaryDescriptorPath: /wdl/cohort_wdl/workflows/truvari_bench.wdl
    -  name: truvariCollapse
-      subclass: WDL
+      subclascs: WDL
       primaryDescriptorPath: /wdl/cohort_wdl/workflows/truvari.wdl
    -  name: genotypeTruvariHapdiff
       subclass: WDL
@@ -95,5 +95,8 @@ workflows:
       primaryDescriptorPath: /wdl/workflows/severus.wdl 
    -  name: compressAFile
       subclass: WDL
-      primaryDescriptorPath: /wdl/tasks/compressAFile.wdl     
+      primaryDescriptorPath: /wdl/tasks/compressAFile.wdl 
+   -  name: calculatePhaseBlocks
+      subclass: WDL
+      primaryDescriptorPath: /wdl/tasks/calculatePhaseBlocks.wdl     
       
