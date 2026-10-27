@@ -11,7 +11,8 @@ workflow runMarginPhase {
         String sampleName
         Int preemptible_count = 0
         Int threads = 96
-        String dockerImage = "meredith705/card_harmonize_vcf:0.2"
+        Int memSizeGb = 600
+        String dockerImage = "meredith705/card_harmonize_vcf:0.4"
         File? monitoring_script
     }
 
@@ -40,6 +41,7 @@ workflow runMarginPhase {
         dockerImage = dockerImage,
         preemptible_count = preemptible_count,
         threads = threads,
+        memSizeGb = memSizeGb,
         monitoring_script = monitoring_script
     }
 
